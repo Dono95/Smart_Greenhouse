@@ -68,5 +68,8 @@
         "cinttypes": "cpp",
         "typeinfo": "cpp",
         "*.inc": "cpp"
-    }
+    },
+    "C_Cpp.errorSquiggles": "Disabled",
+    "cmake.configureOnOpen": false,
+    "idf.flashType": "UART"
 }
