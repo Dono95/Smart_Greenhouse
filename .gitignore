@@ -2006,3 +2006,7 @@ build/esp-idf/spi_flash/CMakeFiles/__idf_spi_flash.dir/spi_flash_chip_th.c.obj
 build/esp-idf/wpa_supplicant/CMakeFiles/__idf_wpa_supplicant.dir/src/eap_peer/eap_fast_common.c.obj
 build/esp-idf/wpa_supplicant/CMakeFiles/__idf_wpa_supplicant.dir/src/eap_peer/eap_fast_pac.c.obj
 build/esp-idf/wpa_supplicant/CMakeFiles/__idf_wpa_supplicant.dir/src/eap_peer/eap_fast.c.obj
+build/.cmake/api/v1/reply/cmakeFiles-v1-8f6e5595175b9a570aac.json
+build/.cmake/api/v1/reply/codemodel-v2-8bddd0b9d478577838d0.json
+build/.cmake/api/v1/reply/index-2022-10-02T16-09-41-0256.json
+build/.cmake/api/v1/reply/target-__idf_app_update-094346d62d2a1b4728f0.json
