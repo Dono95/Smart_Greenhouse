@@ -2006,3 +2006,7 @@ build/.cmake/api/v1/reply/target-SmartGreenhouse.elf-4e810b049808f916e2de.json
 build/.cmake/api/v1/reply/target-uf2-app-1b8e46393bc794b5024c.json
 build/.cmake/api/v1/reply/target-uf2-cfa0d76bf22ecde29c3c.json
 build/.cmake/api/v1/reply/toolchains-v1-f9612bc40c23e50aea92.json
+build/.cmake/api/v1/reply/cmakeFiles-v1-2dc4913f7f4f4332cb17.json
+build/.cmake/api/v1/reply/codemodel-v2-3de16fd095c6b4c2badd.json
+build/.cmake/api/v1/reply/index-2022-10-01T17-08-16-0195.json
+build/.cmake/api/v1/reply/target-__idf_app_update-5d288fd2377de52e74aa.json
