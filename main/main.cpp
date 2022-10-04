@@ -4,9 +4,7 @@
  * SPDX-License-Identifier: Unlicense OR CC0-1.0
  */
 
-
-
-/****************************************************************************
+/***************************************************************************
 *
 * This demo showcases BLE GATT client. It can scan BLE devices and connect to one device.
 * Run the gatt_server demo, the client demo will automatically connect to the gatt_server demo.
@@ -447,7 +445,8 @@ extern "C" void app_main(void)
     }
     ESP_ERROR_CHECK( ret );
 
-    ESP_ERROR_CHECK(esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT));
+    ESP_ERROR_CHECK(esp_bt_controller_mem_release(ESP_BT_MODE_BLE));
+
 
     esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
     ret = esp_bt_controller_init(&bt_cfg);
