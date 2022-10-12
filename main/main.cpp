@@ -11,19 +11,36 @@
 #include "esp_log.h"
 
 /* Bluetooth includes */
-#include "esp_bt.h"             //  implements BT controller and VHCI configuration procedures from the host side.
-#include "esp_bt_main.h"        //  implements initialization and enabling of the Bluedroid stack.
-#include "esp_gap_ble_api.h"    //  implements GAP configuration, such as advertising and connection parameters.
-#include "esp_gatts_api.h"      //  implements GATT configuration, such as creating services and characteristics.
-
-
+#include "esp_bt.h"                 //  implements BT controller and VHCI configuration procedures from the host side.
+#include "esp_bt_main.h"            //  implements initialization and enabling of the Bluedroid stack.
+#include "esp_gap_ble_api.h"        //  implements GAP configuration, such as advertising and connection parameters.
+#include "esp_gatts_api.h"          //  implements GATT configuration, such as creating services and characteristics.
+#include "esp_gatt_common_api.h"
 
 /****** DEFINE *********/
 #define NUMBER_OF_PROFILES 1
 #define GREEENHOUSE_PROFILE 0
 
+#define BLUETOOTH_NAME "Greenhouse"
+#define GATTS_AIR_SERVICE_UUID 0x00FF
+
 /* Declare profile event handler */
 static void gatts_greenhouse_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);
+
+struct gatts_profile_inst {
+    esp_gatts_cb_t gatts_cb;
+    uint16_t gatts_if;
+    uint16_t app_id;
+    uint16_t conn_id;
+    uint16_t service_handle;
+    esp_gatt_srvc_id_t service_id;
+    uint16_t char_handle;
+    esp_bt_uuid_t char_uuid;
+    esp_gatt_perm_t perm;
+    esp_gatt_char_prop_t property;
+    uint16_t descr_handle;
+    esp_bt_uuid_t descr_uuid;
+};
 
 /* One gatt-based profile one app_id and one gatts_if, this array will store the gatts_if returned by ESP_GATTS_REG_EVT */
 static struct gatts_profile_inst gl_profile_tab[NUMBER_OF_PROFILES] = {
@@ -38,17 +55,60 @@ static const char* GATTS_TAG = "Gatt_Server_Greenhouse";
 
 static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param) 
 {
-    ESP_LOGI(GATTS_TAG, "Gap event handler: %s", __func__);
+    ESP_LOGI(GATTS_TAG, "%s with type %d", __func__, event);
 }
 
 static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param) 
 {
-    ESP_LOGI(GATTS_TAG, "Gatts event handler: %s", __func__);
+    ESP_LOGI(GATTS_TAG, "%s with event type: %d", __func__, event);
+
+    /* If event is register event, store the gatts_if for each profile */
+    if (event == ESP_GATTS_REG_EVT) {
+        if (param->reg.status == ESP_GATT_OK) {
+            gl_profile_tab[param->reg.app_id].gatts_if = gatts_if;
+        } else {
+            ESP_LOGE(GATTS_TAG, "Reg app failed, app_id %04x, status %d\n", param->reg.app_id, param->reg.status);
+            return;
+        }
+    }
+
+
+    for (int profileID = 0; profileID < NUMBER_OF_PROFILES; ++profileID) 
+    {
+        if (gatts_if == ESP_GATT_IF_NONE || gatts_if == gl_profile_tab[profileID].gatts_if) {
+            if (!gl_profile_tab[profileID].gatts_cb) {
+                ESP_LOGE(GATTS_TAG, "No callback function set for profile with ID [%d].", profileID);
+                continue;
+            }
+
+            ESP_LOGI(GATTS_TAG, "Calling callback for profile with ID [%d].", profileID);
+            gl_profile_tab[profileID].gatts_cb(event, gatts_if, param);
+        }
+    }
 }
 
 static void gatts_greenhouse_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param) 
 {
+    switch (event)
+    {
+        case (ESP_GATTS_REG_EVT): {
+           ESP_LOGI(GATTS_TAG, "Regsiter application with ID [%d] and status %d", param->reg.app_id, param->reg.status); 
+            gl_profile_tab[GREEENHOUSE_PROFILE].service_id.is_primary = true;
+            gl_profile_tab[GREEENHOUSE_PROFILE].service_id.id.inst_id = 0x00;
+            gl_profile_tab[GREEENHOUSE_PROFILE].service_id.id.uuid.len = ESP_UUID_LEN_16;
+            gl_profile_tab[GREEENHOUSE_PROFILE].service_id.id.uuid.uuid.uuid16 = GATTS_AIR_SERVICE_UUID;
 
+            esp_err_t set_dev_name_ret = esp_ble_gap_set_device_name(BLUETOOTH_NAME);
+            if (set_dev_name_ret){
+                ESP_LOGE(GATTS_TAG, "set device name failed, error code = %x", set_dev_name_ret);
+            }
+           break;
+        }
+        default: {
+            ESP_LOGW(GATTS_TAG, "Unhandled event with ID: %d", event);
+            break;
+        }
+    }
 }
 
 extern "C" void app_main(void)
@@ -112,5 +172,14 @@ extern "C" void app_main(void)
     if (result){
         ESP_LOGE(GATTS_TAG, "gatts app register error, error code = %x", result);
         return;
+    }
+
+    esp_err_t local_mtu_ret = esp_ble_gatt_set_local_mtu(512);
+    if (local_mtu_ret){
+        ESP_LOGE(GATTS_TAG, "set local  MTU failed, error code = %x", local_mtu_ret);
+    }
+
+    while (true)
+    {
     }
 }
