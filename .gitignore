@@ -2017,3 +2017,4 @@ build/.cmake/api/v1/reply/cmakeFiles-v1-e66d33a58718bf7d15bf.json
 build/.cmake/api/v1/reply/codemodel-v2-9996fadc0874989ac384.json
 build/.cmake/api/v1/reply/index-2022-10-11T15-57-37-0788.json
 build/.cmake/api/v1/reply/target-__idf_app_update-6d9b08c7edd73f1e58dc.json
+build/merged_qemu.bin
