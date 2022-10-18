@@ -410,8 +410,4 @@ extern "C" void app_main(void)
     if (local_mtu_ret){
         ESP_LOGE(GATTS_TAG, "set local  MTU failed, error code = %x", local_mtu_ret);
     }
-
-    while (true)
-    {
-    }
 }
