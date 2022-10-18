@@ -69,6 +69,7 @@
         "typeinfo": "cpp",
         "*.inc": "cpp"
     },
-    "idf.flashType": "UART",
-    "cmake.configureOnOpen": false
+    "C_Cpp.errorSquiggles": "Disabled",
+    "cmake.configureOnOpen": false,
+    "idf.flashType": "UART"
 }

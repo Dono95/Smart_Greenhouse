@@ -5,19 +5,8 @@
             "includePath": [
                 "${HOME}/esp/esp-idf/components**"
             ],
-            /*"includePath": [
-                "${workspaceFolder}/**",
-                "${vcpkgRoot}/x64-linux/include",
-                "${HOME}/esp/esp-idf/components/esp_common/include",
-                "${HOME}/esp/esp-idf/components/driver/include",
-                "${HOME}/esp/esp-idf/components/esp_hw_support/include",
-                "${HOME}/esp/esp-idf/components/freertos/include",
-                "${HOME}/esp/esp-idf/components/freertos/include/esp_additions/freertos",
-                "${HOME}/esp/esp-idf/components/spi_flash/sim/sdkconfig"
-            ],*/
             "defines": [],
-            "compilerPath": "/home/dominik/.espressif/tools/xtensa-esp32-elf/esp-2021r2-8.4.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-gcc",
-            //"compilerPath": "/usr/bin/gcc",
+            "compilerPath": "/home/dominik/.espressif/tools/xtensa-esp32-elf/esp-2021r2-patch3-8.4.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-gcc",
             "cStandard": "gnu17",
             "cppStandard": "c++11",
             "intelliSenseMode": "linux-gcc-x64",
