@@ -1,12 +1,9 @@
 /* Project specific includes */
 #include "GreenhouseManager.hpp"
 
-/* STL includes */
-#include <stdexcept>
-
 using namespace Greenhouse;
 
-GreenhouseManager* GreenhouseManager::mManagerInstance{nullptr};
+GreenhouseManager *GreenhouseManager::mManagerInstance{nullptr};
 
 /*********************************************
  *              PRIVATE API                  *
@@ -15,7 +12,7 @@ GreenhouseManager* GreenhouseManager::mManagerInstance{nullptr};
 /**
  * @brief Class constructor
  */
-GreenhouseManager::GreenhouseManager()
+GreenhouseManager::GreenhouseManager() : mBluetoothController(new BluetoothController())
 {
 }
 
@@ -37,6 +34,6 @@ GreenhouseManager *GreenhouseManager::GetInstance()
 {
     if (!mManagerInstance)
         mManagerInstance = new GreenhouseManager();
-        
+
     return mManagerInstance;
 }

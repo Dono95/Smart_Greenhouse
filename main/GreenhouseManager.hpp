@@ -6,6 +6,12 @@
 #ifndef GREENHOUSE_MANAGER
 #define GREENHOUSE_MANAGER
 
+/* Project specific includes */
+#include "Bluetooth/BluetoothController.hpp"
+
+/* STL includes */
+#include <memory>
+
 namespace Greenhouse
 {
     class GreenhouseManager
@@ -29,6 +35,9 @@ namespace Greenhouse
 
         /* Singleton instance of GreenhouseManager object */
         static GreenhouseManager* mManagerInstance;
+
+        /* Unique pointer of Bluetooth controller*/
+        std::unique_ptr<BluetoothController> mBluetoothController;
     };
 } // namespace Greenhouse
 
