@@ -1,7 +1,7 @@
 #ifndef SHT4x_H
 #define SHT4x_H
 
-#include "Drivers/Interfaces/I2C_I.hpp"
+#include "Drivers/Com_Interfaces/I2C_I.hpp"
 #include "Commands_Definition.hpp"
 
 #include <cstdint>
