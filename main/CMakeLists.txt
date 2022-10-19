@@ -1,6 +1,7 @@
 set(SOURCES 
 ./main.cpp
 ./GreenhouseManager.cpp
+./Bluetooth/BluetoothController.cpp
 ./Drivers/Com_Interfaces/I2C_I.cpp
 ./Drivers/Sensors/SHT4x.cpp)
 
