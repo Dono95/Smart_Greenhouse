@@ -416,12 +416,11 @@ extern "C" void app_main(void)
     // Check result of initialization non-volatile flash memory
     ESP_ERROR_CHECK(result);
 
-    // Creating Greenhouse manager
+    // Creating the Greenhouse manager
     auto greenhouseManager = Greenhouse::GreenhouseManager::GetInstance();
 
     while (true)
     {
-        printf("While loop\n");
         vTaskDelay(1000);
     }
     // Check result of bluetooth controller to memory release of classic bluetooth
