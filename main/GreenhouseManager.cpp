@@ -1,6 +1,9 @@
 /* Project specific includes */
 #include "GreenhouseManager.hpp"
 
+/* ESP logs library */
+#include "esp_log.h"
+
 using namespace Greenhouse;
 
 GreenhouseManager *GreenhouseManager::mManagerInstance{nullptr};
@@ -14,7 +17,9 @@ GreenhouseManager *GreenhouseManager::mManagerInstance{nullptr};
  */
 GreenhouseManager::GreenhouseManager() : mBluetoothController(new BluetoothController())
 {
-    mBluetoothController->InitBluetoothController(ESP_BT_MODE_BLE);
+    if (mBluetoothController->InitBluetoothController(ESP_BT_MODE_BLE) != BluetoothController::INIT_BLUETOOTH_RV::RV_BLUETOOTH_INIT_OK) {
+        ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Initialization of bluetooth controller failed");
+    }
 }
 
 /**

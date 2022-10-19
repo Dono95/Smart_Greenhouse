@@ -12,6 +12,8 @@
 /* STL includes */
 #include <memory>
 
+const static char* GREENHOUSE_MANAGER_TAG = "Greenhouse Manager";
+
 namespace Greenhouse
 {
     class GreenhouseManager
