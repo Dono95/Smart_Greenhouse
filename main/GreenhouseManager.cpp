@@ -1,12 +1,12 @@
 /* Project specific includes */
 #include "GreenhouseManager.hpp"
 
-/* STL includes */
-#include <stdexcept>
+/* ESP logs library */
+#include "esp_log.h"
 
 using namespace Greenhouse;
 
-GreenhouseManager* GreenhouseManager::mManagerInstance{nullptr};
+GreenhouseManager *GreenhouseManager::mManagerInstance{nullptr};
 
 /*********************************************
  *              PRIVATE API                  *
@@ -15,8 +15,11 @@ GreenhouseManager* GreenhouseManager::mManagerInstance{nullptr};
 /**
  * @brief Class constructor
  */
-GreenhouseManager::GreenhouseManager()
+GreenhouseManager::GreenhouseManager() : mBluetoothController(new BluetoothController())
 {
+    if (mBluetoothController->InitBluetoothController(ESP_BT_MODE_BLE) != BluetoothController::INIT_BLUETOOTH_RV::RV_BLUETOOTH_INIT_OK) {
+        ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Initialization of bluetooth controller failed");
+    }
 }
 
 /**
@@ -37,6 +40,6 @@ GreenhouseManager *GreenhouseManager::GetInstance()
 {
     if (!mManagerInstance)
         mManagerInstance = new GreenhouseManager();
-        
+
     return mManagerInstance;
 }
