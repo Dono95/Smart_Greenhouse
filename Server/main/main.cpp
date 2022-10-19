@@ -25,10 +25,8 @@ extern "C" void app_main(void)
     // Check result of initialization non-volatile flash memory
     ESP_ERROR_CHECK(result);
 
-#ifdef TEST_FLAG
     // Creating Greenhouse manager
     auto greenhouseManager = Greenhouse::GreenhouseManager::GetInstance();
-#endif
 
     while (true)
     {
