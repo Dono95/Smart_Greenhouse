@@ -14,6 +14,7 @@ GreenhouseManager *GreenhouseManager::mManagerInstance{nullptr};
  */
 GreenhouseManager::GreenhouseManager() : mBluetoothController(new BluetoothController())
 {
+    mBluetoothController->InitBluetoothController(ESP_BT_MODE_BLE);
 }
 
 /**
