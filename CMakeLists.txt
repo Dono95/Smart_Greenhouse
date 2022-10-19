@@ -6,4 +6,6 @@ set(EXTRA_COMPONENT_DIRS Drivers)
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 
+#add_compile_definitions(TEST_FLAG)
+
 project(SmartGreenhouse)
