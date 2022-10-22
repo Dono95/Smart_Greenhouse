@@ -72,5 +72,5 @@
     "C_Cpp.errorSquiggles": "Disabled",
     "cmake.configureOnOpen": false,
     "idf.flashType": "UART",
-    "cmake.sourceDirectory": "${workspaceFolder}/Server"
+    "cmake.sourceDirectory": "${workspaceFolder}/main"
 }

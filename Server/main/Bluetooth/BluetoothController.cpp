@@ -1,5 +1,6 @@
 /* Project specific includes */
 #include "BluetoothController.hpp"
+#include "GreenhouseManager.hpp"
 
 /* STL includes*/
 #include <iostream>
@@ -34,7 +35,7 @@ BluetoothController::~BluetoothController()
 BluetoothController::INIT_BLUETOOTH_RV BluetoothController::InitBluetoothController(esp_bt_mode_t bluetoothMode)
 {
     // TO DO -> Need to release opposite mode from bluetoothMode
-    // For now programmer is responsible to use only ESP_BT_MODE_BLE
+    // For now; programmer is responsible to use only ESP_BT_MODE_BLE
 
     // Check result of bluetooth controller to memory release of classic bluetooth
     ESP_ERROR_CHECK(esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT));
@@ -47,8 +48,16 @@ BluetoothController::INIT_BLUETOOTH_RV BluetoothController::InitBluetoothControl
     if (result != INIT_BLUETOOTH_RV::RV_BLUETOOTH_INIT_OK)
         return result;
 
-    // Register callback for bluetotth generic attribites
-    esp_err_t registerResult = esp_ble_gatts_register_callback(BluetoothController::GattsEventHandler);
+    auto GattsCallback = [](esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param)
+    {
+        ESP_LOGE(BLUETOOTH_CONTROLLER_TAG, "Gatts lambda function");
+
+        const auto manager = GreenhouseManager::GetInstance();
+        if (manager)
+            manager->GetBluetoothHandler()->HandleGattsEvent(event, gatts_if, param);
+    };
+
+    esp_err_t registerResult = esp_ble_gatts_register_callback(GattsCallback);
     if (registerResult)
     {
         ESP_LOGE(BLUETOOTH_CONTROLLER_TAG, "gatts register error, error code = %x", registerResult);
@@ -299,8 +308,6 @@ BluetoothController::INIT_BLUETOOTH_RV BluetoothController::InitBluedroid(void)
 void BluetoothController::GattsEventHandler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param)
 {
     ESP_LOGI(BLUETOOTH_CONTROLLER_TAG, "%s with event type: %d", __func__, event);
-
-    ESP_LOGI(BLUETOOTH_CONTROLLER_TAG, "ID of app is: %d", param->reg.app_id);
 
     /* If event is register event, store the gatts_if for each profile */
     if (event == ESP_GATTS_REG_EVT)
