@@ -41,6 +41,9 @@ namespace Greenhouse
         Shared_BaseHandlerInterface GetBluetoothHandler() const;
 
     private:
+        /* Unique pointer to Bluetooth controller*/
+        using Unique_BluetoothController = std::unique_ptr<Bluetooth::BluetoothController>;
+
         /**
          * @brief Class constructor
          */
@@ -58,7 +61,7 @@ namespace Greenhouse
         static std::mutex mManagerMutex;
 
         /* Unique pointer of Bluetooth controller*/
-        std::unique_ptr<BluetoothController> mBluetoothController;
+        Unique_BluetoothController mBluetoothController;
 
         /* Shared pointer of Bluetooth events handler*/
         Shared_BaseHandlerInterface mBluetoothHandler;

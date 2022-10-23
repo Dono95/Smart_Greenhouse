@@ -16,7 +16,7 @@ std::mutex GreenhouseManager::mManagerMutex;
 /**
  * @brief Class constructor
  */
-GreenhouseManager::GreenhouseManager() : mBluetoothController(new BluetoothController())
+GreenhouseManager::GreenhouseManager() : mBluetoothController(new Bluetooth::BluetoothController())
 {
     mBluetoothHandler = std::shared_ptr<Bluetooth::ServerBluetoothHandler>(new Bluetooth::ServerBluetoothHandler());
 }
@@ -46,7 +46,15 @@ GreenhouseManager *GreenhouseManager::GetInstance()
 
 bool GreenhouseManager::StartBluetooth()
 {
-    if (mBluetoothController->InitBluetoothController(ESP_BT_MODE_BLE) != BluetoothController::INIT_BLUETOOTH_RV::RV_BLUETOOTH_INIT_OK)
+    using Bluetooth_Initialization_RV = Bluetooth::BluetoothController::INIT_BLUETOOTH_RV;
+
+    if (!mBluetoothHandler->InitializeBluetoothProfiles())
+    {
+        ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Initialization of bluetooth profiles failed");
+        return false;
+    }
+
+    if (mBluetoothController->InitBluetoothController(ESP_BT_MODE_BLE) != Bluetooth_Initialization_RV::RV_BLUETOOTH_INIT_OK)
     {
         ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Initialization of bluetooth controller failed");
         return false;
