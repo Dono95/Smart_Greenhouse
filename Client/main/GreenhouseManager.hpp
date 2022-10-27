@@ -7,7 +7,7 @@
 #define GREENHOUSE_MANAGER
 
 /* Project specific includes */
-#include "Bluetooth/BluetoothController.hpp"
+#include "ClientBluetoothController.hpp"
 
 /* STL includes */
 #include <memory>
@@ -35,11 +35,13 @@ namespace Greenhouse
          */ 
         ~GreenhouseManager();
 
+        using Unique_Bluetooth_Controller = std::unique_ptr<Bluetooth::ClientBluetoothControlller>;
+
         /* Singleton instance of GreenhouseManager object */
         static GreenhouseManager* mManagerInstance;
 
         /* Unique pointer of Bluetooth controller*/
-        std::unique_ptr<BluetoothController> mBluetoothController;
+        Unique_Bluetooth_Controller mBluetoothController;
     };
 } // namespace Greenhouse
 

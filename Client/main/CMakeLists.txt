@@ -1,10 +1,7 @@
 set(SOURCES 
 ./main.cpp
-./GreenhouseManager.cpp
-./Bluetooth/BluetoothController.cpp
-./Drivers/Com_Interfaces/I2C_I.cpp
-./Drivers/Sensors/SHT4x.cpp)
+./GreenhouseManager.cpp)
 
-idf_component_register(SRCS ${SOURCES}
-                        INCLUDE_DIRS ".")
+# Include for common code; need to be reconsidered
+idf_component_register(SRCS ${SOURCES})
 

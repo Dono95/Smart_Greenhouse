@@ -15,9 +15,11 @@ GreenhouseManager *GreenhouseManager::mManagerInstance{nullptr};
 /**
  * @brief Class constructor
  */
-GreenhouseManager::GreenhouseManager() : mBluetoothController(new BluetoothController())
+GreenhouseManager::GreenhouseManager() : mBluetoothController(new Bluetooth::ClientBluetoothControlller())
 {
-    if (mBluetoothController->InitBluetoothController(ESP_BT_MODE_BLE) != BluetoothController::INIT_BLUETOOTH_RV::RV_BLUETOOTH_INIT_OK) {
+    using INIT_STATUS = Component::Bluetooth::INIT_BLUETOOTH_RV;
+    
+    if (mBluetoothController->InitBluetoothController(ESP_BT_MODE_BLE) != INIT_STATUS::RV_BLUETOOTH_INIT_OK) {
         ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Initialization of bluetooth controller failed");
     }
 }
