@@ -9,6 +9,8 @@
 /* Common components */
 #include "Bluetooth/BaseBluetoothController.hpp"
 
+/* STD library includes */
+
 /* Define class log tag */
 #define CLIENT_BLUETOOTH_CONTROLLER_TAG "ClientBluetoothController"
 
@@ -34,8 +36,59 @@ namespace Greenhouse
 
             /**
              * @brief Overridden method to register gap and gatts callback for client controller
-             */ 
+             */
             virtual INIT_BLE_STATUS RegisterCallbacks(void) override;
+
+            /**
+             * @brief Start device scanning in periodic sequences
+             *
+             * @param[in] duration : It stores the time at which the scan is performed
+             *
+             * @return esp_err_t    ESP_OK  : success
+             *                      Other   : failed
+             */
+            esp_err_t StartScanning(uint32_t duration);
+
+            /**
+             * @brief Stop device scanning
+             *
+             * @return esp_err_t    ESP_OK  : success
+             *                      Other   : failed
+             */
+            esp_err_t StopScanning();
+
+            /**
+             * @brief Set scan parameters
+             *
+             * @param[in] params : Optional scanning parameters [nullptr]
+             *
+             * @return esp_err_t    ESP_OK  : success
+             *                      Other   : failed
+             */
+            esp_err_t SetScanParameters(esp_ble_scan_params_t *params = nullptr);
+
+            /**
+             * @brief Open a direct connection to remote device
+             *
+             * @param[in] gattc_if          : Gatt client access interface.
+             * @param[in] removeAddress     : Remote device bluetooth device address.
+             * @param[in] removeAddressType : Remote device bluetooth device the address type.
+             * @param[in] isDirect          : Direct connection
+             *
+             * @return esp_err_t    ESP_OK  : success
+             *                      Other   : failed
+             */
+            esp_err_t OpenConnection(esp_gatt_if_t gattc_if, esp_bd_addr_t remoteAddress, esp_ble_addr_type_t removeAddressType, bool isDirect);
+
+        private:
+            /* Default scan parameters */
+            esp_ble_scan_params_t ble_scan_params = {
+                .scan_type = BLE_SCAN_TYPE_ACTIVE,
+                .own_addr_type = BLE_ADDR_TYPE_PUBLIC,
+                .scan_filter_policy = BLE_SCAN_FILTER_ALLOW_ALL,
+                .scan_interval = 0x50,
+                .scan_window = 0x30,
+                .scan_duplicate = BLE_SCAN_DUPLICATE_DISABLE};
         };
     } // namespace Bluetooth
 } // namespace Greenhouse
@@ -50,11 +103,11 @@ namespace Greenhouse
 //#define REMOTE_SERVICE_UUID 0x00FF
 //#define REMOTE_NOTIFY_CHAR_UUID 0xFF01
 
-//static const char remote_device_name[] = "Greenhouse";
-//static bool connect = false;
-//static bool get_server = false;
-//static esp_gattc_char_elem_t *char_elem_result = NULL;
-//static esp_gattc_descr_elem_t *descr_elem_result = NULL;
+// static const char remote_device_name[] = "Greenhouse";
+// static bool connect = false;
+// static bool get_server = false;
+// static esp_gattc_char_elem_t *char_elem_result = NULL;
+// static esp_gattc_descr_elem_t *descr_elem_result = NULL;
 
 //#define GATTS_AIR_SERVICE_UUID 0x00FF
 //#define GATTS_NUM_HANDLE_TEST_A 4
@@ -62,7 +115,7 @@ namespace Greenhouse
 
 //#define GATTS_DEMO_CHAR_VAL_LEN_MAX 0x40
 
-//const static char *BLUETOOTH_CONTROLLER_TAG = "BluetoothController";
+// const static char *BLUETOOTH_CONTROLLER_TAG = "BluetoothController";
 
 namespace Greenhouse
 {

@@ -34,31 +34,31 @@ ClientBluetoothControlller::~ClientBluetoothControlller()
  */
 ClientBluetoothControlller::INIT_BLE_STATUS ClientBluetoothControlller::RegisterCallbacks(void)
 {
-    esp_err_t registerResult = esp_ble_gap_register_callback([](esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param){
+    esp_err_t registerResult = esp_ble_gap_register_callback([](esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param)
+                                                             {
         const auto manager = GreenhouseManager::GetInstance();
 
         if (manager)
-            manager->GetHandler()->HandleGapEvent(event, param);
-    });
-    
+            manager->GetHandler()->HandleGapEvent(event, param); });
+
     if (registerResult)
     {
         ESP_LOGE(CLIENT_BLUETOOTH_CONTROLLER_TAG, "gap register error, error code = %x", registerResult);
         return INIT_BLE_STATUS::RV_REGISTER_CALLBACK_FAILED;
     }
 
-    registerResult = esp_ble_gattc_register_callback([](esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if, esp_ble_gattc_cb_param_t *param){
+    registerResult = esp_ble_gattc_register_callback([](esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if, esp_ble_gattc_cb_param_t *param)
+                                                     {
         const auto manager = GreenhouseManager::GetInstance();
 
         if (manager)
-            manager->GetHandler()->HandleGattcEvent(event, gattc_if, param);
-    });
+            manager->GetHandler()->HandleGattcEvent(event, gattc_if, param); });
 
     if (registerResult)
     {
         ESP_LOGE(CLIENT_BLUETOOTH_CONTROLLER_TAG, "gatts register error, error code = %x", registerResult);
         return INIT_BLE_STATUS::RV_REGISTER_CALLBACK_FAILED;
-    }   
+    }
 
     registerResult = esp_ble_gattc_app_register(GREENHOUSE_PROFILE);
     if (registerResult)
@@ -67,6 +67,57 @@ ClientBluetoothControlller::INIT_BLE_STATUS ClientBluetoothControlller::Register
         return INIT_BLE_STATUS::RV_REGISTER_APP_FAILED;
     }
     return INIT_BLE_STATUS::RV_BLUETOOTH_INIT_OK;
+}
+
+/**
+ * @brief Start device scanning in periodic sequences
+ */
+esp_err_t ClientBluetoothControlller::StartScanning(uint32_t duration)
+{
+    auto result = esp_ble_gap_start_scanning(duration);
+    if (result)
+        ESP_LOGE(CLIENT_BLUETOOTH_CONTROLLER_TAG, "Failed to start scan with result code %d", result);
+
+    return result;
+}
+
+/**
+ * @brief Stop device scanning
+ */
+esp_err_t ClientBluetoothControlller::StopScanning()
+{
+    auto result = esp_ble_gap_stop_scanning();
+    if (result)
+        ESP_LOGE(CLIENT_BLUETOOTH_CONTROLLER_TAG, "Failed to stop scan with result code %d", result);
+
+    return result;
+}
+
+/**
+ * @brief Set scan parameters
+ */
+esp_err_t ClientBluetoothControlller::SetScanParameters(esp_ble_scan_params_t *params)
+{
+    if (params)
+        ble_scan_params = *params;
+
+    esp_err_t result = esp_ble_gap_set_scan_params(&ble_scan_params);
+    if (result)
+        ESP_LOGE(CLIENT_BLUETOOTH_CONTROLLER_TAG, "Failed to set scan parameters with result code %d", result);
+
+    return result;
+}
+
+/**
+ * @brief Open a direct connection to remote device
+ */
+esp_err_t ClientBluetoothControlller::OpenConnection(esp_gatt_if_t gattc_if, esp_bd_addr_t remoteAddress, esp_ble_addr_type_t removeAddressType, bool isDirect)
+{
+    esp_err_t result = esp_ble_gattc_open(gattc_if, remoteAddress, removeAddressType, isDirect);
+    if (result)
+        ESP_LOGE(CLIENT_BLUETOOTH_CONTROLLER_TAG, "Failed to open connection to remote device with result code %d", result);
+
+    return result;
 }
 
 /**
