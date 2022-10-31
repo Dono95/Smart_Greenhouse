@@ -13,7 +13,7 @@
 /* STL includes */
 #include <memory>
 
-const static char *GREENHOUSE_MANAGER_TAG = "Greenhouse Manager";
+#define GREENHOUSE_MANAGER_TAG "Greenhouse Manager"
 
 namespace Greenhouse
 {
@@ -56,13 +56,13 @@ namespace Greenhouse
         ~GreenhouseManager();
 
         /* Unique pointer to bluetooth controller */
-        using Unique_Bluetooth_Controller = std::unique_ptr<Bluetooth::ClientBluetoothControlller>;
+        using Shared_Bluetooth_Controller = std::shared_ptr<Bluetooth::ClientBluetoothControlller>;
 
         /* Singleton instance of GreenhouseManager object */
         static GreenhouseManager *mManagerInstance;
 
-        /* Unique pointer of Bluetooth controller*/
-        Unique_Bluetooth_Controller mBluetoothController;
+        /* Shared pointer of Bluetooth controller*/
+        Shared_Bluetooth_Controller mBluetoothController;
 
         /* Shared pointer to client bluetooth handler*/
         Shared_Bluetooth_Handler mBluetoothHandler;

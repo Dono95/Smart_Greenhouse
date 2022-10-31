@@ -15,9 +15,10 @@ GreenhouseManager *GreenhouseManager::mManagerInstance{nullptr};
 /**
  * @brief Class constructor
  */
-GreenhouseManager::GreenhouseManager() : mBluetoothController(new Bluetooth::ClientBluetoothControlller())
+GreenhouseManager::GreenhouseManager()
+    : mBluetoothController(new Bluetooth::ClientBluetoothControlller()),
+      mBluetoothHandler(new Bluetooth::ClientBluetoothHandler(mBluetoothController))
 {
-    mBluetoothHandler = std::shared_ptr<Bluetooth::ClientBluetoothHandler>(new Bluetooth::ClientBluetoothHandler());
 }
 
 /**
