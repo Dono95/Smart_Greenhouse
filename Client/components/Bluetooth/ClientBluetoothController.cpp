@@ -1,5 +1,7 @@
 /* Project specific includes */
+#include "Bluetooth/BluetoothDefinitions.hpp"
 #include "ClientBluetoothController.hpp"
+#include "GreenhouseManager.hpp"
 
 /* STL includes*/
 #include <iostream>
@@ -30,89 +32,42 @@ ClientBluetoothControlller::~ClientBluetoothControlller()
 /**
  * @brief Method to register gap and gatts callback
  */
-esp_err_t ClientBluetoothControlller::RegisterCallback(void)
+ClientBluetoothControlller::INIT_BLE_STATUS ClientBluetoothControlller::RegisterCallbacks(void)
 {
-    /*auto GapCallback = [](esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param)
-    {
+    esp_err_t registerResult = esp_ble_gap_register_callback([](esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param){
         const auto manager = GreenhouseManager::GetInstance();
-        if (manager)
-            manager->GetBluetoothHandler()->HandleGapEvent(event, param);
-    };
 
-    esp_err_t registerResult = esp_ble_gap_register_callback(BluetoothController::GapEventHandler);
+        if (manager)
+            manager->GetHandler()->HandleGapEvent(event, param);
+    });
+    
     if (registerResult)
     {
         ESP_LOGE(CLIENT_BLUETOOTH_CONTROLLER_TAG, "gap register error, error code = %x", registerResult);
-        return INIT_BLUETOOTH_RV::RV_REGISTER_CALLBACK_FAILED;
+        return INIT_BLE_STATUS::RV_REGISTER_CALLBACK_FAILED;
     }
 
-    registerResult = esp_ble_gattc_register_callback(BluetoothController::GattcEventHandler);
+    registerResult = esp_ble_gattc_register_callback([](esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if, esp_ble_gattc_cb_param_t *param){
+        const auto manager = GreenhouseManager::GetInstance();
+
+        if (manager)
+            manager->GetHandler()->HandleGattcEvent(event, gattc_if, param);
+    });
+
     if (registerResult)
     {
         ESP_LOGE(CLIENT_BLUETOOTH_CONTROLLER_TAG, "gatts register error, error code = %x", registerResult);
-        return INIT_BLUETOOTH_RV::RV_REGISTER_CALLBACK_FAILED;
-    }
+        return INIT_BLE_STATUS::RV_REGISTER_CALLBACK_FAILED;
+    }   
 
-    registerResult = esp_ble_gattc_app_register(GREEENHOUSE_PROFILE);
+    registerResult = esp_ble_gattc_app_register(GREENHOUSE_PROFILE);
     if (registerResult)
     {
         ESP_LOGE(CLIENT_BLUETOOTH_CONTROLLER_TAG, "gatts app register failed, error code = %x", registerResult);
-        return INIT_BLUETOOTH_RV::RV_REGISTER_APP_FAILED;
-    }*/
-    return ESP_OK;
+        return INIT_BLE_STATUS::RV_REGISTER_APP_FAILED;
+    }
+    return INIT_BLE_STATUS::RV_BLUETOOTH_INIT_OK;
 }
-
-/**
- * @brief Method to initialize bluetooth controller. Set bluetooth mode and register
- * callbacks for gap and gatts
- */
-/*BluetoothController::INIT_BLUETOOTH_RV BluetoothController::InitBluetoothController(esp_bt_mode_t bluetoothMode)
-{
-    // TO DO -> Need to release opposite mode from bluetoothMode
-    // For now programmer is responsible to use only ESP_BT_MODE_BLE
-
-    // Check result of bluetooth controller to memory release of classic bluetooth
-    ESP_ERROR_CHECK(esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT));
-
-    INIT_BLUETOOTH_RV result = InitESP_BluetoothController(bluetoothMode);
-    if (result != INIT_BLUETOOTH_RV::RV_BLUETOOTH_INIT_OK)
-        return result;
-
-    result = InitBluedroid();
-    if (result != INIT_BLUETOOTH_RV::RV_BLUETOOTH_INIT_OK)
-        return result;
-
-    // Test lambda [](esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param) {}
-    esp_err_t registerResult = esp_ble_gap_register_callback(BluetoothController::GapEventHandler);
-    if (registerResult)
-    {
-        ESP_LOGE(BLUETOOTH_CONTROLLER_TAG, "gap register error, error code = %x", registerResult);
-        return INIT_BLUETOOTH_RV::RV_REGISTER_CALLBACK_FAILED;
-    }
-
-    registerResult = esp_ble_gattc_register_callback(BluetoothController::GattcEventHandler);
-    if (registerResult)
-    {
-        ESP_LOGE(BLUETOOTH_CONTROLLER_TAG, "gatts register error, error code = %x", registerResult);
-        return INIT_BLUETOOTH_RV::RV_REGISTER_CALLBACK_FAILED;
-    }
-
-    registerResult = esp_ble_gattc_app_register(GREEENHOUSE_PROFILE);
-    if (registerResult)
-    {
-        ESP_LOGE(BLUETOOTH_CONTROLLER_TAG, "gatts app register failed, error code = %x", registerResult);
-        return INIT_BLUETOOTH_RV::RV_REGISTER_APP_FAILED;
-    }
-
-    esp_err_t local_mtu_ret = esp_ble_gatt_set_local_mtu(512);
-    if (local_mtu_ret)
-    {
-        ESP_LOGE(BLUETOOTH_CONTROLLER_TAG, "set local  MTU failed, error code = %x", local_mtu_ret);
-        return INIT_BLUETOOTH_RV::RV_SET_LOCAL_MTU_FAILED;
-    }
-
-    return INIT_BLUETOOTH_RV::RV_BLUETOOTH_INIT_OK;
-}*/
 
 /**
  * @brief The method to handle event for Greenhouse profile
@@ -385,99 +340,6 @@ case ESP_GATTC_DISCONNECT_EVT:
 default:
     break;
 }
-}*/
-
-/*********************************************
- *              PRIVATE API                  *
- ********************************************/
-
-/**
- * @brief Method to initialize ESP bluetooth controller.
- */
-/*BluetoothController::INIT_BLUETOOTH_RV BluetoothController::InitESP_BluetoothController(const esp_bt_mode_t bluetoothMode)
-{
-    // Initialization of default config
-    esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
-    esp_err_t result = esp_bt_controller_init(&bt_cfg);
-    if (result)
-    {
-        ESP_LOGE(BLUETOOTH_CONTROLLER_TAG, "%s initialize controller failed: %s\n", __func__, esp_err_to_name(result));
-        return INIT_BLUETOOTH_RV::RV_BLUETOOTH_INIT_FAILED;
-    }
-
-    // Set Bluetooth  mode
-    result = esp_bt_controller_enable(bluetoothMode);
-    if (result)
-    {
-        ESP_LOGE(BLUETOOTH_CONTROLLER_TAG, "%s enable controller failed\n", __func__);
-        return INIT_BLUETOOTH_RV::RV_BLUETOOTH_SET_MODE_FAILED;
-    }
-
-    return INIT_BLUETOOTH_RV::RV_BLUETOOTH_INIT_OK;
-}*/
-
-/**
- * @brief Method to initialize ESP bluedroid.
- */
-/*BluetoothController::INIT_BLUETOOTH_RV BluetoothController::InitBluedroid(void)
-{
-    // Initialize bluedroid
-    esp_err_t result = esp_bluedroid_init();
-    if (result)
-    {
-        ESP_LOGE(BLUETOOTH_CONTROLLER_TAG, "%s init bluetooth failed\n", __func__);
-        return INIT_BLUETOOTH_RV::RV_BLUEDROID_FAILED;
-    }
-
-    // Enable bluedroid
-    result = esp_bluedroid_enable();
-    if (result)
-    {
-        ESP_LOGE(BLUETOOTH_CONTROLLER_TAG, "%s enable bluetooth failed\n", __func__);
-        return INIT_BLUETOOTH_RV::RV_BLUEDROID_FAILED;
-    }
-
-    return INIT_BLUETOOTH_RV::RV_BLUETOOTH_INIT_OK;
-}*/
-
-/**
- * @brief The method to handle event that are pushed from BLE stack
- */
-/*void BluetoothController::GattcEventHandler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if, esp_ble_gattc_cb_param_t *param)
-{
-    // If event is register event, store the gattc_if for each profile
-    if (event == ESP_GATTC_REG_EVT)
-    {
-        if (param->reg.status == ESP_GATT_OK)
-        {
-            profileTab[param->reg.app_id].gattc_if = gattc_if;
-        }
-        else
-        {
-            ESP_LOGI(BLUETOOTH_CONTROLLER_TAG, "reg app failed, app_id %04x, status %d",
-                     param->reg.app_id,
-                     param->reg.status);
-            return;
-        }
-    }*/
-
-/* If the gattc_if equal to profile A, call profile A cb handler,
- * so here call each profile's callback */
-/*do
-{
-    int idx;
-    for (idx = 0; idx < NUMBER_OF_PROFILES; idx++)
-    {
-        if (gattc_if == ESP_GATT_IF_NONE ||  ESP_GATT_IF_NONE, not specify a certain gatt_if, need to call every profile cb function */
-/*gattc_if == profileTab[idx].gattc_if)
-{
-if (profileTab[idx].gattc_cb)
-{
-    profileTab[idx].gattc_cb(event, gattc_if, param);
-}
-}
-}
-} while (0);
 }*/
 
 /**
