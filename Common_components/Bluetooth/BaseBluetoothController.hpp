@@ -65,7 +65,7 @@ namespace Component
              * @return esp_err_t    ESP_OK  : registration was successful
              *                      Other   : Otherwise with specific enum value with failure code
              */ 
-            virtual esp_err_t RegisterCallback(void) = 0;
+            virtual INIT_BLUETOOTH_RV RegisterCallbacks(void) = 0;
 
         private:
             /**

@@ -6,7 +6,7 @@ set(SOURCES
 
 # Register components with include header files
 idf_component_register(SRCS ${SOURCES}
-                                INCLUDE_DIRS "."
+                                INCLUDE_DIRS "." "./Bluetooth/Interfaces"
                                 REQUIRES bt)
 
 

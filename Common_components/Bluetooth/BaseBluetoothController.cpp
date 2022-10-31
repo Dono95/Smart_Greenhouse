@@ -50,6 +50,7 @@ INIT_BLUETOOTH_RV BaseBluetoothController::InitBluetoothController(const esp_bt_
         return INIT_BLUETOOTH_RV::RV_SET_LOCAL_MTU_FAILED;
     }
 
+    ESP_LOGI(BASE_BLUETOOTH_CONTROLLER_TAG, "Bluetooth controller initialization was successful.");
     return INIT_BLUETOOTH_RV::RV_BLUETOOTH_INIT_OK;
 }
 
