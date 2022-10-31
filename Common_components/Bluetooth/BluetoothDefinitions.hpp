@@ -3,6 +3,7 @@
 
 /* STL includes */
 #include <cstdint>
+#include <string>
 #include <map>
 
 /* Bluetooth includes */
@@ -13,6 +14,39 @@ namespace Component
 {
     namespace Bluetooth
     {
+        static std::string EnumToString(esp_gap_ble_cb_event_t event) 
+        {
+            switch (event)
+            {
+            case (ESP_GAP_BLE_SCAN_PARAM_SET_COMPLETE_EVT): return "ESP_GAP_BLE_SCAN_PARAM_SET_COMPLETE_EVT";
+            case (ESP_GAP_BLE_SCAN_START_COMPLETE_EVT): return "ESP_GAP_BLE_SCAN_START_COMPLETE_EVT";
+            case (ESP_GAP_BLE_SCAN_RESULT_EVT): return "ESP_GAP_BLE_SCAN_RESULT_EVT";
+            default:
+                break;
+            } 
+
+            return "Unimplemented event[" + std::to_string(event) + "] conversion.";
+        }
+
+        static std::string EnumToString(esp_gap_search_evt_t searchEvent) 
+        {
+            switch (searchEvent)
+            {
+            case (ESP_GAP_SEARCH_INQ_RES_EVT): return "ESP_GAP_SEARCH_INQ_RES_EVT";
+            case (ESP_GAP_SEARCH_INQ_CMPL_EVT): return "ESP_GAP_SEARCH_INQ_CMPL_EVT";
+            case (ESP_GAP_SEARCH_DISC_RES_EVT): return "ESP_GAP_SEARCH_DISC_RES_EVT";
+            case (ESP_GAP_SEARCH_DISC_BLE_RES_EVT): return "ESP_GAP_SEARCH_DISC_BLE_RES_EVT";
+            case (ESP_GAP_SEARCH_DISC_CMPL_EVT): return "ESP_GAP_SEARCH_DISC_CMPL_EVT";
+            case (ESP_GAP_SEARCH_DI_DISC_CMPL_EVT): return "ESP_GAP_SEARCH_DI_DISC_CMPL_EVT";
+            case (ESP_GAP_SEARCH_SEARCH_CANCEL_CMPL_EVT): return "ESP_GAP_SEARCH_SEARCH_CANCEL_CMPL_EVT";
+            case (ESP_GAP_SEARCH_INQ_DISCARD_NUM_EVT): return "ESP_GAP_SEARCH_INQ_DISCARD_NUM_EVT";
+            default:
+                break;
+            } 
+
+            return "Unimplemented event[" + std::to_string(searchEvent) + "] conversion.";
+        }
+
         /***************************************************************************************/
         /***********                            CLIENT                               ***********/
         /***************************************************************************************/

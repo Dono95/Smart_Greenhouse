@@ -16,7 +16,6 @@
 #include "esp_gattc_api.h"   //  implements GATT configuration, such as creating services and characteristics.
 #include "esp_gatt_common_api.h"
 
-
 namespace Component
 {
     namespace Bluetooth
@@ -38,7 +37,6 @@ namespace Component
         class BaseBluetoothController
         {
         public:
-
             /**
              * @brief Class base contrustor
              */
@@ -61,31 +59,30 @@ namespace Component
 
             /**
              * @brief Method to register gap and gatts callback
-             * 
+             *
              * @return esp_err_t    ESP_OK  : registration was successful
              *                      Other   : Otherwise with specific enum value with failure code
-             */ 
+             */
             virtual INIT_BLUETOOTH_RV RegisterCallbacks(void) = 0;
 
         private:
             /**
-            * @brief Method to initialize ESP bluetooth controller.
-            *
-            * @param bluetoothMode[in]     Bluetooth mode
-            *
-            * @return INIT_BLUETOOTH_RV -> Return value based on initialization progress
-            *                           -> RV_BLUETOOTH_INIT_OK - Succeeded, Othrewise - Failed
-            */
+             * @brief Method to initialize ESP bluetooth controller.
+             *
+             * @param bluetoothMode[in]     Bluetooth mode
+             *
+             * @return INIT_BLUETOOTH_RV -> Return value based on initialization progress
+             *                           -> RV_BLUETOOTH_INIT_OK - Succeeded, Othrewise - Failed
+             */
             INIT_BLUETOOTH_RV InitESP_BluetoothController(const esp_bt_mode_t bluetoothMode);
 
             /**
-            * @brief Method to initialize ESP bluedroid.
-            *
-            * @return INIT_BLUETOOTH_RV -> Return value based on initialization progress
-            *                           -> RV_BLUETOOTH_INIT_OK - Succeeded, Othrewise - Failed
-            */
+             * @brief Method to initialize ESP bluedroid.
+             *
+             * @return INIT_BLUETOOTH_RV -> Return value based on initialization progress
+             *                           -> RV_BLUETOOTH_INIT_OK - Succeeded, Othrewise - Failed
+             */
             INIT_BLUETOOTH_RV InitBluedroid(void);
-
         };
     } // namespace Bluetooth
 } // namespace Component
