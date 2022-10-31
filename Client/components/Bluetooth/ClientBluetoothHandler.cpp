@@ -7,6 +7,7 @@
 
 /* STD library includes */
 #include <algorithm>
+#include <cstring>
 
 using namespace Greenhouse::Bluetooth;
 
@@ -17,7 +18,15 @@ using namespace Greenhouse::Bluetooth;
 /**
  * @brief Class constructor
  */
-ClientBluetoothHandler::ClientBluetoothHandler()
+ClientBluetoothHandler::ClientBluetoothHandler() : mRemoteDevice{"Greenhouse"}, mConnected{false}
+{
+}
+
+/**
+ * @brief Class constructor with controller parameter
+ */
+ClientBluetoothHandler::ClientBluetoothHandler(std::weak_ptr<ClientBluetoothControlller> controller)
+    : mBluetoothController(controller), mRemoteDevice{"Greenhouse"}, mConnected{false}
 {
 }
 
@@ -51,10 +60,24 @@ bool ClientBluetoothHandler::InitializeBluetoothProfiles()
 }
 
 /**
+ * @brief Setter to set pointer to bluetooth controller
+ */
+void ClientBluetoothHandler::SetBluetoothController(std::weak_ptr<ClientBluetoothControlller> controller)
+{
+    mBluetoothController = controller;
+}
+
+/**
  * @brief Overriden method to handle events from gatts interface (BLE stack)
  */
 void ClientBluetoothHandler::HandleGattcEvent(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if, esp_ble_gattc_cb_param_t *param)
 {
+    if (mBluetoothController.expired())
+    {
+        ESP_LOGE(CLIENT_BLUETOOTH_HANDLER_TAG, "Bluetooth controller is invalid. Unable to continue in handling event");
+        return;
+    }
+
     if (IsRegistrationEvent(event))
     {
         if (!HandleRegistrationEvent(gattc_if, param))
@@ -79,13 +102,15 @@ void ClientBluetoothHandler::HandleGattcEvent(esp_gattc_cb_event_t event, esp_ga
  */
 void ClientBluetoothHandler::HandleGapEvent(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param)
 {
+    ESP_LOGI(CLIENT_BLUETOOTH_HANDLER_TAG, "[%s] Event: %s.", __func__, Component::Bluetooth::EnumToString(event).c_str());
+
     switch (event)
     {
     case (ESP_GAP_BLE_SCAN_PARAM_SET_COMPLETE_EVT):
     {
-        ESP_LOGI(CLIENT_BLUETOOTH_HANDLER_TAG, "Event type ESP_GAP_BLE_SCAN_PARAM_SET_COMPLETE_EVT");
-        // Parameter of function is in seconds
-        esp_ble_gap_start_scanning(30);
+        if (const auto controller = mBluetoothController.lock())
+            controller->StartScanning(30);
+
         break;
     }
     case (ESP_GAP_BLE_SCAN_START_COMPLETE_EVT):
@@ -102,8 +127,8 @@ void ClientBluetoothHandler::HandleGapEvent(esp_gap_ble_cb_event_t event, esp_bl
     }
     case (ESP_GAP_BLE_SCAN_RESULT_EVT):
     {
-        ESP_LOGI(CLIENT_BLUETOOTH_HANDLER_TAG, "Event type ESP_GAP_BLE_SCAN_RESULT_EVT");
         HandleScanResultEvent(param);
+        break;
     }
     default:
         break;
@@ -116,17 +141,20 @@ void ClientBluetoothHandler::HandleGapEvent(esp_gap_ble_cb_event_t event, esp_bl
 void ClientBluetoothHandler::GreenhouseEventHandler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if, esp_ble_gattc_cb_param_t *param)
 {
     ESP_LOGW(CLIENT_BLUETOOTH_HANDLER_TAG, "Event in %s", __func__);
+    // Create shared_pointer from weak_ptr mBluetooth controller
+    const auto controller = mBluetoothController.lock();
+    if (!controller)
+    {
+        ESP_LOGE(CLIENT_BLUETOOTH_HANDLER_TAG, "Unable to lock weak_ptr in middle of %s function.", __func__);
+        return;
+    }
 
     switch (event)
     {
     case (ESP_GATTC_REG_EVT):
     {
         ESP_LOGI(CLIENT_BLUETOOTH_HANDLER_TAG, "REG_EVT");
-        esp_err_t scan_ret = esp_ble_gap_set_scan_params(&ble_scan_params);
-        if (scan_ret)
-            ESP_LOGE(CLIENT_BLUETOOTH_HANDLER_TAG, "set scan params error, error code = %x", scan_ret);
-
-        break;
+        controller->SetScanParameters();
     }
     default:
         break;
@@ -182,6 +210,8 @@ bool ClientBluetoothHandler::HandleRegistrationEvent(esp_gatt_if_t gattc_if, esp
  */
 void ClientBluetoothHandler::HandleScanResultEvent(esp_ble_gap_cb_param_t *scanResult)
 {
+    ESP_LOGI(CLIENT_BLUETOOTH_HANDLER_TAG, "[%s] Search event: %s.", __func__, Component::Bluetooth::EnumToString(scanResult->scan_rst.search_evt).c_str());
+
     switch (scanResult->scan_rst.search_evt)
     {
     case (ESP_GAP_SEARCH_INQ_RES_EVT):
@@ -191,25 +221,31 @@ void ClientBluetoothHandler::HandleScanResultEvent(esp_ble_gap_cb_param_t *scanR
 
         if (adv_name)
         {
-            
+            if (mRemoteDevice.size() == adv_name_len && (strcmp((char *)adv_name, mRemoteDevice.c_str()) == 0))
+            {
+                ESP_LOGI(CLIENT_BLUETOOTH_HANDLER_TAG, "Searched device %s found.", mRemoteDevice.c_str());
+                if (IsConnected())
+                    break;
+
+                if (const auto controller = mBluetoothController.lock())
+                {
+                    ESP_LOGI(CLIENT_BLUETOOTH_HANDLER_TAG, "Trying to connect to %s", mRemoteDevice.c_str());
+                    controller->StopScanning();
+                    controller->OpenConnection(mProfilesMap.at(GREENHOUSE_PROFILE).gattc_if, scanResult->scan_rst.bda, scanResult->scan_rst.ble_addr_type, true);
+                }
+            }
         }
-        /*if (adv_name)
-{
-    if (strlen(remote_device_name) == adv_name_len && strncmp((char *)adv_name, remote_device_name, adv_name_len) == 0)
-    {
-        ESP_LOGI(BLUETOOTH_CONTROLLER_TAG, "searched device %s\n", remote_device_name);
-        if (connect == false)
-        {
-            connect = true;
-            ESP_LOGI(BLUETOOTH_CONTROLLER_TAG, "connect to the remote device.");
-            esp_ble_gap_stop_scanning();
-            esp_ble_gattc_open(profileTab[GREEENHOUSE_PROFILE].gattc_if, scan_result->scan_rst.bda, scan_result->scan_rst.ble_addr_type, true);
-        }
-    }
-}*/
         break;
     }
     default:
         break;
     }
+}
+
+/**
+ * @brief Return connection status to remote device
+ */
+bool ClientBluetoothHandler::IsConnected() const
+{
+    return mConnected;
 }
