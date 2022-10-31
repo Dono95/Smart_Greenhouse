@@ -12,6 +12,11 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
+/* ESP log library */
+#include "esp_log.h"
+
+#define MAIN_TAG "Main"
+
 extern "C" void app_main(void)
 {
     // Initialize NVS.
@@ -27,6 +32,9 @@ extern "C" void app_main(void)
 
     // Creating Greenhouse manager
     auto greenhouseManager = Greenhouse::GreenhouseManager::GetInstance();
+    if (!greenhouseManager->StartBluetooth()) {
+        ESP_LOGE(MAIN_TAG, "Failed to start bluetooth.");
+    }
 
     while (true)
     {
