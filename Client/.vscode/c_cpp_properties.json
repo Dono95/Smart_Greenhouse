@@ -6,7 +6,7 @@
                 "${HOME}/esp/esp-idf/components**"
             ],
             "defines": [],
-            "compilerPath": "/home/dominik/.espressif/tools/xtensa-esp32-elf/esp-2021r2-patch3-8.4.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-gcc",
+            "compilerPath": "/home/dominik/.espressif/tools/xtensa-esp32-elf/esp-2021r2-8.4.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-gcc",
             "cStandard": "gnu17",
             "cppStandard": "c++11",
             "intelliSenseMode": "linux-gcc-x64",
