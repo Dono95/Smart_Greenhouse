@@ -91,7 +91,8 @@ namespace Component
             };
 
         } // namespace Interface
-    }     // namespace Bluetooth
+
+    } // namespace Bluetooth
 } // namespace Greenhouse
 
 #endif // BASE_BLUETOOTH_HANDLER_INTERFACE
