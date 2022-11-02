@@ -7,11 +7,14 @@
 #define SERVER_BLUETOOTH_HANDLER
 
 /* Project specific includes */
-#include "BaseBluetoothDefinitions.hpp"
-#include "BaseBluetoothHandlerInterface.hpp"
+#include "ServerBluetoothController.hpp"
 
-/* STL includes */
-#include <map>
+/* Common components */
+#include "Bluetooth/BluetoothDefinitions.hpp"
+#include "Bluetooth/Interfaces/BaseBluetoothHandlerInterface.hpp"
+
+/* STD library includes */
+#include <memory>
 
 /*************         DEFINES        *************/
 #define SERVER_BLUETOOTH_HANDLER_TAG "ServerBluetoothHandler"
@@ -22,13 +25,16 @@ namespace Greenhouse
 {
     namespace Bluetooth
     {
-        class ServerBluetoothHandler : public BaseBluetoothHandlerInterface
+        class ServerBluetoothHandler : public Component::Bluetooth::Interface::ServerBluetoothHandlerInterface<ServerBluetoothController>
         {
         public:
+            /* Typedef for incialization bluetooth return code*/
+            using INIT_BLE_STATUS = Component::Bluetooth::INIT_BLUETOOTH_RV;
+
             /**
-             * @brief Default class constructor
+             * @brief Class constructor with controller parameter
              */
-            explicit ServerBluetoothHandler();
+            explicit ServerBluetoothHandler(std::weak_ptr<ServerBluetoothController> controller);
 
             /**
              * @brief Class destructor
@@ -37,11 +43,19 @@ namespace Greenhouse
 
             /**
              * @brief Method to initialize bluetooth profiles on server side
-             * 
+             *
              * @return bool     true    : Initialization has been successful
              *                  false   : Otherwise
-             */ 
+             */
             bool InitializeBluetoothProfiles() override;
+
+            /**
+             * @brief Method to handle event that are pushed from BLE stack
+             *
+             * @param event     -> Event from BLE stack
+             * @param param     -> Pointer to parameters of gatts
+             */
+            virtual void HandleGapEvent(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param) override;
 
             /**
              * @brief Method to handle events from gatts interface on server side
@@ -52,13 +66,6 @@ namespace Greenhouse
              */
             void HandleGattsEvent(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param) override;
 
-            /**
-             * @brief Method to handle event that are pushed from BLE stack
-             *
-             * @param event     -> Event from BLE stack
-             * @param param     -> Pointer to parameters of gatts
-             */
-            virtual void HandleGapEvent(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param) override;
         private:
             /**
              * @brief Checking eventy for comparison on ESP_GATTS_REG_EVT
@@ -90,10 +97,8 @@ namespace Greenhouse
              */
             void GreenhouseEventHandler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);
 
-            /* Map with profile ID as key map and structure of gatts progile*/
-            using ProfileMap = std::map<uint8_t, GattsProfile_I>;
-
-            ProfileMap mProfileMap;
+            /* Profiles map */
+            Component::Bluetooth::ServerProfileMap mProfilesMap;
         };
     } // namespace Bluetooth
 } // namespace Greenhouse

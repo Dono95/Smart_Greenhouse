@@ -23,23 +23,7 @@ namespace Greenhouse
 
 #define GATTS_DEMO_CHAR_VAL_LEN_MAX 0x40
 
-        struct GattsProfile_I
-        {
-            esp_gatts_cb_t gatts_cb;
-            uint16_t gatts_if;
-            uint16_t app_id;
-            uint16_t conn_id;
-            uint16_t service_handle;
-            esp_gatt_srvc_id_t service_id;
-            uint16_t char_handle;
-            esp_bt_uuid_t char_uuid;
-            esp_gatt_perm_t perm;
-            esp_gatt_char_prop_t property;
-            uint16_t descr_handle;
-            esp_bt_uuid_t descr_uuid;
-        };
-
-        static uint8_t char1_str[] = {0x11, 0x22, 0x33};
+                static uint8_t char1_str[] = {0x11, 0x22, 0x33};
         static esp_gatt_char_prop_t a_property = 0;
 
         static esp_attr_value_t gatts_demo_char1_val =

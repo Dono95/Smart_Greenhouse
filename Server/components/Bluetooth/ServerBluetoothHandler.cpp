@@ -1,4 +1,4 @@
-/* Project specific includes */ 
+/* Project specific includes */
 #include "ServerBluetoothHandler.hpp"
 #include "GreenhouseManager.hpp"
 
@@ -11,10 +11,11 @@
 using namespace Greenhouse::Bluetooth;
 
 /**
- * @brief Default class constructor
+ * @brief Class constructor with controller parameter
  */
-ServerBluetoothHandler::ServerBluetoothHandler()
-{   
+ServerBluetoothHandler::ServerBluetoothHandler(std::weak_ptr<ServerBluetoothController> controller)
+{
+    SetBluetoothController(controller);
 }
 
 /**
@@ -25,24 +26,77 @@ ServerBluetoothHandler::~ServerBluetoothHandler()
 }
 
 /**
-* @brief Method to initialize bluetooth profiles on server side
-*/ 
-bool ServerBluetoothHandler::InitializeBluetoothProfiles() {
-    mProfileMap.insert({GREENHOUSE_PROFILE, {
-        .gatts_cb = [](esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param){
-            const auto manager = GreenhouseManager::GetInstance();
+ * @brief Method to initialize bluetooth profiles on server side
+ */
+bool ServerBluetoothHandler::InitializeBluetoothProfiles()
+{
+    mProfilesMap.insert({GREENHOUSE_PROFILE, {.gatts_cb = [](esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param)
+                                              {
+                                                  const auto manager = GreenhouseManager::GetInstance();
 
-            if (!manager)
-                return;
+                                                  if (!manager)
+                                                      return;
 
-            const auto serverHandler = std::dynamic_pointer_cast<ServerBluetoothHandler>(manager->GetBluetoothHandler());
-            if (serverHandler)
-                serverHandler->GreenhouseEventHandler(event, gatts_if, param);
-        },
-        .gatts_if = ESP_GATT_IF_NONE
-    }});
+                                                  const auto serverHandler = std::dynamic_pointer_cast<ServerBluetoothHandler>(manager->GetHandler());
+                                                  if (serverHandler)
+                                                      serverHandler->GreenhouseEventHandler(event, gatts_if, param);
+                                              },
+                                              .gatts_if = ESP_GATT_IF_NONE}});
 
     return true;
+}
+
+/**
+ * @brief Method to handle event that are pushed from BLE stack
+ */
+void ServerBluetoothHandler::HandleGapEvent(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param)
+{
+    ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "[%s] Event: %s.", __func__, Component::Bluetooth::EnumToString(event).c_str());
+
+    switch (event)
+    {
+    case (ESP_GAP_BLE_ADV_DATA_SET_COMPLETE_EVT):
+    {
+        /*adv_config_done &= (~adv_config_flag);
+        if (adv_config_done == 0)
+        {
+            esp_ble_gap_start_advertising(&adv_params);
+        }*/
+        break;
+    }
+    case (ESP_GAP_BLE_SCAN_RSP_DATA_SET_COMPLETE_EVT):
+    {
+        /*adv_config_done &= (~scan_rsp_config_flag);
+        if (adv_config_done == 0)
+        {
+            esp_ble_gap_start_advertising(&adv_params);
+        }*/
+        break;
+    }
+    case (ESP_GAP_BLE_ADV_START_COMPLETE_EVT):
+    {
+        // advertising start complete event to indicate advertising start successfully or failed
+        /*if (param->adv_start_cmpl.status != ESP_BT_STATUS_SUCCESS)
+        {
+            ESP_LOGE(SERVER_BLUETOOTH_HANDLER_TAG, "Advertising start failed\n");
+        }*/
+        break;
+    }
+    case (ESP_GAP_BLE_UPDATE_CONN_PARAMS_EVT):
+        /*ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "update connection params status = %d, min_int = %d, max_int = %d,conn_int = %d,latency = %d, timeout = %d",
+                 param->update_conn_params.status,
+                 param->update_conn_params.min_int,
+                 param->update_conn_params.max_int,
+                 param->update_conn_params.conn_int,
+                 param->update_conn_params.latency,
+                 param->update_conn_params.timeout);*/
+        break;
+    default:
+    {
+        // ESP_LOGW(SERVER_BLUETOOTH_HANDLER_TAG, "Unhandled event with ID: %d in function %s", event, __func__);
+        break;
+    }
+    }
 }
 
 /**
@@ -50,75 +104,25 @@ bool ServerBluetoothHandler::InitializeBluetoothProfiles() {
  */
 void ServerBluetoothHandler::HandleGattsEvent(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param)
 {
-    if (IsRegistrationEvent(event)) {
-        if (!HandleRegistrationEvent(gatts_if, param)) {
+    if (IsRegistrationEvent(event))
+    {
+        if (!HandleRegistrationEvent(gatts_if, param))
             return;
-        }
     }
 
-    for (const auto& profile : mProfileMap) {
-        if (gatts_if == ESP_GATT_IF_NONE || gatts_if == profile.second.gatts_if) {
-            if (!profile.second.gatts_cb) {
+    for (const auto &profile : mProfilesMap)
+    {
+        if (gatts_if == ESP_GATT_IF_NONE || gatts_if == profile.second.gatts_if)
+        {
+            if (!profile.second.gatts_cb)
+            {
                 ESP_LOGE(SERVER_BLUETOOTH_HANDLER_TAG, "No callback function set for profile with ID [%d].", profile.first);
-                continue; 
+                continue;
             }
 
             ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "Calling callback for profile with ID [%d].", profile.first);
             profile.second.gatts_cb(event, gatts_if, param);
         }
-    }
-}
-
-/**
-* @brief Method to handle event that are pushed from BLE stack
-*/
-void ServerBluetoothHandler::HandleGapEvent(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param) 
-{
-    ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "%s with event type %d", __func__, event);  
-
-    switch (event)
-    {
-    case (ESP_GAP_BLE_ADV_DATA_SET_COMPLETE_EVT):
-    {
-        adv_config_done &= (~adv_config_flag);
-        if (adv_config_done == 0)
-        {
-            esp_ble_gap_start_advertising(&adv_params);
-        }
-        break;
-    }
-    case (ESP_GAP_BLE_SCAN_RSP_DATA_SET_COMPLETE_EVT):
-    {
-        adv_config_done &= (~scan_rsp_config_flag);
-        if (adv_config_done == 0)
-        {
-            esp_ble_gap_start_advertising(&adv_params);
-        }
-        break;
-    }
-    case (ESP_GAP_BLE_ADV_START_COMPLETE_EVT):
-    {
-        // advertising start complete event to indicate advertising start successfully or failed
-        if (param->adv_start_cmpl.status != ESP_BT_STATUS_SUCCESS)
-        {
-            ESP_LOGE(SERVER_BLUETOOTH_HANDLER_TAG, "Advertising start failed\n");
-        }
-        break;
-    }
-    case (ESP_GAP_BLE_UPDATE_CONN_PARAMS_EVT):
-        ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "update connection params status = %d, min_int = %d, max_int = %d,conn_int = %d,latency = %d, timeout = %d",
-                 param->update_conn_params.status,
-                 param->update_conn_params.min_int,
-                 param->update_conn_params.max_int,
-                 param->update_conn_params.conn_int,
-                 param->update_conn_params.latency,
-                 param->update_conn_params.timeout);
-        break;
-    default:
-    {
-        ESP_LOGW(SERVER_BLUETOOTH_HANDLER_TAG, "Unhandled event with ID: %d in function %s", event, __func__);
-        break;
-    }
     }
 }
 
@@ -143,16 +147,17 @@ bool ServerBluetoothHandler::HandleRegistrationEvent(esp_gatt_if_t gatts_if, esp
     }
 
     // Find profile based on ID
-    auto profile = std::find_if(mProfileMap.begin(), mProfileMap.end(), [&](const std::pair<uint8_t, GattsProfile_I>& itr){
+    auto profile = std::find_if(mProfilesMap.begin(), mProfilesMap.end(), [&](const std::pair<uint8_t, Component::Bluetooth::ServerGattsProfile> &itr)
+                                {
         if (itr.first == param->reg.app_id) {
             return true;
         }
 
-        return false;
-    });
+        return false; });
 
     // If profile with specific ID exist, register Gatts interface to profile structure
-    if (profile != mProfileMap.end()) {
+    if (profile != mProfilesMap.end())
+    {
         ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "Register Gatts interfae [%d] to profile with ID: %d", gatts_if, profile->first);
         profile->second.gatts_if = gatts_if;
         return true;
@@ -162,17 +167,18 @@ bool ServerBluetoothHandler::HandleRegistrationEvent(esp_gatt_if_t gatts_if, esp
 }
 
 /**
-* @brief Method to handle events for Greenhouse profile
-*/
-void ServerBluetoothHandler::GreenhouseEventHandler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param) 
+ * @brief Method to handle events for Greenhouse profile
+ */
+void ServerBluetoothHandler::GreenhouseEventHandler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param)
 {
-    ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "%s with event type %d", __func__, event);     
+    ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "[%s] Event: %s.", __func__, Component::Bluetooth::EnumToString(event).c_str());
 
     switch (event)
     {
     case ESP_GATTS_REG_EVT:
     {
-        ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "REGISTER_APP_EVT, status %d, app_id %d\n", param->reg.status, param->reg.app_id);
+
+        /*ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "REGISTER_APP_EVT, status %d, app_id %d\n", param->reg.status, param->reg.app_id);
         mProfileMap.at(GREENHOUSE_PROFILE).service_id.is_primary = true;
         mProfileMap.at(GREENHOUSE_PROFILE).service_id.id.inst_id = 0x00;
         mProfileMap.at(GREENHOUSE_PROFILE).service_id.id.uuid.len = ESP_UUID_LEN_16;
@@ -201,40 +207,38 @@ void ServerBluetoothHandler::GreenhouseEventHandler(esp_gatts_cb_event_t event, 
         adv_config_done |= scan_rsp_config_flag;
 
         //esp_ble_gatts_create_service(gatts_if, &profileTab[GREENHOUSE_PROFILE].service_id, GATTS_NUM_HANDLE_TEST_A);
-        esp_ble_gatts_create_service(gatts_if, &mProfileMap.at(GREENHOUSE_PROFILE).service_id, GATTS_NUM_HANDLE_TEST_A);
+        esp_ble_gatts_create_service(gatts_if, &mProfileMap.at(GREENHOUSE_PROFILE).service_id, GATTS_NUM_HANDLE_TEST_A);*/
         break;
     }
     case ESP_GATTS_READ_EVT:
     {
-        ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "GATT_READ_EVT, conn_id %d, trans_id %d, handle %d\n", param->read.conn_id, param->read.trans_id, param->read.handle);
+        // ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "GATT_READ_EVT, conn_id %d, trans_id %d, handle %d\n", param->read.conn_id, param->read.trans_id, param->read.handle);
         break;
     }
     case ESP_GATTS_WRITE_EVT:
     {
-        ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "GATT_WRITE_EVT, conn_id %d, trans_id %d, handle %d", param->write.conn_id, param->write.trans_id, param->write.handle);
-        
-        esp_ble_gatts_send_response(gatts_if, param->write.conn_id, param->write.trans_id, ESP_GATT_OK, NULL);
-        
+        /*ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "GATT_WRITE_EVT, conn_id %d, trans_id %d, handle %d", param->write.conn_id, param->write.trans_id, param->write.handle);
+
+        esp_ble_gatts_send_response(gatts_if, param->write.conn_id, param->write.trans_id, ESP_GATT_OK, NULL);*/
         break;
     }
     case ESP_GATTS_EXEC_WRITE_EVT:
-        ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "GATT_WRITE_EVT, conn_id %d, trans_id %d, handle %d\n", param->write.conn_id, param->write.trans_id, param->write.handle);
-        
+        // ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "GATT_WRITE_EVT, conn_id %d, trans_id %d, handle %d\n", param->write.conn_id, param->write.trans_id, param->write.handle);
         break;
     case ESP_GATTS_MTU_EVT:
-        ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "ESP_GATTS_MTU_EVT, MTU %d", param->mtu.mtu);
+        // ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "ESP_GATTS_MTU_EVT, MTU %d", param->mtu.mtu);
         break;
     case ESP_GATTS_UNREG_EVT:
         break;
     case ESP_GATTS_CREATE_EVT:
     {
-        ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "CREATE_SERVICE_EVT, status %d,  service_handle %d\n", param->create.status, param->create.service_handle);
+        /*ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "CREATE_SERVICE_EVT, status %d,  service_handle %d\n", param->create.status, param->create.service_handle);
         mProfileMap.at(GREENHOUSE_PROFILE).service_handle = param->create.service_handle;
         mProfileMap.at(GREENHOUSE_PROFILE).char_uuid.len = ESP_UUID_LEN_16;
         mProfileMap.at(GREENHOUSE_PROFILE).char_uuid.uuid.uuid16 = GATTS_CHAR_UUID_TEST_A;
 
         esp_ble_gatts_start_service(mProfileMap.at(GREENHOUSE_PROFILE).service_handle);
-        
+
         esp_err_t add_char_ret = esp_ble_gatts_add_char(mProfileMap.at(GREENHOUSE_PROFILE).service_handle, &mProfileMap.at(GREENHOUSE_PROFILE).char_uuid,
                                                         ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,
                                                         ESP_GATT_CHAR_PROP_BIT_WRITE,
@@ -242,14 +246,14 @@ void ServerBluetoothHandler::GreenhouseEventHandler(esp_gatts_cb_event_t event, 
         if (add_char_ret)
         {
             ESP_LOGE(SERVER_BLUETOOTH_HANDLER_TAG, "add char failed, error code =%x", add_char_ret);
-        }
+        }*/
         break;
     }
     case ESP_GATTS_ADD_INCL_SRVC_EVT:
         break;
     case ESP_GATTS_ADD_CHAR_EVT:
     {
-        uint16_t length = 0;
+        /*uint16_t length = 0;
         const uint8_t *prf_char;
 
         ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "ADD_CHAR_EVT, status %d,  attr_handle %d, service_handle %d\n",
@@ -273,28 +277,27 @@ void ServerBluetoothHandler::GreenhouseEventHandler(esp_gatts_cb_event_t event, 
         if (add_descr_ret)
         {
             ESP_LOGE(SERVER_BLUETOOTH_HANDLER_TAG, "add char descr failed, error code =%x", add_descr_ret);
-        }
+        }*/
         break;
     }
     case ESP_GATTS_ADD_CHAR_DESCR_EVT:
-        mProfileMap.at(GREENHOUSE_PROFILE).descr_handle = param->add_char_descr.attr_handle;
+        /*mProfileMap.at(GREENHOUSE_PROFILE).descr_handle = param->add_char_descr.attr_handle;
         ESP_LOGI(BLUETOOTH_CONTROLLER_TAG, "ADD_DESCR_EVT, status %d, attr_handle %d, service_handle %d\n",
-                 param->add_char_descr.status, param->add_char_descr.attr_handle, param->add_char_descr.service_handle);
-        
+                 param->add_char_descr.status, param->add_char_descr.attr_handle, param->add_char_descr.service_handle);*/
         break;
     case ESP_GATTS_DELETE_EVT:
         break;
     case ESP_GATTS_START_EVT:
-        ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "SERVICE_START_EVT, status %d, service_handle %d\n",
-                 param->start.status, param->start.service_handle);
+        /*ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "SERVICE_START_EVT, status %d, service_handle %d\n",
+                 param->start.status, param->start.service_handle);*/
         break;
     case ESP_GATTS_STOP_EVT:
         break;
     case ESP_GATTS_CONNECT_EVT:
     {
-        esp_ble_conn_update_params_t conn_params = {0};
+        /*esp_ble_conn_update_params_t conn_params = {0};
         memcpy(conn_params.bda, param->connect.remote_bda, sizeof(esp_bd_addr_t));
-        /* For the IOS system, please reference the apple official documents about the ble connection parameters restrictions. */
+        //For the IOS system, please reference the apple official documents about the ble connection parameters restrictions.
         conn_params.latency = 0;
         conn_params.max_int = 0x20; // max_int = 0x20*1.25ms = 40ms
         conn_params.min_int = 0x10; // min_int = 0x10*1.25ms = 20ms
@@ -307,19 +310,19 @@ void ServerBluetoothHandler::GreenhouseEventHandler(esp_gatts_cb_event_t event, 
         // start sent the update connection parameters to the peer device.
         esp_ble_gap_update_conn_params(&conn_params);
 
-        //esp_ble_gap_start_advertising(&adv_params);
+        //esp_ble_gap_start_advertising(&adv_params);*/
         break;
     }
     case ESP_GATTS_DISCONNECT_EVT:
-        ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "ESP_GATTS_DISCONNECT_EVT, disconnect reason 0x%x", param->disconnect.reason);
-        esp_ble_gap_start_advertising(&adv_params);
+        /*ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "ESP_GATTS_DISCONNECT_EVT, disconnect reason 0x%x", param->disconnect.reason);
+        esp_ble_gap_start_advertising(&adv_params);*/
         break;
     case ESP_GATTS_CONF_EVT:
-        ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "ESP_GATTS_CONF_EVT, status %d attr_handle %d", param->conf.status, param->conf.handle);
+        /*ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "ESP_GATTS_CONF_EVT, status %d attr_handle %d", param->conf.status, param->conf.handle);
         if (param->conf.status != ESP_GATT_OK)
         {
             esp_log_buffer_hex(SERVER_BLUETOOTH_HANDLER_TAG, param->conf.value, param->conf.len);
-        }
+        }*/
         break;
     case ESP_GATTS_OPEN_EVT:
     case ESP_GATTS_CANCEL_OPEN_EVT:
@@ -328,5 +331,5 @@ void ServerBluetoothHandler::GreenhouseEventHandler(esp_gatts_cb_event_t event, 
     case ESP_GATTS_CONGEST_EVT:
     default:
         break;
-    } 
+    }
 }

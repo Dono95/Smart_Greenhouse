@@ -7,9 +7,8 @@
 #define GREENHOUSE_MANAGER
 
 /* Project specific includes */
-#include "Bluetooth/BaseBluetoothHandlerInterface.hpp"
-#include "Bluetooth/ServerBluetoothHandler.hpp"
-#include "Bluetooth/BluetoothController.hpp"
+#include "ServerBluetoothController.hpp"
+#include "ServerBluetoothHandler.hpp"
 
 /* STL includes */
 #include <memory>
@@ -22,8 +21,8 @@ namespace Greenhouse
     class GreenhouseManager
     {
     public:
-        /* Shared pointer to base bluetooth */
-        using Shared_BaseHandlerInterface = std::shared_ptr<Bluetooth::BaseBluetoothHandlerInterface>;
+        /* Shared pointer to bluetooth events handler */
+        using Shared_Bluetooth_Handler = std::shared_ptr<Bluetooth::ServerBluetoothHandler>;
 
         /**
          * @brief Static method to get instance of GreenhouseManager
@@ -36,13 +35,18 @@ namespace Greenhouse
          * @return  true    : Start sequence was successful
          *          false   : Otherwise
          */
-        bool StartBluetooth();
+        bool StartBluetooth(void);
 
-        Shared_BaseHandlerInterface GetBluetoothHandler() const;
+        /**
+         * @brief Getter for bluetooth handler
+         *
+         * @return Shared_Bluetooth_Handler
+         */
+        Shared_Bluetooth_Handler GetHandler() const;
 
     private:
-        /* Unique pointer to Bluetooth controller*/
-        using Unique_BluetoothController = std::unique_ptr<Bluetooth::BluetoothController>;
+        /* Shared pointer to Bluetooth controller*/
+        using Shared_Bluetooth_Controller = std::shared_ptr<Bluetooth::ServerBluetoothController>;
 
         /**
          * @brief Class constructor
@@ -60,11 +64,11 @@ namespace Greenhouse
         /* Singleton mutex to protect instance from multithread*/
         static std::mutex mManagerMutex;
 
-        /* Unique pointer of Bluetooth controller*/
-        Unique_BluetoothController mBluetoothController;
+        /* Shared pointer of Bluetooth controller*/
+        Shared_Bluetooth_Controller mBluetoothController;
 
         /* Shared pointer of Bluetooth events handler*/
-        Shared_BaseHandlerInterface mBluetoothHandler;
+        Shared_Bluetooth_Handler mBluetoothHandler;
     };
 } // namespace Greenhouse
 
