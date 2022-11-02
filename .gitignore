@@ -110,3 +110,10 @@ Client/build/esp-idf/Common_components/CMakeFiles/__idf_Common_components.dir/Bl
 Client/build/esp-idf/components/cmake_install.cmake
 Client/build/esp-idf/main/CMakeFiles/__idf_main.dir/Bluetooth/ClientBluetoothController.cpp.obj
 Client/build/esp-idf/Bluetooth/CMakeFiles/__idf_Bluetooth.dir/ClientBluetoothHandler.cpp.obj
+Server/build/esp-idf/Bluetooth/cmake_install.cmake
+Server/build/esp-idf/Bluetooth/libBluetooth.a
+Server/build/esp-idf/Bluetooth/CMakeFiles/__idf_Bluetooth.dir/ServerBluetoothController.cpp.obj
+Server/build/esp-idf/Bluetooth/CMakeFiles/__idf_Bluetooth.dir/ServerBluetoothHandler.cpp.obj
+Server/build/esp-idf/Common_components/cmake_install.cmake
+Server/build/esp-idf/Common_components/libCommon_components.a
+Server/build/esp-idf/Common_components/CMakeFiles/__idf_Common_components.dir/Bluetooth/BaseBluetoothController.cpp.obj
