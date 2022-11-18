@@ -25,6 +25,14 @@ namespace Component
                 return "ESP_GAP_BLE_SCAN_START_COMPLETE_EVT";
             case (ESP_GAP_BLE_SCAN_RESULT_EVT):
                 return "ESP_GAP_BLE_SCAN_RESULT_EVT";
+            case (ESP_GAP_BLE_ADV_DATA_SET_COMPLETE_EVT):
+                return "ESP_GAP_BLE_ADV_DATA_SET_COMPLETE_EVT";
+            case (ESP_GAP_BLE_SCAN_RSP_DATA_SET_COMPLETE_EVT):
+                return "ESP_GAP_BLE_SCAN_RSP_DATA_SET_COMPLETE_EVT";
+            case (ESP_GAP_BLE_UPDATE_CONN_PARAMS_EVT):
+                return "ESP_GAP_BLE_UPDATE_CONN_PARAMS_EVT";
+            case (ESP_GAP_BLE_ADV_START_COMPLETE_EVT):
+                return "ESP_GAP_BLE_ADV_START_COMPLETE_EVT";
             default:
                 break;
             }
@@ -62,6 +70,8 @@ namespace Component
         /***************************************************************************************/
         /***********                            SERVER                               ***********/
         /***************************************************************************************/
+#define GATTS_AIR_SERVICE_UUID 0x00FF
+
         struct ServerGattsProfile
         {
             esp_gatts_cb_t gatts_cb;
