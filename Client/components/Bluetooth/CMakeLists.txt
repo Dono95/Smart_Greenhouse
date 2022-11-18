@@ -1,4 +1,4 @@
-message(STATUS "Building component: Bluetooth")
+message(STATUS "Building component: Client bluetooth")
 
 # Set source file to variable SOURCES
 set(SOURCES

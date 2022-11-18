@@ -6,6 +6,4 @@ set(EXTRA_COMPONENT_DIRS components)
 
 include(/home/dominik/esp/esp-idf/tools/cmake/project.cmake)
 
-#add_compile_definitions(TEST_FLAG)
-
 project(SmartGreenhouse)
