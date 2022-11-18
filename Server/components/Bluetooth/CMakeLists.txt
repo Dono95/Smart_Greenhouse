@@ -1,9 +1,9 @@
-message(STATUS "Building component: Client bluetooth")
+message(STATUS "Building component: Server bluetooth")
 
 # Set source file to variable SOURCES
 set(SOURCES
-./ClientBluetoothController.cpp
-./ClientBluetoothHandler.cpp)
+./ServerBluetoothController.cpp
+./ServerBluetoothHandler.cpp)
 
 # Register components with include header files
 idf_component_register(SRCS ${SOURCES}

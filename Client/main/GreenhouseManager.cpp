@@ -7,6 +7,7 @@
 using namespace Greenhouse;
 
 GreenhouseManager *GreenhouseManager::mManagerInstance{nullptr};
+std::mutex GreenhouseManager::mManagerMutex;
 
 /*********************************************
  *              PRIVATE API                  *
@@ -37,6 +38,7 @@ GreenhouseManager::~GreenhouseManager()
  */
 GreenhouseManager *GreenhouseManager::GetInstance()
 {
+    std::lock_guard<std::mutex> lock(mManagerMutex);
     if (!mManagerInstance)
         mManagerInstance = new GreenhouseManager();
 
