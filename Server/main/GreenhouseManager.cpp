@@ -20,6 +20,7 @@ GreenhouseManager::GreenhouseManager()
     : mBluetoothController(new Bluetooth::ServerBluetoothController()),
       mBluetoothHandler(new Bluetooth::ServerBluetoothHandler(mBluetoothController))
 {
+    mBluetoothDataPublisher = Publisher::BluetoothDataPublisher::GetInstance();
 }
 
 /**

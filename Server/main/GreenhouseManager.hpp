@@ -9,6 +9,7 @@
 /* Project specific includes */
 #include "ServerBluetoothController.hpp"
 #include "ServerBluetoothHandler.hpp"
+#include "../Publishers/BluetoothDataPublisher.hpp"
 
 /* STL includes */
 #include <memory>
@@ -69,6 +70,9 @@ namespace Greenhouse
 
         /* Shared pointer of Bluetooth events handler*/
         Shared_Bluetooth_Handler mBluetoothHandler;
+
+        /* Unique pointer to Bluetooth data publisher */
+        Publisher::BluetoothDataPublisher *mBluetoothDataPublisher;
     };
 } // namespace Greenhouse
 
