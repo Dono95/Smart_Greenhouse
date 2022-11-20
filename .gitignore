@@ -117,3 +117,12 @@ Server/build/esp-idf/Bluetooth/CMakeFiles/__idf_Bluetooth.dir/ServerBluetoothHan
 Server/build/esp-idf/Common_components/cmake_install.cmake
 Server/build/esp-idf/Common_components/libCommon_components.a
 Server/build/esp-idf/Common_components/CMakeFiles/__idf_Common_components.dir/Bluetooth/BaseBluetoothController.cpp.obj
+Server/build/esp-idf/GreenhousePublishers/cmake_install.cmake
+Server/build/esp-idf/GreenhousePublishers/libGreenhousePublishers.a
+Server/build/esp-idf/GreenhousePublishers/CMakeFiles/__idf_GreenhousePublishers.dir/Test.cpp.obj
+Server/build/esp-idf/Observers/cmake_install.cmake
+Server/build/esp-idf/Observers/libObservers.a
+Server/build/esp-idf/Observers/CMakeFiles/__idf_Observers.dir/BluetoothDataObserver.cpp.obj
+Server/build/esp-idf/Publishers/cmake_install.cmake
+Server/build/esp-idf/Publishers/libPublishers.a
+Server/build/esp-idf/Publishers/CMakeFiles/__idf_Publishers.dir/BluetoothDataPublisher.cpp.obj
