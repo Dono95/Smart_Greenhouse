@@ -126,3 +126,8 @@ Server/build/esp-idf/Observers/CMakeFiles/__idf_Observers.dir/BluetoothDataObser
 Server/build/esp-idf/Publishers/cmake_install.cmake
 Server/build/esp-idf/Publishers/libPublishers.a
 Server/build/esp-idf/Publishers/CMakeFiles/__idf_Publishers.dir/BluetoothDataPublisher.cpp.obj
+Server/build/esp-idf/Common_components/CMakeFiles/__idf_Common_components.dir/Drivers/Network/WiFiDriver.cpp.obj
+Server/build/esp-idf/Managers/cmake_install.cmake
+Server/build/esp-idf/Managers/libManagers.a
+Server/build/esp-idf/Managers/CMakeFiles/__idf_Managers.dir/EventManager.cpp.obj
+Server/build/esp-idf/Managers/CMakeFiles/__idf_Managers.dir/NetworkManager.cpp.obj
