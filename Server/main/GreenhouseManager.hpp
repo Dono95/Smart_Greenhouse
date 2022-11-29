@@ -26,6 +26,8 @@ namespace Greenhouse
 
         /**
          * @brief Static method to get instance of GreenhouseManager
+         *
+         * @return GreenhouseManager    : Pointer to Greenhouse manager
          */
         static GreenhouseManager *GetInstance();
 
@@ -35,7 +37,15 @@ namespace Greenhouse
          * @return  true    : Start sequence was successful
          *          false   : Otherwise
          */
-        bool StartBluetooth(void);
+        bool StartBluetoothServer(void);
+
+        /**
+         * @brief Connect to WiFi network
+         *
+         * @note Parameter void of method is temporary and more parameters will be
+         *       add in next version. Use default wifi parameter for now.
+         */
+        bool ConnectToNetwork(void);
 
         /**
          * @brief Getter for bluetooth handler

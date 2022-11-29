@@ -23,6 +23,11 @@ namespace Component
             {
             public:
                 /**
+                 * @brief Virtual class destructor
+                 */
+                virtual ~BaseBluetoothHandlerInterface(){};
+
+                /**
                  * @brief Pure virtual method to initialize bluetooth profiles
                  *
                  * @return bool     true    : Initialization has been successful

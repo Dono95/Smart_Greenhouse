@@ -1,8 +1,12 @@
 /* Project specific includes */
 #include "GreenhouseManager.hpp"
+#include "Managers/NetworkManager.h"
 
 /* ESP logs library */
-#include "esp_log.h"
+#include <esp_log.h>
+
+/* STL library includes */
+#include <utility>
 
 using namespace Greenhouse;
 
@@ -45,7 +49,7 @@ GreenhouseManager *GreenhouseManager::GetInstance()
     return mManagerInstance;
 }
 
-bool GreenhouseManager::StartBluetooth()
+bool GreenhouseManager::StartBluetoothServer()
 {
     using BluetoothInitStatus = Component::Bluetooth::INIT_BLUETOOTH_RV;
 
@@ -68,6 +72,14 @@ bool GreenhouseManager::StartBluetooth()
     }
 
     return true;
+}
+
+/**
+ * @brief Connect to WiFi network
+ */
+bool GreenhouseManager::ConnectToNetwork(void)
+{
+    return Manager::NetworkManager::GetInstance()->ConnectToWifi(std::make_pair("ESP", "Password"));
 }
 
 /**
