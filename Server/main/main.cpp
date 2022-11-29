@@ -23,6 +23,7 @@ extern "C" void app_main(void)
     esp_err_t result = nvs_flash_init();
     if (result == ESP_ERR_NVS_NO_FREE_PAGES || result == ESP_ERR_NVS_NEW_VERSION_FOUND)
     {
+
         ESP_ERROR_CHECK(nvs_flash_erase());
         result = nvs_flash_init();
     }
@@ -32,10 +33,12 @@ extern "C" void app_main(void)
 
     // Creating Greenhouse manager
     auto greenhouseManager = Greenhouse::GreenhouseManager::GetInstance();
-    if (!greenhouseManager->StartBluetooth())
+    if (!greenhouseManager->ConnectToNetwork())
+        ESP_LOGE(MAIN_TAG, "Failed to connect to WiFi network!");
+
+    if (!greenhouseManager->StartBluetoothServer())
     {
         ESP_LOGE(MAIN_TAG, "Bluetooth startup failed!");
-        return;
     }
 
     while (true)
