@@ -9,6 +9,9 @@
 /* Common components includes */
 #include "Drivers/Network/WiFiDriver.hpp"
 
+/* Project specific includes */
+#include "Observers/BluetoothDataObserver.hpp"
+
 #define NETWORK_MANAGER_TAG "Network manager"
 
 namespace Greenhouse
@@ -57,6 +60,8 @@ namespace Greenhouse
 
             /* Wifi driver */
             WifiDriver *mWifiDriver;
+
+            /* Data bluetooth  */
         };
     } // namespace Manager
 } // namespace Greenhouse
