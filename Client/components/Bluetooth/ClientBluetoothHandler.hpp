@@ -10,8 +10,8 @@
 #include "ClientBluetoothController.hpp"
 
 /* Common components */
-#include "Bluetooth/Interfaces/BaseBluetoothHandlerInterface.hpp"
 #include "Bluetooth/BluetoothDefinitions.hpp"
+#include "Bluetooth/Interfaces/BaseBluetoothHandlerInterface.hpp"
 
 /* STL includes */
 #include <memory>
@@ -24,7 +24,7 @@ namespace Greenhouse
 {
     namespace Bluetooth
     {
-        class ClientBluetoothHandler : public Component::Bluetooth::Interface::ClientBluetoothHandlerInterface
+        class ClientBluetoothHandler : public Component::Bluetooth::Interface::ClientBluetoothHandlerInterface<ClientBluetoothControlller>
         {
         public:
             /**
@@ -111,9 +111,9 @@ namespace Greenhouse
 
             /**
              * @brief Return connection status to remote device
-             * 
+             *
              * @return bool :   true  -> Client is connected to remote device
-             *                  false -> Otherwise    
+             *                  false -> Otherwise
              */
             bool IsConnected() const;
 
