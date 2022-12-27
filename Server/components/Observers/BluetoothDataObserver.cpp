@@ -1,5 +1,8 @@
 #include "BluetoothDataObserver.hpp"
 
+/* ESP log library */
+#include "esp_log.h"
+
 using namespace Greenhouse::Observer;
 
 /**
@@ -19,4 +22,13 @@ BluetoothDataObserver::BluetoothDataObserver(Greenhouse::Manager::EventManager *
  */
 BluetoothDataObserver::~BluetoothDataObserver()
 {
+}
+
+void BluetoothDataObserver::Update(Component::Publisher::EventData *eventData)
+{
+    ESP_LOGI("Observer", "Update");
+
+    auto bluetoothData = dynamic_cast<Component::Publisher::BluetoothEventData *>(eventData);
+    if (!bluetoothData)
+        ESP_LOGE("Observer", "unsuported data type");
 }

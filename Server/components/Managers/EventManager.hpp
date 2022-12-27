@@ -48,7 +48,7 @@ namespace Greenhouse
             /**
              * @brief Method to notify observer about new event from E
              */
-            void Notify(Event_T event) override;
+            void Notify(Event_T event, Component::Publisher::EventData *eventData) override;
 
         private:
             /* Map consist of pointer to observers follow specific event*/

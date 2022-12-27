@@ -96,7 +96,23 @@ void EventManager::Unsubscribe(Event_T event, Observer_T *observer)
 /**
  * @brief Method to notify observer about new data from bluetooth handler
  */
-void EventManager::Notify(Event_T event)
+void EventManager::Notify(Event_T event, Component::Publisher::EventData *eventData)
 {
     ESP_LOGI(EVENT_MANAGER_TAG, "Notify about %s event.", Component::Publisher::EnumToString(event).c_str());
+
+    auto eventObservers = mObservers.find(event);
+    if (eventObservers == mObservers.end())
+    {
+        ESP_LOGE(EVENT_MANAGER_TAG, "Provided event not found in observers map.");
+        return;
+    }
+
+    if (eventObservers->second.empty())
+    {
+        ESP_LOGW(EVENT_MANAGER_TAG, "No observers found to have interested about event");
+        return;
+    }
+
+    for (const auto &observer : eventObservers->second)
+        observer->Update(eventData);
 }

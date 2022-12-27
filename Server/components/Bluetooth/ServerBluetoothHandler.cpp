@@ -223,16 +223,21 @@ void ServerBluetoothHandler::GreenhouseEventHandler(esp_gatts_cb_event_t event, 
     case ESP_GATTS_WRITE_EVT:
     {
         auto eventManager = Manager::EventManager::GetInstance();
-        eventManager->Notify(Greenhouse::Manager::EventManager::Event_T::BLUETOOTH_DATA_RECEIVED);
+
+        auto eventData = new Component::Publisher::BluetoothEventData();
+        eventManager->Notify(Greenhouse::Manager::EventManager::Event_T::BLUETOOTH_DATA_RECEIVED, eventData);
+
         esp_ble_gatts_send_response(gatts_if, param->write.conn_id, param->write.trans_id, ESP_GATT_OK, NULL);
 
         // sleep(3);
         /*ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "GATT_WRITE_EVT, conn_id %d, trans_id %d, handle %d", param->write.conn_id, param->write.trans_id, param->write.handle);
 
         esp_ble_gatts_send_response(gatts_if, param->write.conn_id, param->write.trans_id, ESP_GATT_OK, NULL);*/
-        ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "Goint to sleep.");
-        vTaskDelay(10000);
-        ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "Woke up");
+        // ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "Goint to sleep.");
+        // vTaskDelay(10000);
+        // ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "Woke up");
+
+        delete eventData;
         break;
     }
     case ESP_GATTS_EXEC_WRITE_EVT:

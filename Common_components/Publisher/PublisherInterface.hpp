@@ -4,6 +4,7 @@
 /* Common components includes */
 #include "BasePublisherDefinitions.hpp"
 #include "Observer/ObserverInterface.hpp"
+#include "EventData.hpp"
 
 namespace Component
 {
@@ -42,7 +43,7 @@ namespace Component
                 /**
                  * @brief Pure virtual method to notify observer about somethind based on specific publisher
                  */
-                virtual void Notify(Event_T event) = 0;
+                virtual void Notify(Event_T event, EventData *eventData) = 0;
             };
         } // namespace Interface
 

@@ -3,6 +3,7 @@
 
 /* Common components includes  */
 #include "Publisher/BasePublisherDefinitions.hpp"
+#include "Publisher/EventData.hpp"
 
 namespace Component
 {
@@ -27,13 +28,17 @@ namespace Component
                 virtual ~ObserverInterface() {}
 
                 /**
-                 * @brief
+                 * @brief Get observer event type
                  */
                 Event_T GetObservedEvent() const
                 {
                     return mObserverEvent;
                 }
 
+                virtual void Update(Component::Publisher::EventData *eventData) = 0;
+
+            private:
+                // Event type
                 Event_T mObserverEvent;
             };
         } // namespace Interface

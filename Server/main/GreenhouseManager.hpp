@@ -9,6 +9,7 @@
 /* Project specific includes */
 #include "ServerBluetoothController.hpp"
 #include "ServerBluetoothHandler.hpp"
+#include "Observers/BluetoothDataObserver.hpp"
 
 /* STL includes */
 #include <memory>
@@ -79,6 +80,8 @@ namespace Greenhouse
 
         /* Shared pointer of Bluetooth events handler*/
         Shared_Bluetooth_Handler mBluetoothHandler;
+
+        Observer::BluetoothDataObserver *test;
     };
 } // namespace Greenhouse
 

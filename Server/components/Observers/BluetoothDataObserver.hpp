@@ -3,6 +3,7 @@
 
 /* Common components includes */
 #include "Observer/ObserverInterface.hpp"
+#include "Publisher/EventData.hpp"
 
 /* Project specific includes */
 #include "Managers/EventManager.hpp"
@@ -23,6 +24,8 @@ namespace Greenhouse
              * @brief Class destructor
              */
             ~BluetoothDataObserver();
+
+            void Update(Component::Publisher::EventData *eventData) override;
         };
     } // namespace Observer
 } // namespace Greenhouse
