@@ -17,6 +17,14 @@
 
 #define MAIN_TAG "Main"
 
+/******** TEST ************/
+
+#include "Drivers/Sensors/SHT4x.hpp"
+
+#include "Common_components/Drivers/Communication/I2C.hpp"
+
+/*******  END TEST ********/
+
 extern "C" void app_main(void)
 {
     // Initialize NVS.
@@ -30,11 +38,19 @@ extern "C" void app_main(void)
     // Check result of initialization non-volatile flash memory
     ESP_ERROR_CHECK(result);
 
+    /*auto sensor = new Sensor::SHT4x(0x44, i2c);
+    vTaskDelay(1000);
+    ESP_LOGI(MAIN_TAG, "Sensor serial number \"%s\"", sensor->SerialNumber().c_str());
+
+    sensor->SoftReset();
+    ESP_LOGI(MAIN_TAG, "Sensor serial number \"%s\"", sensor->SerialNumber().c_str());*/
+
     // Creating Greenhouse manager
     auto greenhouseManager = Greenhouse::GreenhouseManager::GetInstance();
-    if (!greenhouseManager->StartBluetooth()) {
+    /*if (!greenhouseManager->StartBluetooth())
+    {
         ESP_LOGE(MAIN_TAG, "Failed to start bluetooth.");
-    }
+    }*/
 
     while (true)
     {

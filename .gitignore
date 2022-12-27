@@ -131,3 +131,8 @@ Server/build/esp-idf/Managers/cmake_install.cmake
 Server/build/esp-idf/Managers/libManagers.a
 Server/build/esp-idf/Managers/CMakeFiles/__idf_Managers.dir/EventManager.cpp.obj
 Server/build/esp-idf/Managers/CMakeFiles/__idf_Managers.dir/NetworkManager.cpp.obj
+Client/build/esp-idf/Common_components/CMakeFiles/__idf_Common_components.dir/Drivers/Communication/I2C.cpp.obj
+Client/build/esp-idf/Common_components/CMakeFiles/__idf_Common_components.dir/Drivers/Network/WiFiDriver.cpp.obj
+Client/build/esp-idf/Drivers/cmake_install.cmake
+Client/build/esp-idf/Drivers/libDrivers.a
+Client/build/esp-idf/Drivers/CMakeFiles/__idf_Drivers.dir/Sensors/SHT4x.cpp.obj

@@ -9,6 +9,8 @@
 /* Project specific includes */
 #include "ClientBluetoothController.hpp"
 #include "ClientBluetoothHandler.hpp"
+#include "Common_components/Drivers/Communication/I2C.hpp"
+#include "Drivers/Sensors/SHT4x.hpp"
 
 /* STL includes */
 #include <memory>
@@ -22,7 +24,7 @@ namespace Greenhouse
     {
     public:
         /* Shared pointer to bluetooth events handler */
-        using Shared_Bluetooth_Handler = std::shared_ptr<Component::Bluetooth::Interface::ClientBluetoothHandlerInterface>;
+        using Shared_Bluetooth_Handler = std::shared_ptr<Bluetooth::ClientBluetoothHandler>;
 
         /**
          * @brief Static method to get instance of GreenhouseManager
@@ -49,6 +51,8 @@ namespace Greenhouse
         /* Unique pointer to bluetooth controller */
         using Shared_Bluetooth_Controller = std::shared_ptr<Bluetooth::ClientBluetoothControlller>;
 
+        using I2C = Component::Driver::Communication::I2C;
+
         /**
          * @brief Class constructor
          */
@@ -70,6 +74,12 @@ namespace Greenhouse
 
         /* Shared pointer to client bluetooth handler*/
         Shared_Bluetooth_Handler mBluetoothHandler;
+
+        /* Pointer to I2C driver */
+        I2C *mI2C{nullptr};
+
+        /* Pointer to tempareture a humanity sensor */
+        Sensor::SHT4x *mSHT41{nullptr};
     };
 } // namespace Greenhouse
 
