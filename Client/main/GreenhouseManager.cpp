@@ -20,6 +20,13 @@ GreenhouseManager::GreenhouseManager()
     : mBluetoothController(new Bluetooth::ClientBluetoothControlller()),
       mBluetoothHandler(new Bluetooth::ClientBluetoothHandler(mBluetoothController))
 {
+    mI2C = new I2C(GPIO_NUM_21, GPIO_NUM_22);
+    mI2C->SetMode(i2c_mode_t::I2C_MODE_MASTER, I2C_NUM_0, 400000);
+
+    if (mI2C->Activate() != ESP_OK)
+        ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Activation of I2C failed");
+
+    mSHT41 = new Sensor::SHT4x(0x44, mI2C);
 }
 
 /**
