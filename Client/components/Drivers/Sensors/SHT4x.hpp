@@ -72,6 +72,13 @@ namespace Sensor
         // Type alias -> The methods results of I2C interface class
         using I2C_OperationResult = Component::Driver::Communication::I2C_Result;
 
+        /**
+         * @brief Output signal conversion
+         *
+         * @param[in] sensorData : The sensor outpus signals
+         */
+        void ConversionSignalOutput(const std::vector<uint8_t> sensorData);
+
         // I2C slave address of sensor
         uint8_t mI2C_address{0};
 

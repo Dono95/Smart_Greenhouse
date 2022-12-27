@@ -27,6 +27,11 @@ GreenhouseManager::GreenhouseManager()
         ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Activation of I2C failed");
 
     mSHT41 = new Sensor::SHT4x(0x44, mI2C);
+
+    mSHT41->Measure(Sensor::SHT4x::MeasurePrecision::HIGH);
+
+    ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Temperature is %f", mSHT41->GetTemperature());
+    ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Humanity is %d", mSHT41->GetHumanity());
 }
 
 /**
