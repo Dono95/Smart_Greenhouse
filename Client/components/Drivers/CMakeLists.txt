@@ -1,15 +1,12 @@
-message(STATUS "Common components")
+message(STATUS "Drivers")
 
 # Set source file to variable SOURCES
 set(SOURCES
-./Bluetooth/BaseBluetoothController.cpp
-./Drivers/Network/WiFiDriver.cpp
-./Drivers/Communication/I2C.cpp)
+./Sensors/SHT4x.cpp)
 
 set(DIRECTORIES
 "."
-"./Drivers/Network"
-"./Drivers/Communication")
+"../")  # Common coponents
 
 # Register components with include header files
 idf_component_register(SRCS ${SOURCES}
