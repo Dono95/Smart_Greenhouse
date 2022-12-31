@@ -5,12 +5,14 @@
 #include <utility>
 #include <string>
 #include <mutex>
+#include <memory>
 
 /* Common components includes */
 #include "Drivers/Network/WiFiDriver.hpp"
 
 /* Project specific includes */
 #include "Observers/BluetoothDataObserver.hpp"
+#include "SensorsData/SensorsData.hpp"
 
 /* ESP MQTT library */
 #include <mqtt_client.h>
@@ -55,7 +57,12 @@ namespace Greenhouse
              */
             esp_err_t ConnectTo_MQTT_Broker(const std::string &uri);
 
-            void Send();
+            /**
+             * @brief Method to publish sensors data to MQTT server
+             *
+             * @param shared_ptr : Shared pointer to sensors data
+             */
+            void Publish(const std::shared_ptr<SensorsData> sensorsData);
 
         private:
             /**

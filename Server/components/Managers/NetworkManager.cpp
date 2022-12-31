@@ -1,9 +1,11 @@
 /* Project specific includes */
 #include "NetworkManager.h"
+#include "EventManager.hpp"
 
 /* ESP log library*/
 #include <esp_log.h>
 
+/* SDK config file */
 #include "sdkconfig.h"
 
 using namespace Greenhouse::Manager;
@@ -22,6 +24,7 @@ static const char *TAG = "MQTT_EXAMPLE";
  */
 NetworkManager::NetworkManager()
 {
+    mBluetoothObserver = new Observer::BluetoothDataObserver(EventManager::GetInstance());
 }
 
 /**
@@ -156,7 +159,7 @@ esp_err_t NetworkManager::ConnectTo_MQTT_Broker(const std::string &uri)
     if (uri.empty())
         return ESP_ERR_INVALID_ARG;
 
-    mMQTT_Client = new MQTT_Client("mqtt://192.168.0.104:1883", "ESP_Client");
+    mMQTT_Client = new MQTT_Client(uri, CONFIG_MQTT_Client_name);
     if (mMQTT_Client->RegisterEventHandler(esp_mqtt_event_id_t::MQTT_EVENT_ANY, NetworkManager::MQTT_EventHandler, nullptr))
     {
         ESP_LOGE(MQTT_CLIENT_TAG, "Registration event handler failed.");
@@ -169,11 +172,10 @@ esp_err_t NetworkManager::ConnectTo_MQTT_Broker(const std::string &uri)
         return ESP_FAIL;
     }
 
-    // ESP_LOGE(MQTT_CLIENT_TAG, "IMPORTATNT %s", "TEST_VALUE".);
     return ESP_OK;
 }
 
-void NetworkManager::Send()
+void NetworkManager::Publish(const std::shared_ptr<SensorsData> sensorsData)
 {
-    ESP_LOGI(TAG, "Test send method");
+    ESP_LOGE(NETWORK_MANAGER_TAG, "Publish %.2f", sensorsData->GetTemperature());
 }
