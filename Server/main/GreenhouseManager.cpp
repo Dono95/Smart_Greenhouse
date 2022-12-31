@@ -24,7 +24,6 @@ GreenhouseManager::GreenhouseManager()
     : mBluetoothController(new Bluetooth::ServerBluetoothController()),
       mBluetoothHandler(new Bluetooth::ServerBluetoothHandler(mBluetoothController))
 {
-    test = new Observer::BluetoothDataObserver(Manager::EventManager::GetInstance());
 }
 
 /**
