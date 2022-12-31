@@ -8,6 +8,8 @@
 /* Project specific includes */
 #include "Managers/EventManager.hpp"
 
+#define BLUETOOTH_DATA_OBSERVER_TAG "Bluetooth data observer"
+
 namespace Greenhouse
 {
     namespace Observer
