@@ -9,7 +9,6 @@
 /* Project specific includes */
 #include "ServerBluetoothController.hpp"
 #include "ServerBluetoothHandler.hpp"
-#include "Observers/BluetoothDataObserver.hpp"
 
 /* STL includes */
 #include <memory>
@@ -49,6 +48,14 @@ namespace Greenhouse
         bool ConnectToNetwork(void);
 
         /**
+         * @brief Connect to MQTT Broker
+         *
+         * @note Parameter void of method is temporary and more parameters will be
+         *       add in next version. Use default wifi parameter for now.
+         */
+        bool ConnectToMQTT(void);
+
+        /**
          * @brief Getter for bluetooth handler
          *
          * @return Shared_Bluetooth_Handler
@@ -80,8 +87,6 @@ namespace Greenhouse
 
         /* Shared pointer of Bluetooth events handler*/
         Shared_Bluetooth_Handler mBluetoothHandler;
-
-        Observer::BluetoothDataObserver *test;
     };
 } // namespace Greenhouse
 

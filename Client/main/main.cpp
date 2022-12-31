@@ -19,9 +19,8 @@
 
 /******** TEST ************/
 
-#include "Drivers/Sensors/SHT4x.hpp"
-
-#include "Common_components/Drivers/Communication/I2C.hpp"
+#include "driver/adc.h"
+#include "esp_adc_cal.h"
 
 /*******  END TEST ********/
 
@@ -38,19 +37,25 @@ extern "C" void app_main(void)
     // Check result of initialization non-volatile flash memory
     ESP_ERROR_CHECK(result);
 
-    /*auto sensor = new Sensor::SHT4x(0x44, i2c);
-    vTaskDelay(1000);
-    ESP_LOGI(MAIN_TAG, "Sensor serial number \"%s\"", sensor->SerialNumber().c_str());
-
-    sensor->SoftReset();
-    ESP_LOGI(MAIN_TAG, "Sensor serial number \"%s\"", sensor->SerialNumber().c_str());*/
-
     // Creating Greenhouse manager
     auto greenhouseManager = Greenhouse::GreenhouseManager::GetInstance();
     /*if (!greenhouseManager->StartBluetooth())
     {
         ESP_LOGE(MAIN_TAG, "Failed to start bluetooth.");
     }*/
+
+    int read_raw;
+    adc2_config_channel_atten(ADC2_CHANNEL_0, ADC_ATTEN_11db);
+
+    while (true)
+    {
+        if (adc2_get_raw(ADC2_CHANNEL_0, ADC_WIDTH_12Bit, &read_raw) == ESP_OK)
+            printf("Value: %d\n", read_raw);
+        else
+            printf("Bad reading...\n");
+
+        vTaskDelay(100);
+    }
 
     while (true)
     {

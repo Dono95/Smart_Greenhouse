@@ -1,4 +1,7 @@
+/* Project specific includes */
 #include "BluetoothDataObserver.hpp"
+#include "NetworkManager.h"
+#include "SensorsData/SensorsData.hpp"
 
 /* ESP log library */
 #include "esp_log.h"
@@ -26,9 +29,12 @@ BluetoothDataObserver::~BluetoothDataObserver()
 
 void BluetoothDataObserver::Update(Component::Publisher::EventData *eventData)
 {
-    ESP_LOGI("Observer", "Update");
-
     auto bluetoothData = dynamic_cast<Component::Publisher::BluetoothEventData *>(eventData);
     if (!bluetoothData)
-        ESP_LOGE("Observer", "unsuported data type");
+        ESP_LOGE(BLUETOOTH_DATA_OBSERVER_TAG, "Unsuported data type.");
+
+    auto sensorsData = std::make_shared<SensorsData>();
+    sensorsData->SetTemperature(15);
+
+    Manager::NetworkManager::GetInstance()->Publish(sensorsData);
 }

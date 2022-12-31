@@ -1,4 +1,4 @@
-message(STATUS "Building component: Server greenhouse observers")
+message(STATUS "Building component: Server observers")
 
 # Set source file to variable SOURCES
 set(SOURCES
