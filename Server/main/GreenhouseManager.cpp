@@ -8,6 +8,9 @@
 /* STL library includes */
 #include <utility>
 
+/* SDK configuration file */
+#include "sdkconfig.h"
+
 using namespace Greenhouse;
 
 GreenhouseManager *GreenhouseManager::mManagerInstance{nullptr};
@@ -79,7 +82,15 @@ bool GreenhouseManager::StartBluetoothServer()
  */
 bool GreenhouseManager::ConnectToNetwork(void)
 {
-    return Manager::NetworkManager::GetInstance()->ConnectToWifi(std::make_pair("ESP", "Password"));
+    return Manager::NetworkManager::GetInstance()->ConnectToWifi(std::make_pair(CONFIG_WiFi_SSID, CONFIG_WiFi_Password));
+}
+
+/**
+ * @brief Connect to MQTT Broker
+ */
+bool GreenhouseManager::ConnectToMQTT(void)
+{
+    return Manager::NetworkManager::GetInstance()->ConnectTo_MQTT_Broker("mqtt://" CONFIG_MQTT_URI ":" CONFIG_MQTT_Port) == ESP_OK;
 }
 
 /**

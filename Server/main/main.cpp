@@ -17,6 +17,12 @@
 
 #define MAIN_TAG "Main"
 
+////// TEST
+
+#include "NetworkManager.h"
+
+/// END TEST
+
 extern "C" void app_main(void)
 {
     // Initialize NVS.
@@ -36,10 +42,11 @@ extern "C" void app_main(void)
     if (!greenhouseManager->ConnectToNetwork())
         ESP_LOGE(MAIN_TAG, "Failed to connect to WiFi network!");
 
+    if (!greenhouseManager->ConnectToMQTT())
+        ESP_LOGE(MAIN_TAG, "Failed to connect to MQTT Broker!");
+
     if (!greenhouseManager->StartBluetoothServer())
-    {
         ESP_LOGE(MAIN_TAG, "Bluetooth startup failed!");
-    }
 
     while (true)
     {

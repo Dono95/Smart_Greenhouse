@@ -48,6 +48,14 @@ namespace Greenhouse
         bool ConnectToNetwork(void);
 
         /**
+         * @brief Connect to MQTT Broker
+         *
+         * @note Parameter void of method is temporary and more parameters will be
+         *       add in next version. Use default wifi parameter for now.
+         */
+        bool ConnectToMQTT(void);
+
+        /**
          * @brief Getter for bluetooth handler
          *
          * @return Shared_Bluetooth_Handler
