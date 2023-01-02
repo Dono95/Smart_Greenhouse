@@ -222,3 +222,10 @@ Client/build/.cmake/api/v1/reply/target-mbedcrypto-4700a823eb6803348d48.json
 Client/build/.cmake/api/v1/reply/target-mbedtls-5fd3fabe6c935479b752.json
 Client/build/.cmake/api/v1/reply/target-mbedx509-7a5f4cbd7cb751c84f9c.json
 Client/build/.cmake/api/v1/reply/target-SmartGreenhouse.elf-55ec2598ca4e34a9450d.json
+Server/build/esp-idf/Common_components/CMakeFiles/__idf_Common_components.dir/Convertors/Convertor_JSON.cpp.obj
+Server/build/esp-idf/SensorsData/cmake_install.cmake
+Server/build/esp-idf/SensorsData/libSensorsData.a
+Server/build/esp-idf/SensorsData/CMakeFiles/__idf_SensorsData.dir/SensorsData.cpp.obj
+Client/build/.cmake/api/v1/reply/codemodel-v2-75976fc8a1d0556b719b.json
+Client/build/.cmake/api/v1/reply/index-2023-01-01T10-34-28-0891.json
+Client/build/.cmake/api/v1/reply/target-__idf_app_update-1d6f99097fba0974e0e0.json
