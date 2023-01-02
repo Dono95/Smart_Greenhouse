@@ -1,12 +1,19 @@
 /* Project specific includes */
 #include "NetworkManager.h"
 #include "EventManager.hpp"
+#include "Common_components/Convertors/Convertor_JSON.hpp"
 
 /* ESP log library*/
 #include <esp_log.h>
 
+/* STD library */
+#include <algorithm>
+
 /* SDK config file */
 #include "sdkconfig.h"
+
+/* ESP cJSON library */
+#include <cJSON.h>
 
 using namespace Greenhouse::Manager;
 
@@ -23,6 +30,7 @@ static const char *TAG = "MQTT_EXAMPLE";
  * @brief Class constructor
  */
 NetworkManager::NetworkManager()
+    : mWifiDriver(nullptr), mMQTT_Client(nullptr)
 {
     mBluetoothObserver = new Observer::BluetoothDataObserver(EventManager::GetInstance());
 }
@@ -37,6 +45,11 @@ NetworkManager::~NetworkManager()
         delete mWifiDriver;
         mWifiDriver = nullptr;
     }
+    if (mMQTT_Client)
+    {
+        delete mMQTT_Client;
+        mMQTT_Client = nullptr;
+    }
 }
 
 /**
@@ -47,16 +60,24 @@ void NetworkManager::MQTT_EventHandler(void *handlerArg, esp_event_base_t base,
 {
     ESP_LOGD(NETWORK_MANAGER_TAG, "Event dispatched from event loop base=%s, event_id=%d", base, eventID);
 
+    auto event = static_cast<esp_mqtt_event_handle_t>(eventData);
+
     switch (static_cast<esp_mqtt_event_id_t>(eventID))
     {
     case (MQTT_EVENT_CONNECTED):
     {
         ESP_LOGI(NETWORK_MANAGER_TAG, "MQTT Client is connected to MQTT Broker.");
+        NetworkManager::GetInstance()->SendInfoToServer();
         break;
     }
     case (MQTT_EVENT_DISCONNECTED):
     {
         ESP_LOGI(NETWORK_MANAGER_TAG, "MQTT Client is disconnected from MQTT Broker.");
+        break;
+    }
+    case MQTT_EVENT_PUBLISHED:
+    {
+        ESP_LOGI(NETWORK_MANAGER_TAG, "MQTT Client publish data. Message ID: %d", event->msg_id);
         break;
     }
     default:
@@ -124,6 +145,21 @@ esp_err_t NetworkManager::MQTT_Client::Stop() const
     return esp_mqtt_client_stop(mClient);
 }
 
+/**
+ * @brief Client publish message to MQTT broker
+ *
+ * @param[in] topic  : MQTT topic
+ * @param[in] data   : Data
+ * @param[in] QoS    : Quality of Service
+ * @param[in] retain : Retain flag (Default false)
+ *
+ * @return int  : Message ID
+ */
+int NetworkManager::MQTT_Client::Publish(const std::string &topic, const std::string &data, int QoS, bool retain)
+{
+    return esp_mqtt_client_publish(mClient, topic.c_str(), data.c_str(), data.size(), QoS, retain);
+}
+
 /*********************************************
  *              PUBLIC API                   *
  ********************************************/
@@ -154,6 +190,56 @@ bool NetworkManager::ConnectToWifi(const std::pair<std::string, std::string> &wi
     return mWifiDriver->Connect();
 }
 
+/**
+ * @brief Get ESP board IP address
+ */
+esp_ip4_addr_t NetworkManager::GetIpAddress() const
+{
+    if (!mWifiDriver)
+        return {};
+
+    return mWifiDriver->GetIpAddress();
+}
+
+/**
+ * @brief Get ESP board IP address as string
+ *
+ * @return string : Return IP address in string format
+ */
+std::string NetworkManager::GetIpAddressAsString(bool reverse) const
+{
+    auto ip_address = GetIpAddress().addr;
+    // If no address set return 0.0.0.0
+    if (!ip_address)
+        return "0.0.0.0";
+
+    // String IP address
+    std::string ip_str;
+
+    // IP block
+    uint32_t block = reverse ? 0x000000FF : 0xFF000000;
+
+    for (uint8_t i = 0; i < 4; ++i)
+    {
+        // Logical and to filter parts of IP address
+        // Example 192.168.0.124 & 0x00FF0000 = 0.168.0.0
+        auto ip_block_number = (ip_address & block);
+
+        // Shift IP part to right edge
+        ip_block_number = reverse ? (ip_block_number >> (i * 8)) : (ip_block_number >> (24 - (i * 8)));
+
+        ip_str.append(std::to_string(ip_block_number) + '.');
+
+        // Shift 8 bits to left or right base of reverse parameter
+        block = reverse ? block << 8 : block >> 8;
+    }
+
+    // Remove last useless dot
+    ip_str.pop_back();
+
+    return ip_str;
+}
+
 esp_err_t NetworkManager::ConnectTo_MQTT_Broker(const std::string &uri)
 {
     if (uri.empty())
@@ -174,8 +260,47 @@ esp_err_t NetworkManager::ConnectTo_MQTT_Broker(const std::string &uri)
 
     return ESP_OK;
 }
+/**
+ * @brief Method to send data to Server
+ *
+ * @param shared_ptr : Shared pointer to sensors data
+ */
+void NetworkManager::SendToServer(const std::shared_ptr<SensorsData> sensorsData)
+{
+    if (mMQTT_Client)
+        Publish(sensorsData);
+}
 
+/**
+ * @brief Send basic info about board to server
+ */
+void NetworkManager::SendInfoToServer() const
+{
+    if (!mMQTT_Client)
+        return;
+
+    auto root = cJSON_CreateObject();
+    cJSON_AddNumberToObject(root, "ID", 0x00);
+    cJSON_AddStringToObject(root, "Board", "esp-wroom-32");
+
+    auto ip_address = GetIpAddressAsString();
+    std::reverse(ip_address.begin(), ip_address.end());
+
+    cJSON_AddStringToObject(root, "IP address", GetIpAddressAsString(true).c_str());
+
+    mMQTT_Client->Publish("Greenhouse_info", Component::Convertor::Convertor_JSON::GetInstance()->ToString(root).c_str(), 1);
+}
+
+/**
+ * @brief Method to publish sensors data to MQTT server
+ *
+ * @param shared_ptr : Shared pointer to sensors data
+ */
 void NetworkManager::Publish(const std::shared_ptr<SensorsData> sensorsData)
 {
-    ESP_LOGE(NETWORK_MANAGER_TAG, "Publish %.2f", sensorsData->GetTemperature());
+    auto root = cJSON_CreateObject();
+    cJSON_AddNumberToObject(root, "Temperature", sensorsData->GetTemperature());
+    cJSON_AddNumberToObject(root, "Humanity", sensorsData->GetHumanity());
+
+    mMQTT_Client->Publish("SensorsData_IN", Component::Convertor::Convertor_JSON::GetInstance()->ToString(root).c_str(), 1);
 }

@@ -11,4 +11,4 @@ set(DIRECTORIES
 # Register components with include header files
 idf_component_register(SRCS ${SOURCES}
                                 INCLUDE_DIRS ${DIRECTORIES}
-                                REQUIRES Common_components mqtt)
+                                REQUIRES Common_components mqtt json)

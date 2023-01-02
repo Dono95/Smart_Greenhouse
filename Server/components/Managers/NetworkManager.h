@@ -47,6 +47,23 @@ namespace Greenhouse
             bool ConnectToWifi(const std::pair<std::string, std::string> &wifiLogin);
 
             /**
+             * @brief Get ESP board IP address
+             *
+             * @return esp_ip4_addr_t : If ESP board is connected to network. Method return assigned IP address.
+             *                          Otherwise is returned empty structure.
+             */
+            esp_ip4_addr_t GetIpAddress() const;
+
+            /**
+             * @brief Get ESP board IP address as string
+             *
+             * @param[in] reverse : Reverse order
+             *
+             * @return string : Return IP address in string format
+             */
+            std::string GetIpAddressAsString(bool reverse = false) const;
+
+            /**
              * @brief Connect to MQTT broker with provided uri
              *
              * @param[in] uri   : MQTT Broker URI
@@ -58,11 +75,16 @@ namespace Greenhouse
             esp_err_t ConnectTo_MQTT_Broker(const std::string &uri);
 
             /**
-             * @brief Method to publish sensors data to MQTT server
+             * @brief Method to send data to Server
              *
              * @param shared_ptr : Shared pointer to sensors data
              */
-            void Publish(const std::shared_ptr<SensorsData> sensorsData);
+            void SendToServer(const std::shared_ptr<SensorsData> sensorsData);
+
+            /**
+             * @brief Send basic info about board to server
+             */
+            void SendInfoToServer() const;
 
         private:
             /**
@@ -85,6 +107,13 @@ namespace Greenhouse
              */
             static void MQTT_EventHandler(void *handlerArg, esp_event_base_t base,
                                           int32_t eventID, void *eventData);
+
+            /**
+             * @brief Method to publish sensors data to MQTT server
+             *
+             * @param shared_ptr : Shared pointer to sensors data
+             */
+            void Publish(const std::shared_ptr<SensorsData> sensorsData);
 
             class MQTT_Client
             {
@@ -130,9 +159,17 @@ namespace Greenhouse
                  */
                 esp_err_t Stop() const;
 
-                void Test()
-                {
-                }
+                /**
+                 * @brief Client publish message to MQTT broker
+                 *
+                 * @param[in] topic  : MQTT topic
+                 * @param[in] data   : Data
+                 * @param[in] QoS    : Quality of Service
+                 * @param[in] retain : Retain flag (Default false)
+                 *
+                 * @return int  : Message ID
+                 */
+                int Publish(const std::string &topic, const std::string &data, int QoS, bool retain = false);
 
             private:
                 // Pointer to client MQTT configuration file
