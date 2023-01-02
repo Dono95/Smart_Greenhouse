@@ -280,8 +280,8 @@ void NetworkManager::SendInfoToServer() const
         return;
 
     auto root = cJSON_CreateObject();
-    cJSON_AddNumberToObject(root, "ID", 0x00);
-    cJSON_AddStringToObject(root, "Board", "esp-wroom-32");
+    cJSON_AddNumberToObject(root, "ID", CONFIG_Greenhouse_ID);
+    cJSON_AddStringToObject(root, "Board", CONFIG_ESP_Board);
 
     auto ip_address = GetIpAddressAsString();
     std::reverse(ip_address.begin(), ip_address.end());
