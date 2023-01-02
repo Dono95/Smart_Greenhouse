@@ -10,7 +10,7 @@
 #include "ServerBluetoothController.hpp"
 #include "ServerBluetoothHandler.hpp"
 
-/* STL includes */
+/* STD library includes */
 #include <memory>
 #include <mutex>
 

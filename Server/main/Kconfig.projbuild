@@ -1,0 +1,17 @@
+menu "General configuration"
+
+    config Greenhouse_ID
+        int "Greenhouse ID"
+        default 0
+
+        help 
+            Set ID of greenhouse
+
+    config ESP_Board
+        string "ESP Board type"
+        default "esp-wroom-32"
+
+        help 
+            Type of main ESP Board
+endmenu
+
