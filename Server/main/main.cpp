@@ -19,7 +19,13 @@
 
 ////// TEST
 
+#include "EventManager.hpp"
+#include "Common_components/Publisher/EventData.hpp"
+
 #include "NetworkManager.h"
+
+#include <cJSON.h>
+#include "Common_components/Convertors/Convertor_JSON.hpp"
 
 /// END TEST
 
@@ -45,11 +51,20 @@ extern "C" void app_main(void)
     if (!greenhouseManager->ConnectToMQTT())
         ESP_LOGE(MAIN_TAG, "Failed to connect to MQTT Broker!");
 
-    if (!greenhouseManager->StartBluetoothServer())
-        ESP_LOGE(MAIN_TAG, "Bluetooth startup failed!");
+    auto eventManager = Greenhouse::Manager::EventManager::GetInstance();
+
+    // if (!greenhouseManager->StartBluetoothServer())
+    //     ESP_LOGE(MAIN_TAG, "Bluetooth startup failed!");
 
     while (true)
     {
-        vTaskDelay(1000);
+        auto temp = 18 + (std::rand() % (24 - 18 + 1));
+        auto hum = 25 + (std::rand() % (50 - 25 + 1));
+        auto eventData = new Component::Publisher::BluetoothEventData(temp, hum);
+        eventManager->Notify(Greenhouse::Manager::EventManager::Event_T::BLUETOOTH_DATA_RECEIVED, eventData);
+
+        // delete eventData;
+        //  sleep 1 min
+        vTaskDelay(60000);
     }
 }
