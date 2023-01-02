@@ -79,6 +79,13 @@ namespace Component
                 std::string GetWifiName() const;
 
                 /**
+                 * @brief Get IP address
+                 *
+                 * @return esp_ip4_addr_t
+                 */
+                esp_ip4_addr_t GetIpAddress() const;
+
+                /**
                  * @brief Method to handle wifi events
                  *
                  * @param[in] arg       : Event arguments

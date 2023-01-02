@@ -31,6 +31,8 @@ WifiDriver::WifiDriver(const std::string &ssid, const std::string &password,
     mInitConfig = WIFI_INIT_CONFIG_DEFAULT();
     mWiFiEventGroup = xEventGroupCreate();
 
+    mIP_Address.addr = 0;
+
     if (connnect)
     {
         Enable();
@@ -141,6 +143,16 @@ bool WifiDriver::IsConnected() const
 std::string WifiDriver::GetWifiName() const
 {
     return mSSID;
+}
+
+/**
+ * @brief Get IP address
+ *
+ * @return esp_ip4_addr_t
+ */
+esp_ip4_addr_t WifiDriver::GetIpAddress() const
+{
+    return mIP_Address;
 }
 
 void WifiDriver::WifiEventHandler(void *arg, esp_event_base_t eventBase,
