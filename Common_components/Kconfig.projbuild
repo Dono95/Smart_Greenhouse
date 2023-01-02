@@ -1,0 +1,10 @@
+menu "Convertor configuration"
+
+    config JSON_Number_Precision
+        int "JSON Number precision"
+        default 3
+
+        help 
+            The number represent a floating-point precision when a number is converted to string
+endmenu
+
