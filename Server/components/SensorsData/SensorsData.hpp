@@ -1,38 +1,41 @@
 #ifndef SENSORS_DATA
 #define SENSORS_DATA
 
+/* STD library*/
+#include <cstdint>
+
 namespace Greenhouse
 {
     template <class T>
-    class Temperature
+    class SensorValue
     {
     public:
         /**
          * @brief Class constructor
          */
-        explicit Temperature(T temperature = 0) : mTemperature(temperature) {}
+        explicit SensorValue(T value = 0) : mSensorValue(value) {}
 
         /**
          * @brief Class destructor
          */
-        ~Temperature() {}
+        ~SensorValue() {}
 
         /**
-         * @brief Set temperature value
+         * @brief Set sensor value
          *
-         * @param[in] temperature : Temperature value
+         * @param[in] value : Value
          */
-        void SetTemperature(T temperature) { mTemperature = temperature; }
+        void Set(T value) { mSensorValue = value; }
 
         /**
-         * @brief Get temperature value
+         * @brief Get sensor value
          *
          * @return float
          */
-        T GetTemperature() const { return mTemperature; }
+        T Get() const { return mSensorValue; }
 
     private:
-        T mTemperature;
+        T mSensorValue;
     };
 
     class SensorsData
@@ -41,29 +44,33 @@ namespace Greenhouse
         /**
          * @brief Class constructor
          */
-        explicit SensorsData() : mTemperature(0) {}
+        explicit SensorsData(float temperature, uint8_t humanity);
 
         /**
          * @brief Class destructor
          */
-        ~SensorsData() {}
-
-        /**
-         * @brief Set temperature
-         *
-         * @param[in] temperature : Temperature value
-         */
-        void SetTemperature(float temperature) { mTemperature.SetTemperature(temperature); }
+        ~SensorsData();
 
         /**
          * @brief Get temperature
          *
          * @return float
          */
-        float GetTemperature() const { return mTemperature.GetTemperature(); }
+        float GetTemperature() const;
+
+        /**
+         * @brief Get humanity
+         *
+         * @return uint8_t
+         */
+        uint8_t GetHumanity() const;
 
     private:
-        Temperature<float> mTemperature;
+        // Temperature
+        SensorValue<float> mTemperature;
+
+        // Humanity
+        SensorValue<uint8_t> mHumanity;
     };
 } // namespace Greenhouse
 

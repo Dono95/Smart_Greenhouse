@@ -31,10 +31,10 @@ void BluetoothDataObserver::Update(Component::Publisher::EventData *eventData)
 {
     auto bluetoothData = dynamic_cast<Component::Publisher::BluetoothEventData *>(eventData);
     if (!bluetoothData)
+    {
         ESP_LOGE(BLUETOOTH_DATA_OBSERVER_TAG, "Unsuported data type.");
+        return;
+    }
 
-    auto sensorsData = std::make_shared<SensorsData>();
-    sensorsData->SetTemperature(15);
-
-    Manager::NetworkManager::GetInstance()->Publish(sensorsData);
+    Manager::NetworkManager::GetInstance()->SendToServer(std::make_shared<SensorsData>(bluetoothData->GetTemperature(), bluetoothData->GetHumanity()));
 }
