@@ -5,7 +5,8 @@ set(SOURCES
 ./Bluetooth/BaseBluetoothController.cpp
 ./Drivers/Network/WiFiDriver.cpp
 ./Drivers/Communication/I2C.cpp
-./Convertors/Convertor_JSON.cpp)
+./Convertors/Convertor_JSON.cpp
+./Managers/TimeManager.cpp)
 
 set(DIRECTORIES
 "."
