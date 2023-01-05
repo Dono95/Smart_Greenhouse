@@ -1,5 +1,4 @@
-menu "General configuration"
-
+menu "General"
     config Greenhouse_ID
         int "Greenhouse ID"
         default 0
@@ -14,4 +13,3 @@ menu "General configuration"
         help 
             Type of main ESP Board
 endmenu
-

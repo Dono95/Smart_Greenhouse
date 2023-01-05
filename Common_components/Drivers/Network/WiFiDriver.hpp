@@ -104,6 +104,8 @@ namespace Component
                  */
                 void CheckEventBits(EventBits_t bits) const;
 
+                // esp_err_t RegisterEventHandler();
+
                 /* Inicialization config passed to esp_wifi_init call */
                 wifi_init_config_t mInitConfig;
 

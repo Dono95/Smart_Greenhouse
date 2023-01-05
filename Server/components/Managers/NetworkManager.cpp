@@ -245,7 +245,7 @@ esp_err_t NetworkManager::ConnectTo_MQTT_Broker(const std::string &uri)
     if (uri.empty())
         return ESP_ERR_INVALID_ARG;
 
-    mMQTT_Client = new MQTT_Client(uri, CONFIG_MQTT_Client_name);
+    mMQTT_Client = new MQTT_Client(uri, CONFIG_MQTT_CLIENT_NAME);
     if (mMQTT_Client->RegisterEventHandler(esp_mqtt_event_id_t::MQTT_EVENT_ANY, NetworkManager::MQTT_EventHandler, nullptr))
     {
         ESP_LOGE(MQTT_CLIENT_TAG, "Registration event handler failed.");

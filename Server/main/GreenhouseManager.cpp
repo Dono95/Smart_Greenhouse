@@ -82,7 +82,7 @@ bool GreenhouseManager::StartBluetoothServer()
  */
 bool GreenhouseManager::ConnectToNetwork(void)
 {
-    return Manager::NetworkManager::GetInstance()->ConnectToWifi(std::make_pair(CONFIG_WiFi_SSID, CONFIG_WiFi_Password));
+    return Manager::NetworkManager::GetInstance()->ConnectToWifi(std::make_pair(CONFIG_WiFi_SSID, CONFIG_WiFi_PASSWORD));
 }
 
 /**
@@ -90,7 +90,11 @@ bool GreenhouseManager::ConnectToNetwork(void)
  */
 bool GreenhouseManager::ConnectToMQTT(void)
 {
-    return Manager::NetworkManager::GetInstance()->ConnectTo_MQTT_Broker("mqtt://" CONFIG_MQTT_URI ":" CONFIG_MQTT_Port) == ESP_OK;
+#ifdef CONFIG_STANDALONE_SERVER
+    return Manager::NetworkManager::GetInstance()->ConnectTo_MQTT_Broker("mqtt://" CONFIG_SERVER_HOST ":" CONFIG_MQTT_PORT) == ESP_OK;
+#elif CONFIG_MULTI_SERVER
+    return Manager::NetworkManager::GetInstance()->ConnectTo_MQTT_Broker("mqtt://" CONFIG_MQTT_HOST ":" CONFIG_MQTT_Port) == ESP_OK;
+#endif
 }
 
 /**

@@ -4,7 +4,7 @@
             "name": "Linux",
             "includePath": [
                 "${HOME}/esp/esp-idf/components/**",
-                "${workspaceFolder}/components/Common_components/**"
+                "${HOME}/VisualStudioCode/Smart_Greenhouse/Common_components/**"
             ],
             "defines": [],
             "compilerPath": "/home/dominik/.espressif/tools/xtensa-esp32-elf/esp-2021r2-8.4.0/xtensa-esp32-elf/bin/xtensa-esp32-elf-gcc",
