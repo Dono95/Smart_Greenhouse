@@ -127,32 +127,45 @@ CONFIG_PARTITION_TABLE_MD5=y
 # end of Partition Table
 
 #
-# General configuration
+# General
 #
 CONFIG_Greenhouse_ID=0
 CONFIG_ESP_Board="esp-wroom-32"
-# end of General configuration
+# end of General
 
 #
-# Convertor configuration
+# Convertors configuration
 #
 CONFIG_JSON_Number_Precision=3
-# end of Convertor configuration
+# end of Convertors configuration
 
 #
-# Network configuration
+# Network
+#
+CONFIG_STANDALONE_SERVER=y
+# CONFIG_MULTI_SERVER is not set
+CONFIG_SERVER_HOST="192.168.0.107"
+
+#
+# WiFi
 #
 CONFIG_WiFi_SSID="ESP"
-CONFIG_WiFi_Password="Password"
-# end of Network configuration
+CONFIG_WiFi_PASSWORD="Password"
+# end of WiFi
 
 #
 # MQTT
 #
-CONFIG_MQTT_URI="192.168.0.105"
-CONFIG_MQTT_Port="1883"
-CONFIG_MQTT_Client_name="ESP_Client"
+CONFIG_MQTT_PORT="1883"
+CONFIG_MQTT_CLIENT_NAME="ESP_Client"
 # end of MQTT
+
+#
+# NTP
+#
+CONFIG_TIME_ZONE="CET-1CEST,M3.5.0,M10.5.0/3"
+# end of NTP
+# end of Network
 
 #
 # Compiler options
@@ -565,7 +578,7 @@ CONFIG_ESP_SLEEP_RTC_BUS_ISO_WORKAROUND=y
 #
 # IPC (Inter-Processor Call)
 #
-CONFIG_ESP_IPC_TASK_STACK_SIZE=1536
+CONFIG_ESP_IPC_TASK_STACK_SIZE=2048
 CONFIG_ESP_IPC_USES_CALLERS_PRIORITY=y
 CONFIG_ESP_IPC_ISR_ENABLE=y
 # end of IPC (Inter-Processor Call)
@@ -1452,7 +1465,7 @@ CONFIG_FOUR_UNIVERSAL_MAC_ADDRESS=y
 CONFIG_NUMBER_OF_UNIVERSAL_MAC_ADDRESS=4
 CONFIG_ESP_SYSTEM_PD_FLASH=y
 # CONFIG_ESP32C3_LIGHTSLEEP_GPIO_RESET_WORKAROUND is not set
-CONFIG_IPC_TASK_STACK_SIZE=1536
+CONFIG_IPC_TASK_STACK_SIZE=2048
 CONFIG_ESP32_PHY_CALIBRATION_AND_DATA_STORAGE=y
 # CONFIG_ESP32_PHY_INIT_DATA_IN_PARTITION is not set
 CONFIG_ESP32_PHY_MAX_WIFI_TX_POWER=20

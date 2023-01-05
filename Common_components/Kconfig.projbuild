@@ -1,10 +1,73 @@
-menu "Convertor configuration"
-
+menu "Convertors configuration"
     config JSON_Number_Precision
         int "JSON Number precision"
         default 3
-
+        
         help 
             The number represent a floating-point precision when a number is converted to string
 endmenu
 
+menu "Network"
+    choice SERVER_TYPE
+        prompt "Server_Type"
+        default STANDALONE_SERVER
+        help 
+            Server solution for project. All services on standalone server with only one provided
+            IP address or hostname. Multi server configuration value provide ip configuration for 
+            each service individually.
+            
+        config STANDALONE_SERVER
+            bool "Standalone-Server"
+        config MULTI_SERVER
+            bool "Multi-Server"
+    endchoice
+
+    config SERVER_HOST
+        depends on STANDALONE_SERVER
+        string "Server Host"
+        default "192.168.0.105"
+    menu "WiFi"
+        config WiFi_SSID
+            string "WiFi SSID"
+            default "ESP"
+    
+            help 
+                WiFi network name
+        
+        config WiFi_PASSWORD
+            string "WiFi Password"
+            default "Password"
+            
+            help 
+                WiFi network password
+    endmenu
+    menu "MQTT"
+        config MQTT_HOST
+            depends on MULTI_SERVER
+            string "MQTT Broker Host"
+            default "192.168.0.105"
+        
+            help 
+                MQTT Broker IP
+            
+        config MQTT_PORT
+            string "MQTT Broker Port"
+            default "1883"
+        
+        config MQTT_CLIENT_NAME
+            string "MQTT Client name"
+            default "ESP_Client"
+                
+    endmenu
+
+    menu "NTP"
+        config NTP_HOST
+            depends on MULTI_SERVER
+            string "NTP Host"
+            default "192.168.0.104"
+
+        config TIME_ZONE
+            string "Time zone"
+            default "CET-1CEST,M3.5.0,M10.5.0/3"
+    endmenu
+endmenu
