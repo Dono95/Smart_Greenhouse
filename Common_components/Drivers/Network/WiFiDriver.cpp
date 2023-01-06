@@ -29,7 +29,26 @@ WifiDriver::WifiDriver(const std::string &ssid, const std::string &password,
         .required = false};
 
     mInitConfig = WIFI_INIT_CONFIG_DEFAULT();
-    mWiFiEventGroup = xEventGroupCreate();
+
+    // Create esp event loop for WiFi events
+    ESP_ERROR_CHECK(esp_event_loop_create_default());
+
+    // Initialize the underlying TCP/IP stack.
+    ESP_ERROR_CHECK(esp_netif_init());
+    esp_netif_create_default_wifi_sta();
+
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(
+        WIFI_EVENT,
+        ESP_EVENT_ANY_ID,
+        [](void *arg, esp_event_base_t eventBase,
+           int32_t eventID, void *eventData)
+        {
+            auto &wifiManager = WiFiDriverManager::GetInstance();
+            if (wifiManager.GetWiFiDriver())
+                wifiManager.GetWiFiDriver()->WifiEventHandler(arg, eventBase, eventID, eventData);
+        },
+        nullptr,
+        nullptr));
 
     mIP_Address.addr = 0;
 
@@ -73,60 +92,40 @@ bool WifiDriver::IsEnabled() const
     return mEnabled;
 }
 
+/**
+ * @brief Method to connect ot WiFi
+ */
 bool WifiDriver::Connect()
 {
+    // Unable to continue if wifi driver is not enabled
     if (!IsEnabled())
     {
         ESP_LOGE(WIFI_DRIVER_TAG, "WiFi driver has not been enabled.");
         return false;
     }
 
+    if (IsConnected())
+        return true;
+
     ESP_LOGI(WIFI_DRIVER_TAG, "Connecting to \"%s\" ... ", GetWifiName().c_str());
-
-    ESP_ERROR_CHECK(esp_netif_init());
-    ESP_ERROR_CHECK(esp_event_loop_create_default());
-    esp_netif_create_default_wifi_sta();
-
-    esp_event_handler_instance_t instance_any_id;
-    esp_event_handler_instance_t instance_got_ip;
-
-    auto wifiEvent = [](void *arg, esp_event_base_t eventBase,
-                        int32_t eventID, void *eventData)
-    {
-        auto &wifiManager = WiFiDriverManager::GetInstance();
-        if (wifiManager.GetWiFiDriver())
-            wifiManager.GetWiFiDriver()->WifiEventHandler(arg, eventBase, eventID, eventData);
-    };
-
-    ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
-                                                        ESP_EVENT_ANY_ID,
-                                                        wifiEvent,
-                                                        NULL,
-                                                        &instance_any_id));
-    ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT,
-                                                        IP_EVENT_STA_GOT_IP,
-                                                        wifiEvent,
-                                                        NULL,
-                                                        &instance_got_ip));
 
     ESP_ERROR_CHECK(esp_wifi_init(&mInitConfig));
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &mConfig));
+
     ESP_ERROR_CHECK(esp_wifi_start());
 
-    EventBits_t bits = xEventGroupWaitBits(mWiFiEventGroup,
-                                           WIFI_CONNECTED_BIT | WIFI_FAIL_BIT,
-                                           pdFALSE,
-                                           pdFALSE,
-                                           portMAX_DELAY);
+    // Wait to connect to AP
+    uint16_t timeoutAttempts = DEFAULT_MAX_TIMEOUT / 100;
+    for (uint8_t i = 0; i < timeoutAttempts; ++i)
+    {
+        if (mAttempts >= MAX_NUMBER_OF_ATTEMPTS || IsConnected())
+            break;
 
-    CheckEventBits(bits);
+        vTaskDelay(100);
+    }
 
-    // ESP_ERROR_CHECK(esp_event_handler_instance_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, instance_got_ip));
-    // ESP_ERROR_CHECK(esp_event_handler_instance_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, instance_any_id));
-    vEventGroupDelete(mWiFiEventGroup);
-
-    return true;
+    return IsConnected();
 }
 
 /**
@@ -158,6 +157,7 @@ esp_ip4_addr_t WifiDriver::GetIpAddress() const
 void WifiDriver::WifiEventHandler(void *arg, esp_event_base_t eventBase,
                                   int32_t eventID, void *eventData)
 {
+    ESP_LOGW(WIFI_DRIVER_TAG, "Event %d.", eventID);
     if (eventBase == WIFI_EVENT)
     {
         switch (eventID)
@@ -171,9 +171,10 @@ void WifiDriver::WifiEventHandler(void *arg, esp_event_base_t eventBase,
         {
             if (mAttempts >= MAX_NUMBER_OF_ATTEMPTS)
             {
-                xEventGroupSetBits(mWiFiEventGroup, WIFI_FAIL_BIT);
-                ESP_LOGE(WIFI_DRIVER_TAG, "Failed to connect to \"%s\" !", GetWifiName().c_str());
-                return;
+                mAttempts = 0;
+                mConnected = false;
+                ESP_LOGE(WIFI_DRIVER_TAG, "Maximal number of attempts reaed. Failed to connect to \"%s\" !", GetWifiName().c_str());
+                break;
             }
 
             ESP_LOGI(WIFI_DRIVER_TAG, "Retry to connect to the AP ... ");
@@ -187,22 +188,14 @@ void WifiDriver::WifiEventHandler(void *arg, esp_event_base_t eventBase,
             mAttempts = 0;
             mConnected = true;
 
+            ip_event_got_ip_t *ipData = (ip_event_got_ip_t *)eventData;
+            mIP_Address = ipData->ip_info.ip;
+
             break;
         }
         default:
             ESP_LOGW(WIFI_DRIVER_TAG, "Unhandled WiFi event with code %d.", eventID);
             break;
-        }
-    }
-    else if (eventBase == IP_EVENT)
-    {
-        if (eventID == IP_EVENT_STA_GOT_IP)
-        {
-            ip_event_got_ip_t *ipData = (ip_event_got_ip_t *)eventData;
-            mIP_Address = ipData->ip_info.ip;
-            ESP_LOGI(WIFI_DRIVER_TAG, "ESP module got IP: " IPSTR, IP2STR(&mIP_Address));
-
-            xEventGroupSetBits(mWiFiEventGroup, WIFI_CONNECTED_BIT);
         }
     }
     else
@@ -215,15 +208,3 @@ void WifiDriver::WifiEventHandler(void *arg, esp_event_base_t eventBase,
 /*********************************************
  *              PRIVATE API                  *
  ********************************************/
-/**
- * @brief Method to check event bits
- */
-void WifiDriver::CheckEventBits(EventBits_t bits) const
-{
-    if (bits & WIFI_CONNECTED_BIT)
-        ESP_LOGI(WIFI_DRIVER_TAG, "Successfully connected to AP \"%s\"", GetWifiName().c_str());
-    else if (bits & WIFI_FAIL_BIT)
-        ESP_LOGI(WIFI_DRIVER_TAG, "Failed to connect to SSID: \"%s\"", GetWifiName().c_str());
-    else
-        ESP_LOGE(WIFI_DRIVER_TAG, "Unexpected bits.");
-}

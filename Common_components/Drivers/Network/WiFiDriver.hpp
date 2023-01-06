@@ -11,9 +11,8 @@
 
 #define WIFI_DRIVER_TAG "WiFi driver"
 
-#define MAX_NUMBER_OF_ATTEMPTS 10
-#define WIFI_CONNECTED_BIT BIT0
-#define WIFI_FAIL_BIT BIT1
+#define DEFAULT_MAX_TIMEOUT 30000 // 30s
+#define MAX_NUMBER_OF_ATTEMPTS 10 // Maximam numbers of attempts
 
 namespace Component
 {
@@ -97,15 +96,6 @@ namespace Component
                                       int32_t eventID, void *eventData);
 
             private:
-                /**
-                 * @brief Method to check event bits
-                 *
-                 * @param[in] bits      : Event bits
-                 */
-                void CheckEventBits(EventBits_t bits) const;
-
-                // esp_err_t RegisterEventHandler();
-
                 /* Inicialization config passed to esp_wifi_init call */
                 wifi_init_config_t mInitConfig;
 
@@ -119,16 +109,13 @@ namespace Component
                 bool mEnabled;
 
                 /* Store value if WiFi has IP address and is connected to AP*/
-                bool mConnected;
+                volatile bool mConnected;
 
                 /* IP address */
                 esp_ip4_addr_t mIP_Address;
 
-                /* FreeRTOS event group to signal when we are connected*/
-                EventGroupHandle_t mWiFiEventGroup;
-
                 /* Number of attempts */
-                uint8_t mAttempts;
+                volatile uint8_t mAttempts;
 
             private:
                 class WiFiDriverManager
