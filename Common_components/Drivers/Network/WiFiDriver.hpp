@@ -11,11 +11,8 @@
 
 #define WIFI_DRIVER_TAG "WiFi driver"
 
-conncetion#define DEFAULT_MAX_TIMEOUT 30000 // 30s
+#define DEFAULT_MAX_TIMEOUT 30000 // 30s
 #define MAX_NUMBER_OF_ATTEMPTS 10 // Maximam numbers of attempts
-
-#define WIFI_CONNECTED_BIT BIT0
-#define WIFI_FAIL_BIT BIT1
 
 namespace Component
 {
