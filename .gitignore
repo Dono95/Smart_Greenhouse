@@ -267,3 +267,5 @@ Server/build/esp-idf/wpa_supplicant/CMakeFiles/__idf_wpa_supplicant.dir/src/tls/
 Server/build/esp-idf/wpa_supplicant/CMakeFiles/__idf_wpa_supplicant.dir/src/tls/x509v3.c.obj
 Server/build/esp-idf/Common_components/CMakeFiles/__idf_Common_components.dir/Drivers/Communication/I2C.cpp.obj
 Server/build/esp-idf/Common_components/CMakeFiles/__idf_Common_components.dir/Managers/TimeManager.cpp.obj
+Client/build/esp-idf/Common_components/CMakeFiles/__idf_Common_components.dir/Convertors/Convertor_JSON.cpp.obj
+Client/build/esp-idf/Common_components/CMakeFiles/__idf_Common_components.dir/Managers/TimeManager.cpp.obj
