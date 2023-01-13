@@ -209,6 +209,7 @@ esp_ip4_addr_t NetworkManager::GetIpAddress() const
 std::string NetworkManager::GetIpAddressAsString(bool reverse) const
 {
     auto ip_address = GetIpAddress().addr;
+
     // If no address set return 0.0.0.0
     if (!ip_address)
         return "0.0.0.0";
@@ -282,9 +283,6 @@ void NetworkManager::SendInfoToServer() const
     auto root = cJSON_CreateObject();
     cJSON_AddNumberToObject(root, "ID", CONFIG_Greenhouse_ID);
     cJSON_AddStringToObject(root, "Board", CONFIG_ESP_Board);
-
-    auto ip_address = GetIpAddressAsString();
-    std::reverse(ip_address.begin(), ip_address.end());
 
     cJSON_AddStringToObject(root, "IP address", GetIpAddressAsString(true).c_str());
 
