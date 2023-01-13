@@ -20,6 +20,7 @@ GreenhouseManager::GreenhouseManager()
     : mBluetoothController(new Bluetooth::ClientBluetoothControlller()),
       mBluetoothHandler(new Bluetooth::ClientBluetoothHandler(mBluetoothController))
 {
+    // Inicialize I2C
     mI2C = new I2C(GPIO_NUM_21, GPIO_NUM_22);
     mI2C->SetMode(i2c_mode_t::I2C_MODE_MASTER, I2C_NUM_0, 400000);
 
@@ -28,10 +29,16 @@ GreenhouseManager::GreenhouseManager()
 
     mSHT41 = new Sensor::SHT4x(0x44, mI2C);
 
+    mSHT41->SoftReset();
     mSHT41->Measure(Sensor::SHT4x::MeasurePrecision::HIGH);
 
+#ifdef CONFIG_TEMPERATURE
     ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Temperature is %f", mSHT41->GetTemperature());
+#endif
+
+#ifdef CONFIG_HUMANITY
     ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Humanity is %d", mSHT41->GetHumanity());
+#endif
 }
 
 /**

@@ -1,0 +1,39 @@
+menu "Greenhouse"
+    config CLIENT_ID
+        int "Client ID"
+        default 0
+
+    choice CLIENT_POSITION
+        prompt "Client position"
+        default INSIDE
+        help 
+            The client's position within the greenhouse
+           
+        config INSIDE
+            bool "Inside"
+
+        config OUTSIDE
+            bool "Outside"
+    endchoice
+
+    config TEMPERATURE
+        bool "Temperature"
+        default y
+
+        help
+            Allows to measure temperature
+
+    config HUMANITY
+        bool "Humanity"
+        default y
+
+        help
+            Allows to measure humanity
+    
+    config CO2
+        bool "CO2"
+        default n
+
+        help
+            Allows to measure CO2
+endmenu
