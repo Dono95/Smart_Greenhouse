@@ -50,6 +50,22 @@ WifiDriver::WifiDriver(const std::string &ssid, const std::string &password,
         nullptr,
         nullptr));
 
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(
+        IP_EVENT,
+        IP_EVENT_STA_GOT_IP,
+        [](void *arg, esp_event_base_t eventBase,
+           int32_t eventID, void *eventData)
+        {
+            auto &wifiManager = WiFiDriverManager::GetInstance();
+            if (wifiManager.GetWiFiDriver())
+            {
+                ip_event_got_ip_t *ipData = (ip_event_got_ip_t *)eventData;
+                wifiManager.GetWiFiDriver()->SetIpAddress(ipData->ip_info.ip);
+            }
+        },
+        NULL,
+        nullptr));
+
     mIP_Address.addr = 0;
 
     if (connnect)
@@ -154,6 +170,15 @@ esp_ip4_addr_t WifiDriver::GetIpAddress() const
     return mIP_Address;
 }
 
+/**
+ * @brief Set IP address
+ */
+void WifiDriver::SetIpAddress(esp_ip4_addr_t &ip_address)
+{
+    mIP_Address = ip_address;
+    ESP_LOGI(WIFI_DRIVER_TAG, "IP address set to " IPSTR, IP2STR(&mIP_Address));
+}
+
 void WifiDriver::WifiEventHandler(void *arg, esp_event_base_t eventBase,
                                   int32_t eventID, void *eventData)
 {
@@ -187,9 +212,6 @@ void WifiDriver::WifiEventHandler(void *arg, esp_event_base_t eventBase,
         {
             mAttempts = 0;
             mConnected = true;
-
-            ip_event_got_ip_t *ipData = (ip_event_got_ip_t *)eventData;
-            mIP_Address = ipData->ip_info.ip;
 
             break;
         }
