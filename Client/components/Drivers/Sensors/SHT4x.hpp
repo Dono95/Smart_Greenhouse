@@ -10,6 +10,9 @@
 /* STD library */
 #include <string>
 
+/* SDK */
+#include "sdkconfig.h"
+
 #define SHT4x_TAG "SHT4x_Sensor"
 
 namespace Sensor
@@ -34,19 +37,23 @@ namespace Sensor
          */
         ~SHT4x();
 
+#ifdef CONFIG_HUMANITY
         /**
-         * @brieg Get last measured humanity
+         * @brief Get last measured humanity
          *
          * @return uint8_t
          */
         uint8_t GetHumanity() const;
+#endif
 
+#ifdef CONFIG_TEMPERATURE
         /**
          * @brief Get last measured temperature
          *
          * @return float
          */
         float GetTemperature() const;
+#endif
 
         /**
          * @brief Measure temperature and humanity with given precision
@@ -85,52 +92,16 @@ namespace Sensor
         // Pointer to I2C driver
         Component::Driver::Communication::I2C *mI2C{nullptr};
 
+#ifdef CONFIG_HUMANITY
         // Humanity
         uint8_t mHumanity;
+#endif
 
+#ifdef CONFIG_TEMPERATURE
         // Temperature
         float mTemperature;
+#endif
     };
 } // namespace Sensor
-
-/*#include "Drivers/Com_Interfaces/I2C_I.hpp"
-#include "Commands_Definition.hpp"
-
-#include <cstdint>
-#include <string>
-
-static const char *SHT4x_TAG = "SHT4x_Sensor";
-
-namespace Sensor
-{
-    class SHT4x
-    {
-        using i2c_result_value = Interface::I2C_Result;
-
-    public:
-
-
-        SHT4x(uint8_t address);
-        ~SHT4x();
-
-        void TriggerMeasure(MeasurePrecision precision);
-        const std::string SerialNumber(void) const;
-        void SoftReset() const;
-
-        uint8_t Humanity() const;
-        float Temperature() const;
-
-    private:
-        const std::string FormatSerialNumber(const std::vector<uint8_t> &data) const;
-        void CalculateValues(const std::vector<uint8_t> &data);
-
-        uint8_t mI2C_Address;
-        Interface::I2C_I *mI2C_I{nullptr};
-
-        // Values from the last measurement
-        uint8_t mHumanity;
-        float mTemperature;
-    };
-} // namespace Interface*/
 
 #endif /* SHT4x_H */
