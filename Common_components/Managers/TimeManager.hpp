@@ -3,6 +3,7 @@
 
 /* STD library */
 #include <mutex>
+#include <string>
 
 /* ESP SNTP library */
 #include <esp_sntp.h>
@@ -34,6 +35,34 @@ namespace Component
              * @return sntp_sync_status_t : Synchronization status
              */
             sntp_sync_status_t GetStatus() const;
+
+            /**
+             * @brief Get Unix timestamp
+             *
+             * @return time_t : POSIX time
+             */
+            time_t GetRawTime() const;
+
+            /**
+             * @brief Get time structure
+             *
+             * @return struct tm : Time structure
+             */
+            struct tm GetTime(const time_t *rawTime) const;
+
+            /**
+             * @brief Get formatted time HH:MM:SS
+             *
+             * @return std::string : Formatted time
+             */
+            std::string GetTime_String(time_t *rawTime = nullptr) const;
+
+            /**
+             * @brief Get formatted date DD MONTH, YYYY
+             *
+             * @return std::string : Formatted date
+             */
+            std::string GetDate_String(time_t *rawTime = nullptr) const;
 
             /**
              * @brief Set NTP server name

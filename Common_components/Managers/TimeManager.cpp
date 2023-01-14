@@ -108,6 +108,89 @@ sntp_sync_status_t TimeManager::GetStatus() const
 }
 
 /**
+ * @brief Get Unix timestamp
+ *
+ * @return time_t : POSIX time
+ */
+time_t TimeManager::GetRawTime() const
+{
+    time_t rawTime;
+    time(&rawTime);
+
+    return rawTime;
+}
+
+/**
+ * @brief Get time structure
+ */
+struct tm TimeManager::GetTime(const time_t *rawTime) const
+{
+    if (!rawTime)
+        return {};
+
+    struct tm timeInfo = {0};
+
+    // Convert epoch timestamp to struct tm
+    localtime_r(rawTime, &timeInfo);
+
+    return timeInfo;
+}
+
+/**
+ * @brief Get formatted time HH:MM:SS
+ *
+ * @return std::string : Formatted time
+ */
+std::string TimeManager::GetTime_String(time_t *rawTime) const
+{
+    bool localMalloc{false};
+
+    if (!rawTime)
+    {
+        localMalloc = true;
+        rawTime = (time_t *)malloc(sizeof(time_t));
+
+        time(rawTime);
+    }
+
+    struct tm timeinfo = GetTime(rawTime);
+
+    if (localMalloc)
+        delete rawTime;
+
+    char time_str[10];
+    strftime(time_str, 10, "%T", &timeinfo);
+
+    return std::string(time_str);
+}
+
+/**
+ * @ * @return std::string : Formatted date
+ */
+std::string TimeManager::GetDate_String(time_t *rawTime) const
+{
+    bool localMalloc{false};
+
+    if (!rawTime)
+    {
+        localMalloc = true;
+        rawTime = (time_t *)malloc(sizeof(time_t));
+
+        time(rawTime);
+    }
+
+    struct tm timeinfo = GetTime(rawTime);
+
+    if (localMalloc)
+        delete rawTime;
+
+    char time_str[25];
+    strftime(time_str, 25, "%d %B, %Y", &timeinfo);
+
+    return std::string(time_str);
+}
+
+/**
  * @brief Set NTP server name
  */
 void TimeManager::SetServerName(uint8_t id, const char *server)
