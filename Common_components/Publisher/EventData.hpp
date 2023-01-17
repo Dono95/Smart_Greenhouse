@@ -1,6 +1,12 @@
 #ifndef EVENT_DATA_H
 #define EVENT_DATA_H
 
+/* STD library*/
+#include <cstdint>
+
+/* Common components */
+#include "Common_components/Utility/DataTypeUtility.hpp"
+
 namespace Component
 {
     namespace Publisher
@@ -19,39 +25,70 @@ namespace Component
             virtual ~EventData() {}
         };
 
-        class BluetoothEventData : public EventData
+        class ClientBluetoothEventData_Greenhouse : public EventData
         {
         public:
             /**
              * @brief Class constructor
              */
-            BluetoothEventData(float temperature, uint8_t humanity) : mTemperature(temperature), mHumanity(humanity) {}
+            ClientBluetoothEventData_Greenhouse(float temperature, int8_t humanity, int8_t co2) : mTemperature(temperature), mHumanity(humanity), mCO2(co2) {}
 
             /**
              * @brief Class destructor
              */
-            ~BluetoothEventData() {}
+            ~ClientBluetoothEventData_Greenhouse() {}
+
+            /**
+             * @brief Set position
+             *
+             * @param[in] uint8_t    : Position
+             */
+            void SetPosition(uint8_t position) { mPosition.Set(position); }
+
+            /**
+             * @brief Get position
+             *
+             * @return uint8_t    : CO2 value
+             */
+            uint8_t GetPosition() const { return mPosition.Get(); }
 
             /**
              * @brief Get temperature
              *
              * @return float    : Temperature value
              */
-            float GetTemperature() const { return mTemperature; }
+            float GetTemperature() const { return mTemperature.Get(); }
 
             /**
              * @brief Get humanity
              *
-             * @return uint8_t    : Humanity value
+             * @return int8_t    : Humanity value
              */
-            uint8_t GetHumanity() const { return mHumanity; }
+            int8_t GetHumanity() const { return mHumanity.Get(); }
+
+            /**
+             * @brief Get CO2
+             *
+             * @return int8_t    : CO2 value
+             */
+            int8_t GetCO2() const { return mCO2.Get(); }
 
         private:
+            // Alias for Value utility
+            template <typename T>
+            using Value = Utility::DataType::Value<T>;
+
             // Temperature
-            float mTemperature;
+            Value<float> mTemperature;
 
             // Humanity
-            uint8_t mHumanity;
+            Value<int8_t> mHumanity;
+
+            // CO2
+            Value<int8_t> mCO2;
+
+            // Position
+            Value<uint8_t> mPosition;
         };
     } // namespace Publisher
 } // namespace Greenhouse
