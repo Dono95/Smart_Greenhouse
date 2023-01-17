@@ -29,12 +29,17 @@ BluetoothDataObserver::~BluetoothDataObserver()
 
 void BluetoothDataObserver::Update(Component::Publisher::EventData *eventData)
 {
-    auto bluetoothData = dynamic_cast<Component::Publisher::BluetoothEventData *>(eventData);
+    auto bluetoothData = dynamic_cast<Component::Publisher::ClientBluetoothEventData_Greenhouse *>(eventData);
     if (!bluetoothData)
     {
         ESP_LOGE(BLUETOOTH_DATA_OBSERVER_TAG, "Unsuported data type.");
         return;
     }
 
-    Manager::NetworkManager::GetInstance()->SendToServer(std::make_shared<SensorsData>(bluetoothData->GetTemperature(), bluetoothData->GetHumanity()));
+    Manager::NetworkManager::GetInstance()->SendToServer(
+        std::make_shared<SensorsData>(
+            static_cast<SensorsData::Position>(bluetoothData->GetPosition()),
+            bluetoothData->GetTemperature(),
+            bluetoothData->GetHumanity(),
+            bluetoothData->GetCO2()));
 }
