@@ -98,6 +98,10 @@ std::string Convertor_JSON::ToString(const cJSON *root)
                                                          StringWithDoubleQuotes(child->valuestring) + ",");
             break;
         }
+        case (cJSON_Object):
+        {
+            break;
+        }
         default:
             ESP_LOGW(CONVERTOR_JSON_TAG, "Unhandled JSON tag %d", child->type);
             break;
@@ -106,8 +110,9 @@ std::string Convertor_JSON::ToString(const cJSON *root)
         child = child->next;
     }
 
-    // Remove comma after last JSON value
-    jsonString.erase(jsonString.size() - 2, 1);
+    // Remove comma after last JSON value if JSON contain some fields
+    if (jsonString.size() > 2)
+        jsonString.erase(jsonString.size() - 2, 1);
 
     return jsonString;
 }
