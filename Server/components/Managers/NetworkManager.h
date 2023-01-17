@@ -111,9 +111,10 @@ namespace Greenhouse
             /**
              * @brief Method to publish sensors data to MQTT server
              *
-             * @param shared_ptr : Shared pointer to sensors data
+             * @param[in] topic      : MQTT Topic
+             * @param[in] shared_ptr : Shared pointer to sensors data
              */
-            void Publish(const std::shared_ptr<SensorsData> sensorsData);
+            void Publish(const std::string &topic, const std::shared_ptr<SensorsData> sensorsData);
 
             class MQTT_Client
             {
