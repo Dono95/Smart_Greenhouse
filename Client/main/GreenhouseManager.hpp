@@ -78,8 +78,9 @@ namespace Greenhouse
         /* Pointer to I2C driver */
         I2C *mI2C{nullptr};
 
-        /* Pointer to tempareture a humanity sensor */
-        Sensor::SHT4x *mSHT41{nullptr};
+        /* Pointer to air's properties sensor*/
+        Sensor::Sensor_I *mAirSensor;
+        // Sensor::SHT4x *mSHT41{nullptr};
     };
 } // namespace Greenhouse
 

@@ -27,75 +27,75 @@ GreenhouseManager::GreenhouseManager()
     if (mI2C->Activate() != ESP_OK)
         ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Activation of I2C failed");
 
-    mSHT41 = new Sensor::SHT4x(0x44, mI2C);
+    /*mSHT41 = new Sensor::SHT4x(0x44, mI2C);
 
-    mSHT41->SoftReset();
-    mSHT41->Measure(Sensor::SHT4x::MeasurePrecision::HIGH);
+mSHT41->SoftReset();
+mSHT41->Measure(Sensor::SHT4x::MeasurePrecision::HIGH);
 
 #ifdef CONFIG_TEMPERATURE
-    ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Temperature is %f", mSHT41->GetTemperature());
+ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Temperature is %f", mSHT41->GetTemperature());
 #endif
 
 #ifdef CONFIG_HUMANITY
-    ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Humanity is %d", mSHT41->GetHumanity());
+ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Humanity is %d", mSHT41->GetHumanity());
 #endif
 }
 
 /**
- * @brief Class destructor
- */
-GreenhouseManager::~GreenhouseManager()
-{
-}
-
-/*********************************************
- *              PUBLIC API                   *
- ********************************************/
-
-/**
- * @brief Static method to get instance of GreenhouseManager
- */
-GreenhouseManager *GreenhouseManager::GetInstance()
-{
-    std::lock_guard<std::mutex> lock(mManagerMutex);
-    if (!mManagerInstance)
-        mManagerInstance = new GreenhouseManager();
-
-    return mManagerInstance;
-}
-
-/**
- * @brief Method to inicialize controller and handler for bluetooth
- */
-bool GreenhouseManager::StartBluetooth(void)
-{
-    using BluetoothInitStatus = Component::Bluetooth::INIT_BLUETOOTH_RV;
-
-    if (mBluetoothController->InitBluetoothController(ESP_BT_MODE_BLE) != BluetoothInitStatus::RV_BLUETOOTH_INIT_OK)
+* @brief Class destructor
+*/
+    GreenhouseManager::~GreenhouseManager()
     {
-        ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Initialization of bluetooth controller failed");
-        return false;
     }
 
-    if (!mBluetoothHandler->InitializeBluetoothProfiles())
+    /*********************************************
+     *              PUBLIC API                   *
+     ********************************************/
+
+    /**
+     * @brief Static method to get instance of GreenhouseManager
+     */
+    GreenhouseManager *GreenhouseManager::GetInstance()
     {
-        ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Initialization of bluetooth profiles failed");
-        return false;
+        std::lock_guard<std::mutex> lock(mManagerMutex);
+        if (!mManagerInstance)
+            mManagerInstance = new GreenhouseManager();
+
+        return mManagerInstance;
     }
 
-    if (mBluetoothController->RegisterCallbacks() != BluetoothInitStatus::RV_BLUETOOTH_INIT_OK)
+    /**
+     * @brief Method to inicialize controller and handler for bluetooth
+     */
+    bool GreenhouseManager::StartBluetooth(void)
     {
-        ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Callbacks registration failed");
-        return false;
+        using BluetoothInitStatus = Component::Bluetooth::INIT_BLUETOOTH_RV;
+
+        if (mBluetoothController->InitBluetoothController(ESP_BT_MODE_BLE) != BluetoothInitStatus::RV_BLUETOOTH_INIT_OK)
+        {
+            ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Initialization of bluetooth controller failed");
+            return false;
+        }
+
+        if (!mBluetoothHandler->InitializeBluetoothProfiles())
+        {
+            ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Initialization of bluetooth profiles failed");
+            return false;
+        }
+
+        if (mBluetoothController->RegisterCallbacks() != BluetoothInitStatus::RV_BLUETOOTH_INIT_OK)
+        {
+            ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Callbacks registration failed");
+            return false;
+        }
+
+        return true;
     }
 
-    return true;
-}
-
-/**
- * @brief Getter for bluetooth handler
- */
-GreenhouseManager::Shared_Bluetooth_Handler GreenhouseManager::GetHandler(void) const
-{
-    return mBluetoothHandler;
-}
+    /**
+     * @brief Getter for bluetooth handler
+     */
+    GreenhouseManager::Shared_Bluetooth_Handler GreenhouseManager::GetHandler(void) const
+    {
+        return mBluetoothHandler;
+    }
