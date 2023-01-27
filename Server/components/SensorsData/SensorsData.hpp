@@ -5,7 +5,7 @@
 #include <cstdint>
 
 /* Common compoennts */
-#include "Common_components/Utility/DataTypeUtility.hpp"
+#include "Common_components/Utility/DataType/DataTypeUtility.hpp"
 #include "Common_components/Managers/TimeManager.hpp"
 
 namespace Greenhouse

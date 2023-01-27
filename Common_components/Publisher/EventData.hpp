@@ -5,7 +5,7 @@
 #include <cstdint>
 
 /* Common components */
-#include "Common_components/Utility/DataTypeUtility.hpp"
+#include "Common_components/Utility/DataType/DataTypeUtility.hpp"
 
 namespace Component
 {
