@@ -37,10 +37,8 @@ extern "C" void app_main(void)
     // Creating Greenhouse manager
     auto greenhouseManager = Greenhouse::GreenhouseManager::GetInstance();
 
-    /*if (!greenhouseManager->StartBluetooth())
-    {
+    if (!greenhouseManager->StartBluetooth())
         ESP_LOGE(MAIN_TAG, "Failed to start bluetooth.");
-    }*/
 
     while (true)
     {
