@@ -26,6 +26,7 @@ namespace Component
             enum class I2C_Result
             {
                 I2C_ERROR,
+                I2C_OK,
                 WRITE_DATA_SUCCESSFUL,
                 READ_DATA_SUCCESSFUL,
                 INVALID_ARGUMENT,
@@ -109,6 +110,17 @@ namespace Component
                  * @return I2C_Result       : WRITE_DATA_SUCCESSFUL - When all data was sent sussessfull
                  */
                 I2C_Result Write(const uint8_t slaveAddress, const uint8_t byte) const;
+
+                /**
+                 * @brief Write data
+                 *
+                 * @param[in] slaveAddress  : Slave address
+                 * @param[in] bytes         : Data to send
+                 * @param[in] count         : Number of bytes to send. Range <1, 4> with default set to 1
+                 *
+                 * @return I2C_Result       : WRITE_DATA_SUCCESSFUL - When all data was sent sussessfull
+                 */
+                I2C_Result Write(const uint8_t slaveAddress, uint32_t bytes, const uint8_t count) const;
 
                 /**
                  * @brief Write data
