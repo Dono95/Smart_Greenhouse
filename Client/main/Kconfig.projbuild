@@ -1,39 +1,52 @@
 menu "Greenhouse"
-    config CLIENT_ID
-        int "Client ID"
-        default 0
-
-    choice CLIENT_POSITION
-        prompt "Client position"
-        default INSIDE
-        help 
-            The client's position within the greenhouse
-           
-        config INSIDE
-            bool "Inside"
-
-        config OUTSIDE
-            bool "Outside"
-    endchoice
-
-    config TEMPERATURE
-        bool "Temperature"
-        default y
-
-        help
-            Allows to measure temperature
-
-    config HUMANITY
-        bool "Humanity"
-        default y
-
-        help
-            Allows to measure humanity
+    menu "Greenhouse general"
+        config CLIENT_ID
+            int "Client ID"
+            default 0
     
-    config CO2
-        bool "CO2"
-        default n
+        choice CLIENT_POSITION
+            prompt "Client position"
+            default INSIDE
+            help 
+                The client's position within the greenhouse
+               
+            config INSIDE
+                bool "Inside"
+    
+            config OUTSIDE
+                bool "Outside"
+        endchoice
+    endmenu
 
-        help
-            Allows to measure CO2
+    menu "Bluetooth"
+        config BLUETOOTH_SERVER
+            string "Bluetooth server"
+            default "Greenhouse"
+
+            help
+                Bluetooth server name
+    endmenu
+
+    menu "Sensor" 
+        config TEMPERATURE
+            bool "Temperature"
+            default y
+    
+            help
+                Enable/Disable measure temperature
+    
+        config HUMANITY
+            bool "Humanity"
+            default y
+    
+            help
+                Enable/Disable measure humanity
+        
+        config CO2
+            bool "CO2"
+            default n
+    
+            help
+                Enable/Disable measure CO2
+    endmenu
 endmenu

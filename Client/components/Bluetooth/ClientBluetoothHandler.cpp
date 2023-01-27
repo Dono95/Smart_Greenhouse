@@ -9,6 +9,9 @@
 #include <algorithm>
 #include <cstring>
 
+/* SDK config */
+#include "sdkconfig.h"
+
 using namespace Greenhouse::Bluetooth;
 
 /*********************************************
@@ -18,7 +21,7 @@ using namespace Greenhouse::Bluetooth;
 /**
  * @brief Class constructor
  */
-ClientBluetoothHandler::ClientBluetoothHandler() : mRemoteDevice{"Greenhouse"}, mConnected{false}
+ClientBluetoothHandler::ClientBluetoothHandler() : mRemoteDevice{CONFIG_BLUETOOTH_SERVER}, mConnected{false}
 {
 }
 
@@ -26,7 +29,7 @@ ClientBluetoothHandler::ClientBluetoothHandler() : mRemoteDevice{"Greenhouse"}, 
  * @brief Class constructor with controller parameter
  */
 ClientBluetoothHandler::ClientBluetoothHandler(std::weak_ptr<ClientBluetoothControlller> controller)
-    : mBluetoothController(controller), mRemoteDevice{"Greenhouse"}, mConnected{false}
+    : mBluetoothController(controller), mRemoteDevice{CONFIG_BLUETOOTH_SERVER}, mConnected{false}
 {
 }
 
