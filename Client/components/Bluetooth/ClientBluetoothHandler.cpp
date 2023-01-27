@@ -224,7 +224,7 @@ void ClientBluetoothHandler::HandleScanResultEvent(esp_ble_gap_cb_param_t *scanR
 
         if (adv_name)
         {
-            if (mRemoteDevice.size() == adv_name_len && (strcmp((char *)adv_name, mRemoteDevice.c_str()) == 0))
+            if (mRemoteDevice.size() == adv_name_len && (strncmp((char *)adv_name, mRemoteDevice.c_str(), adv_name_len) == 0))
             {
                 ESP_LOGI(CLIENT_BLUETOOTH_HANDLER_TAG, "Searched device %s found.", mRemoteDevice.c_str());
                 if (IsConnected())
