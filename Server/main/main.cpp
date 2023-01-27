@@ -55,7 +55,7 @@ extern "C" void app_main(void)
         ESP_LOGE(MAIN_TAG, "Failed to connect to WiFi network!");
 
     auto timeManager = Component::Manager::TimeManager::GetInstance();
-    timeManager->Initialize();
+    /*timeManager->Initialize();
 
     // Wait to synchronize time with NTP server
     for (uint8_t i = 1; i <= MAX_ATTEMPTS; ++i)
@@ -65,23 +65,23 @@ extern "C" void app_main(void)
 
         ESP_LOGI(MAIN_TAG, "Waiting for system time to be synchronized ... (%d/%d)", i, MAX_ATTEMPTS);
         vTaskDelay(WAIT_FOR_SYNC);
-    }
+    }*/
 
     if (!greenhouseManager->ConnectToMQTT())
         ESP_LOGE(MAIN_TAG, "Failed to connect to MQTT Broker!");
 
-    auto eventManager = Greenhouse::Manager::EventManager::GetInstance();
+    // auto eventManager = Greenhouse::Manager::EventManager::GetInstance();
 
-    // if (!greenhouseManager->StartBluetoothServer())
-    //     ESP_LOGE(MAIN_TAG, "Bluetooth startup failed!");
+    if (!greenhouseManager->StartBluetoothServer())
+        ESP_LOGE(MAIN_TAG, "Bluetooth startup failed!");
 
     while (true)
     {
-        auto temp = 18 + (std::rand() % (24 - 18 + 1));
+        /*auto temp = 18 + (std::rand() % (24 - 18 + 1));
         auto hum = 25 + (std::rand() % (50 - 25 + 1));
         auto eventData = new Component::Publisher::ClientBluetoothEventData_Greenhouse(temp, hum, 20);
         eventData->SetPosition(0x01);
-        eventManager->Notify(Greenhouse::Manager::EventManager::Event_T::BLUETOOTH_DATA_RECEIVED, eventData);
+        eventManager->Notify(Greenhouse::Manager::EventManager::Event_T::BLUETOOTH_DATA_RECEIVED, eventData);*/
 
         // delete eventData;
         //  sleep 1 min

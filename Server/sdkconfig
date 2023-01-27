@@ -140,6 +140,12 @@ CONFIG_JSON_Number_Precision=3
 # end of Convertors configuration
 
 #
+# General
+#
+CONFIG_ENABLE_NETWORK=y
+# end of General
+
+#
 # Network
 #
 CONFIG_STANDALONE_SERVER=y
@@ -158,6 +164,13 @@ CONFIG_WiFi_PASSWORD="Password"
 #
 CONFIG_MQTT_PORT="26002"
 CONFIG_MQTT_CLIENT_NAME="ESP_Client"
+
+#
+# MQTT Authentication
+#
+CONFIG_MQTT_USERNAME="ESP_Client"
+CONFIG_MQTT_PASSWORD="3spCli3nt"
+# end of MQTT Authentication
 # end of MQTT
 
 #

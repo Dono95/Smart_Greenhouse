@@ -68,6 +68,16 @@ menu "Network"
         config MQTT_CLIENT_NAME
             string "MQTT Client name"
             default "ESP_Client"
+    
+    menu "MQTT Authentication"
+        config MQTT_USERNAME
+            string "username"
+            default "mqtt_username"        
+        
+        config MQTT_PASSWORD
+            string "password"
+            default "mqtt_password"
+    endmenu
                 
     endmenu
 

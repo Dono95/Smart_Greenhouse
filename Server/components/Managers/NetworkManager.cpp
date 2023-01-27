@@ -102,6 +102,14 @@ NetworkManager::MQTT_Client::MQTT_Client(const std::string &uri, const std::stri
     mConfig->client_id = (const char *)malloc(clientName.size());
     mConfig->client_id = clientName.c_str();
 
+    // Allocate memory and set mqtt username
+    mConfig->username = (const char *)malloc(strlen(CONFIG_MQTT_USERNAME));
+    mConfig->username = CONFIG_MQTT_USERNAME;
+
+    // Allocate memory and set mqtt password
+    mConfig->password = (const char *)malloc(strlen(CONFIG_MQTT_PASSWORD));
+    mConfig->password = CONFIG_MQTT_PASSWORD;
+
     mClient = esp_mqtt_client_init(mConfig);
 }
 
