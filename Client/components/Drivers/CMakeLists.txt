@@ -2,8 +2,9 @@ message(STATUS "Drivers")
 
 # Set source file to variable SOURCES
 set(SOURCES
+./Sensors/Sensor.cpp
 ./Sensors/SHT4x.cpp
-./Sensors/Sensor.cpp)
+./Sensors/SCD4x.cpp)
 
 set(DIRECTORIES
 "."
