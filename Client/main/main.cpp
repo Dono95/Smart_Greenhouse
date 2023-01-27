@@ -37,26 +37,6 @@ extern "C" void app_main(void)
     // Creating Greenhouse manager
     auto greenhouseManager = Greenhouse::GreenhouseManager::GetInstance();
 
-    ESP_LOGI(MAIN_TAG, "Client ID is %d", CONFIG_CLIENT_ID);
-#ifdef CONFIG_INSIDE
-    ESP_LOGI(MAIN_TAG, "Position set to inside %d", CONFIG_INSIDE);
-#endif
-#ifdef CONFIG_OUTSIDE
-    ESP_LOGI(MAIN_TAG, "Position set to outside %d", CONFIG_CLIENT_ID);
-#endif
-
-#ifdef CONFIG_TEMPERATURE
-    ESP_LOGI(MAIN_TAG, "Temperature has been chosen %d", CONFIG_TEMPERATURE);
-#endif
-
-#ifdef CONFIG_HUMANITY
-    ESP_LOGI(MAIN_TAG, "Humanity has been chosen %d", CONFIG_HUMANITY);
-#endif
-
-#ifdef CONFIG_CO2
-    ESP_LOGI(MAIN_TAG, "CO2 has been chosen %d", CONFIG_CO2);
-#endif
-
     /*if (!greenhouseManager->StartBluetooth())
     {
         ESP_LOGE(MAIN_TAG, "Failed to start bluetooth.");

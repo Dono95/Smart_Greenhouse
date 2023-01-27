@@ -1,5 +1,7 @@
 /* Project specific includes */
 #include "GreenhouseManager.hpp"
+#include "Drivers/Sensors/SHT4x.hpp"
+#include "Drivers/Sensors/SCD4x.hpp"
 
 /* ESP logs library */
 #include "esp_log.h"
@@ -27,75 +29,83 @@ GreenhouseManager::GreenhouseManager()
     if (mI2C->Activate() != ESP_OK)
         ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Activation of I2C failed");
 
-    /*mSHT41 = new Sensor::SHT4x(0x44, mI2C);
+#ifdef CONFIG_CO2
+    mAirSensor = new Sensor::SCD4x(0x62, mI2C);
+#else
+    mAirSensor = new Sensor::SHT4x(0x44, mI2C);
+#endif
 
-mSHT41->SoftReset();
-mSHT41->Measure(Sensor::SHT4x::MeasurePrecision::HIGH);
+    ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Serial number is %s\n", mAirSensor->SerialNumber().c_str());
+    mAirSensor->Measure();
 
 #ifdef CONFIG_TEMPERATURE
-ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Temperature is %f", mSHT41->GetTemperature());
+    ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Temperature is %.2f °C", mAirSensor->GetTemperature());
 #endif
 
 #ifdef CONFIG_HUMANITY
-ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Humanity is %d", mSHT41->GetHumanity());
+    ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Humanity is %.2f %%", mAirSensor->GetHumanity());
+#endif
+
+#ifdef CONFIG_CO2
+    ESP_LOGE(GREENHOUSE_MANAGER_TAG, "CO2 is %d ppm\n", mAirSensor->GetCO2());
 #endif
 }
 
 /**
-* @brief Class destructor
-*/
-    GreenhouseManager::~GreenhouseManager()
+ * @brief Class destructor
+ */
+GreenhouseManager::~GreenhouseManager()
+{
+}
+
+/*********************************************
+ *              PUBLIC API                   *
+ ********************************************/
+
+/**
+ * @brief Static method to get instance of GreenhouseManager
+ */
+GreenhouseManager *GreenhouseManager::GetInstance()
+{
+    std::lock_guard<std::mutex> lock(mManagerMutex);
+    if (!mManagerInstance)
+        mManagerInstance = new GreenhouseManager();
+
+    return mManagerInstance;
+}
+
+/**
+ * @brief Method to inicialize controller and handler for bluetooth
+ */
+bool GreenhouseManager::StartBluetooth(void)
+{
+    using BluetoothInitStatus = Component::Bluetooth::INIT_BLUETOOTH_RV;
+
+    if (mBluetoothController->InitBluetoothController(ESP_BT_MODE_BLE) != BluetoothInitStatus::RV_BLUETOOTH_INIT_OK)
     {
+        ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Initialization of bluetooth controller failed");
+        return false;
     }
 
-    /*********************************************
-     *              PUBLIC API                   *
-     ********************************************/
-
-    /**
-     * @brief Static method to get instance of GreenhouseManager
-     */
-    GreenhouseManager *GreenhouseManager::GetInstance()
+    if (!mBluetoothHandler->InitializeBluetoothProfiles())
     {
-        std::lock_guard<std::mutex> lock(mManagerMutex);
-        if (!mManagerInstance)
-            mManagerInstance = new GreenhouseManager();
-
-        return mManagerInstance;
+        ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Initialization of bluetooth profiles failed");
+        return false;
     }
 
-    /**
-     * @brief Method to inicialize controller and handler for bluetooth
-     */
-    bool GreenhouseManager::StartBluetooth(void)
+    if (mBluetoothController->RegisterCallbacks() != BluetoothInitStatus::RV_BLUETOOTH_INIT_OK)
     {
-        using BluetoothInitStatus = Component::Bluetooth::INIT_BLUETOOTH_RV;
-
-        if (mBluetoothController->InitBluetoothController(ESP_BT_MODE_BLE) != BluetoothInitStatus::RV_BLUETOOTH_INIT_OK)
-        {
-            ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Initialization of bluetooth controller failed");
-            return false;
-        }
-
-        if (!mBluetoothHandler->InitializeBluetoothProfiles())
-        {
-            ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Initialization of bluetooth profiles failed");
-            return false;
-        }
-
-        if (mBluetoothController->RegisterCallbacks() != BluetoothInitStatus::RV_BLUETOOTH_INIT_OK)
-        {
-            ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Callbacks registration failed");
-            return false;
-        }
-
-        return true;
+        ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Callbacks registration failed");
+        return false;
     }
 
-    /**
-     * @brief Getter for bluetooth handler
-     */
-    GreenhouseManager::Shared_Bluetooth_Handler GreenhouseManager::GetHandler(void) const
-    {
-        return mBluetoothHandler;
-    }
+    return true;
+}
+
+/**
+ * @brief Getter for bluetooth handler
+ */
+GreenhouseManager::Shared_Bluetooth_Handler GreenhouseManager::GetHandler(void) const
+{
+    return mBluetoothHandler;
+}
