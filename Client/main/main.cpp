@@ -18,20 +18,7 @@
 #define MAIN_TAG "Main"
 
 /******** TEST ************/
-
-#include "driver/adc.h"
-#include "esp_adc_cal.h"
-
-int Calculate(int rawValue)
-{
-    return ((rawValue - 2902) * 100) / (1260 - 2902);
-}
-
-void PrintPercentage(int soilValue)
-{
-    printf("Soil value: %d %%\n", soilValue);
-}
-
+#include "sdkconfig.h"
 /*******  END TEST ********/
 
 extern "C" void app_main(void)
@@ -48,22 +35,15 @@ extern "C" void app_main(void)
     ESP_ERROR_CHECK(result);
 
     // Creating Greenhouse manager
-    // auto greenhouseManager = Greenhouse::GreenhouseManager::GetInstance();
+    auto greenhouseManager = Greenhouse::GreenhouseManager::GetInstance();
+
     /*if (!greenhouseManager->StartBluetooth())
     {
         ESP_LOGE(MAIN_TAG, "Failed to start bluetooth.");
     }*/
 
-    int read_raw;
-    adc2_config_channel_atten(ADC2_CHANNEL_0, ADC_ATTEN_11db);
-
     while (true)
     {
-        if (adc2_get_raw(ADC2_CHANNEL_0, ADC_WIDTH_12Bit, &read_raw) == ESP_OK)
-            PrintPercentage(Calculate(read_raw));
-        else
-            printf("Bad reading...\n");
-
         // Wait for 10s
         vTaskDelay(10000);
     }

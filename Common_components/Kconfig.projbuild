@@ -7,7 +7,18 @@ menu "Convertors configuration"
             The number represent a floating-point precision when a number is converted to string
 endmenu
 
+menu "General"
+    config ENABLE_NETWORK
+        bool "Enable network"
+        default n
+
+        help 
+            Enable network
+endmenu
+
 menu "Network"
+    depends on ENABLE_NETWORK
+
     choice SERVER_TYPE
         prompt "Server_Type"
         default STANDALONE_SERVER

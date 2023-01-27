@@ -10,7 +10,7 @@
 #include "ClientBluetoothController.hpp"
 #include "ClientBluetoothHandler.hpp"
 #include "Common_components/Drivers/Communication/I2C.hpp"
-#include "Drivers/Sensors/SHT4x.hpp"
+#include "Drivers/Sensors/Sensor.hpp"
 
 /* STL includes */
 #include <memory>
@@ -78,8 +78,8 @@ namespace Greenhouse
         /* Pointer to I2C driver */
         I2C *mI2C{nullptr};
 
-        /* Pointer to tempareture a humanity sensor */
-        Sensor::SHT4x *mSHT41{nullptr};
+        /* Pointer to air's properties sensor*/
+        Sensor::AirSensor_I *mAirSensor;
     };
 } // namespace Greenhouse
 
