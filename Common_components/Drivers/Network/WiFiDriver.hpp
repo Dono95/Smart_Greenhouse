@@ -85,6 +85,13 @@ namespace Component
                 esp_ip4_addr_t GetIpAddress() const;
 
                 /**
+                 * @brief Set IP address
+                 *
+                 * @param[in] ip_address : Reference to IP address structure
+                 */
+                void SetIpAddress(esp_ip4_addr_t &ip_address);
+
+                /**
                  * @brief Method to handle wifi events
                  *
                  * @param[in] arg       : Event arguments

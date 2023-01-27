@@ -209,6 +209,7 @@ esp_ip4_addr_t NetworkManager::GetIpAddress() const
 std::string NetworkManager::GetIpAddressAsString(bool reverse) const
 {
     auto ip_address = GetIpAddress().addr;
+
     // If no address set return 0.0.0.0
     if (!ip_address)
         return "0.0.0.0";
@@ -268,7 +269,12 @@ esp_err_t NetworkManager::ConnectTo_MQTT_Broker(const std::string &uri)
 void NetworkManager::SendToServer(const std::shared_ptr<SensorsData> sensorsData)
 {
     if (mMQTT_Client)
-        Publish(sensorsData);
+    {
+        if (sensorsData->GetPosition() == SensorsData::Position::UNKNOWN)
+            ESP_LOGE(NETWORK_MANAGER_TAG, "Sensor data does not contain sensor's position.");
+
+        Publish("SensorData", sensorsData);
+    }
 }
 
 /**
@@ -283,12 +289,9 @@ void NetworkManager::SendInfoToServer() const
     cJSON_AddNumberToObject(root, "ID", CONFIG_Greenhouse_ID);
     cJSON_AddStringToObject(root, "Board", CONFIG_ESP_Board);
 
-    auto ip_address = GetIpAddressAsString();
-    std::reverse(ip_address.begin(), ip_address.end());
-
     cJSON_AddStringToObject(root, "IP address", GetIpAddressAsString(true).c_str());
 
-    mMQTT_Client->Publish("Greenhouse_info", Component::Convertor::Convertor_JSON::GetInstance()->ToString(root).c_str(), 1);
+    mMQTT_Client->Publish("Greenhouse_info", cJSON_Print(root), 1);
 }
 
 /**
@@ -296,11 +299,19 @@ void NetworkManager::SendInfoToServer() const
  *
  * @param shared_ptr : Shared pointer to sensors data
  */
-void NetworkManager::Publish(const std::shared_ptr<SensorsData> sensorsData)
+void NetworkManager::Publish(const std::string &topic, const std::shared_ptr<SensorsData> sensorsData)
 {
     auto root = cJSON_CreateObject();
-    cJSON_AddNumberToObject(root, "Temperature", sensorsData->GetTemperature());
-    cJSON_AddNumberToObject(root, "Humanity", sensorsData->GetHumanity());
 
-    mMQTT_Client->Publish("SensorsData_IN", Component::Convertor::Convertor_JSON::GetInstance()->ToString(root).c_str(), 1);
+    cJSON_AddNumberToObject(root, "ID", CONFIG_Greenhouse_ID);
+    cJSON_AddNumberToObject(root, "position", static_cast<uint8_t>(sensorsData->GetPosition()));
+
+    auto data = cJSON_AddObjectToObject(root, "Data");
+
+    cJSON_AddNumberToObject(data, "measure_time", sensorsData->GetMeasureTime());
+    cJSON_AddNumberToObject(data, "temperature", sensorsData->GetTemperature());
+    cJSON_AddNumberToObject(data, "humanity", sensorsData->GetHumanity());
+    cJSON_AddNumberToObject(data, "CO2", sensorsData->GetCO2());
+
+    mMQTT_Client->Publish(topic, cJSON_Print(root), 1);
 }

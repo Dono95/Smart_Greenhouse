@@ -33,8 +33,6 @@
 
 #include "Common_components/Managers/TimeManager.hpp"
 
-#include "esp_sntp.h"
-
 /// END TEST
 
 extern "C" void app_main(void)
@@ -72,20 +70,21 @@ extern "C" void app_main(void)
     if (!greenhouseManager->ConnectToMQTT())
         ESP_LOGE(MAIN_TAG, "Failed to connect to MQTT Broker!");
 
-    // auto eventManager = Greenhouse::Manager::EventManager::GetInstance();
+    auto eventManager = Greenhouse::Manager::EventManager::GetInstance();
 
     // if (!greenhouseManager->StartBluetoothServer())
     //     ESP_LOGE(MAIN_TAG, "Bluetooth startup failed!");
 
     while (true)
     {
-        /*auto temp = 18 + (std::rand() % (24 - 18 + 1));
+        auto temp = 18 + (std::rand() % (24 - 18 + 1));
         auto hum = 25 + (std::rand() % (50 - 25 + 1));
-        auto eventData = new Component::Publisher::BluetoothEventData(temp, hum);
-        eventManager->Notify(Greenhouse::Manager::EventManager::Event_T::BLUETOOTH_DATA_RECEIVED, eventData);*/
+        auto eventData = new Component::Publisher::ClientBluetoothEventData_Greenhouse(temp, hum, 20);
+        eventData->SetPosition(0x01);
+        eventManager->Notify(Greenhouse::Manager::EventManager::Event_T::BLUETOOTH_DATA_RECEIVED, eventData);
 
         // delete eventData;
         //  sleep 1 min
-        vTaskDelay(1000);
+        vTaskDelay(60000 * 20);
     }
 }

@@ -6,9 +6,10 @@ using namespace Greenhouse;
 /**
  * @brief Class constructor
  */
-SensorsData::SensorsData(float temperature, uint8_t humanity)
-    : mTemperature(temperature), mHumanity(humanity)
+SensorsData::SensorsData(Position position, float temperature, int8_t humanity, int8_t co2)
+    : mPosition(position), mTemperature(temperature), mHumanity(humanity), mCO2(co2)
 {
+    mMeasureTime = Component::Manager::TimeManager::GetInstance()->GetRawTime();
 }
 
 /**
@@ -19,9 +20,15 @@ SensorsData::~SensorsData()
 }
 
 /**
+ * @brief Get Position
+ */
+SensorsData::Position SensorsData::GetPosition() const
+{
+    return mPosition;
+}
+
+/**
  * @brief Get temperature
- *
- * @return float
  */
 float SensorsData::GetTemperature() const
 {
@@ -30,10 +37,26 @@ float SensorsData::GetTemperature() const
 
 /**
  * @brief Get humanity
- *
- * @return uint8_t
  */
-uint8_t SensorsData::GetHumanity() const
+int8_t SensorsData::GetHumanity() const
 {
     return mHumanity.Get();
+}
+
+/**
+ * @brief Get CO2
+ */
+int8_t SensorsData::GetCO2() const
+{
+    return mCO2.Get();
+}
+
+/**
+ * @brief Get measure time
+ *
+ * @return time_t
+ */
+time_t SensorsData::GetMeasureTime() const
+{
+    return mMeasureTime;
 }
