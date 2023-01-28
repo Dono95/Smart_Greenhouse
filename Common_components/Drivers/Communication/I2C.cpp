@@ -1,6 +1,6 @@
 #include "I2C.hpp"
 
-/* C libraries */
+/* C library */
 #include <cstring>
 
 /* ESP log library */
