@@ -23,15 +23,9 @@
 
 ////// TEST
 
-#include "EventManager.hpp"
-#include "Common_components/Publisher/EventData.hpp"
-
-#include "NetworkManager.h"
-
-#include <cJSON.h>
-#include "Common_components/Convertors/Convertor_JSON.hpp"
-
 #include "Common_components/Managers/TimeManager.hpp"
+
+#include
 
 /// END TEST
 
@@ -44,6 +38,10 @@ extern "C" void app_main(void)
 
         ESP_ERROR_CHECK(nvs_flash_erase());
         result = nvs_flash_init();
+    }
+
+    while (true)
+    {
     }
 
     // Check result of initialization non-volatile flash memory
@@ -77,14 +75,6 @@ extern "C" void app_main(void)
 
     while (true)
     {
-        /*auto temp = 18 + (std::rand() % (24 - 18 + 1));
-        auto hum = 25 + (std::rand() % (50 - 25 + 1));
-        auto eventData = new Component::Publisher::ClientBluetoothEventData_Greenhouse(temp, hum, 20);
-        eventData->SetPosition(0x01);
-        eventManager->Notify(Greenhouse::Manager::EventManager::Event_T::BLUETOOTH_DATA_RECEIVED, eventData);*/
-
-        // delete eventData;
-        //  sleep 1 min
         vTaskDelay(60000 * 20);
     }
 }
