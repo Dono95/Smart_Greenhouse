@@ -122,6 +122,9 @@ NetworkManager::MQTT_Client::~MQTT_Client()
     free((char *)mConfig->uri);
     free((char *)mConfig->client_id);
 
+    free((char *)mConfig->username);
+    free((char *)mConfig->password);
+
     free(mConfig);
 
     esp_mqtt_client_destroy(mClient);

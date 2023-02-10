@@ -131,12 +131,28 @@ CONFIG_PARTITION_TABLE_MD5=y
 #
 # Greenhouse
 #
+
+#
+# Greenhouse general
+#
 CONFIG_CLIENT_ID=0
 CONFIG_INSIDE=y
 # CONFIG_OUTSIDE is not set
+# end of Greenhouse general
+
+#
+# Bluetooth
+#
+CONFIG_BLUETOOTH_SERVER="Greenhouse"
+# end of Bluetooth
+
+#
+# Sensor
+#
 CONFIG_TEMPERATURE=y
 CONFIG_HUMANITY=y
-CONFIG_CO2=y
+# CONFIG_CO2 is not set
+# end of Sensor
 # end of Greenhouse
 
 #
