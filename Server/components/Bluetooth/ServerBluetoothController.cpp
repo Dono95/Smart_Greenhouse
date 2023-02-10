@@ -223,6 +223,18 @@ esp_err_t ServerBluetoothController::AddCharacteristicDescriptor(uint16_t servic
     return result;
 }
 
+/**
+ * @brief Method to send response to client
+ */
+esp_err_t ServerBluetoothController::SendResponse(esp_gatt_if_t gatts_if, uint32_t connectionID, uint32_t transferID, esp_gatt_status_t status, esp_gatt_rsp_t *rsp)
+{
+    auto result = esp_ble_gatts_send_response(gatts_if, connectionID, transferID, status, rsp);
+    if (result)
+        ESP_LOGE(SERVER_BLUETOOTH_CONTROLLER_TAG, "Unable to send response. Error code: [%d]", result);
+
+    return result;
+}
+
 /*********************************************
  *              PRIVATE API                  *
  ********************************************/

@@ -1,8 +1,3 @@
-/**
- * Definition of BluetoothController
- *
- * @author Dominik Regec
- */
 #ifndef SERVER_BLUETOOTH_CONTROLLER
 #define SERVER_BLUETOOTH_CONTROLLER
 
@@ -12,17 +7,6 @@
 /* STL includes */
 #include <string>
 #include <vector>
-//#include <cstring>
-
-/* Project specific includes */
-//#include "BaseBluetoothDefinitions.hpp"
-
-/* Bluetooth includes */
-//#include "esp_bt.h"          //  implements BT controller and VHCI configuration procedures from the host side.
-//#include "esp_bt_main.h"     //  implements initialization and enabling of the Bluedroid stack.
-//#include "esp_gap_ble_api.h" //  implements GAP configuration, such as advertising and connection parameters.
-//#include "esp_gatts_api.h"   //  implements GATT configuration, such as creating services and characteristics.
-//#include "esp_gatt_common_api.h"
 
 #define SERVER_BLUETOOTH_CONTROLLER_TAG "ServerBluetoothController"
 
@@ -161,6 +145,20 @@ namespace Greenhouse
              */
             esp_err_t AddCharacteristicDescriptor(uint16_t serviceHandle, esp_bt_uuid_t *descriptorUUID,
                                                   esp_gatt_perm_t permission, esp_attr_value_t *charDescriptorVAlue = nullptr, esp_attr_control_t *control = nullptr);
+
+            /**
+             * @brief Method to send response to client
+             *
+             * @param[in] gatts_if      : GATT server access interface
+             * @param[in] connectionID  : Connection ID
+             * @param[in] transferID    : Transfer ID
+             * @param[in] status        : Status
+             * @param[in] rsp           : Response data
+             *
+             * @return esp_err_t    ESP_OK  : Characteristic descriptor is added
+             *                      Other   : Unable to add chaacteristic descriptor
+             */
+            esp_err_t SendResponse(esp_gatt_if_t gatts_if, uint32_t connectionID, uint32_t transferID, esp_gatt_status_t status, esp_gatt_rsp_t *rsp = nullptr);
 
         private:
         };
