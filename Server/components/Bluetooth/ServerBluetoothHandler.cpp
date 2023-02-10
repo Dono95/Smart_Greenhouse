@@ -222,17 +222,23 @@ void ServerBluetoothHandler::GreenhouseEventHandler(esp_gatts_cb_event_t event, 
     }
     case ESP_GATTS_WRITE_EVT:
     {
+        auto controller = GetBluetoothController().lock();
+        if (!controller)
+        {
+            ESP_LOGE(SERVER_BLUETOOTH_HANDLER_TAG, "Invalid pointer to bluetooth controller.");
+            return;
+        }
+
+        controller->SendResponse(gatts_if, param->write.conn_id, param->write.trans_id, ESP_GATT_OK);
+
         auto eventManager = Manager::EventManager::GetInstance();
 
-        // auto eventData = new Component::Publisher::BluetoothEventData();
-        // eventManager->Notify(Greenhouse::Manager::EventManager::Event_T::BLUETOOTH_DATA_RECEIVED, eventData);
-
-        esp_ble_gatts_send_response(gatts_if, param->write.conn_id, param->write.trans_id, ESP_GATT_OK, NULL);
-
-        // sleep(3);
-        /*ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "GATT_WRITE_EVT, conn_id %d, trans_id %d, handle %d", param->write.conn_id, param->write.trans_id, param->write.handle);
-
-        esp_ble_gatts_send_response(gatts_if, param->write.conn_id, param->write.trans_id, ESP_GATT_OK, NULL);*/
+        ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "Received data: ");
+        for (uint16_t i = 0; i < param->write.len; ++i)
+        {
+            printf("[%d] Data: 0x%x\n", i, param->write.value[i]);
+        }
+        /*esp_ble_gatts_send_response(gatts_if, param->write.conn_id, param->write.trans_id, ESP_GATT_OK, NULL);*/
         // ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "Goint to sleep.");
         // vTaskDelay(10000);
         // ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "Woke up");
@@ -241,7 +247,6 @@ void ServerBluetoothHandler::GreenhouseEventHandler(esp_gatts_cb_event_t event, 
         break;
     }
     case ESP_GATTS_EXEC_WRITE_EVT:
-        // ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "GATT_WRITE_EVT, conn_id %d, trans_id %d, handle %d\n", param->write.conn_id, param->write.trans_id, param->write.handle);
         break;
     case ESP_GATTS_MTU_EVT:
         ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "MTU set to %d.", param->mtu.mtu);
@@ -283,9 +288,9 @@ void ServerBluetoothHandler::GreenhouseEventHandler(esp_gatts_cb_event_t event, 
         std::vector<uint8_t> attrValues;
         controller->GetAttributeValues(param->add_char.attr_handle, attrValues);
 
-        ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "The gatts char length = %x\n", attrValues.size());
+        /*ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "The gatts char length = %x\n", attrValues.size());
         for (const auto &value : attrValues)
-            ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "Char value = %x\n", value);
+            ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "Char value = %x\n", value);*/
 
         controller->AddCharacteristicDescriptor(mProfilesMap.at(GREENHOUSE_PROFILE).service_handle,
                                                 &mProfilesMap.at(GREENHOUSE_PROFILE).descr_uuid,
@@ -294,8 +299,6 @@ void ServerBluetoothHandler::GreenhouseEventHandler(esp_gatts_cb_event_t event, 
     }
     case ESP_GATTS_ADD_CHAR_DESCR_EVT:
         mProfilesMap.at(GREENHOUSE_PROFILE).descr_handle = param->add_char_descr.attr_handle;
-        /*ESP_LOGI(BLUETOOTH_CONTROLLER_TAG, "ADD_DESCR_EVT, status %d, attr_handle %d, service_handle %d\n",
-                 param->add_char_descr.status, param->add_char_descr.attr_handle, param->add_char_descr.service_handle);*/
         break;
     case ESP_GATTS_DELETE_EVT:
         break;
@@ -333,11 +336,6 @@ void ServerBluetoothHandler::GreenhouseEventHandler(esp_gatts_cb_event_t event, 
 
         break;
     case ESP_GATTS_CONF_EVT:
-        /*ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "ESP_GATTS_CONF_EVT, status %d attr_handle %d", param->conf.status, param->conf.handle);
-        if (param->conf.status != ESP_GATT_OK)
-        {
-            esp_log_buffer_hex(SERVER_BLUETOOTH_HANDLER_TAG, param->conf.value, param->conf.len);
-        }*/
         break;
     case ESP_GATTS_OPEN_EVT:
     case ESP_GATTS_CANCEL_OPEN_EVT:

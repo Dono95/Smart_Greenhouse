@@ -43,6 +43,15 @@ namespace Greenhouse
             ~ClientBluetoothHandler();
 
             /**
+             * @brief Get gattc profile data structure
+             *
+             * @param key   : Bluetooth profile ID
+             *
+             * @return Component::Bluetooth::ClientGattcProfile
+             */
+            Component::Bluetooth::ClientGattcProfile GetGattcProfile(const uint8_t key) const;
+
+            /**
              * @brief Overriden method to initialize bluetooth profiles
              *
              * @return bool     true    : Initialization has been successful
@@ -87,12 +96,19 @@ namespace Greenhouse
             /**
              * @brief Method to check if incoming event is registration event
              *
-             * @param[in] event : Event type
+             * @param[in] event     : Event type
              *
-             * @return bool     : true  -> Registration event has came
-             *                  : false -> Otherwise
+             * @return bool         : true  -> Registration event has came
+             *                      : false -> Otherwise
              */
             bool IsRegistrationEvent(esp_gattc_cb_event_t event) const;
+
+            /**
+             * @brief Check service source
+             *
+             * @param[in] source    : Service source
+             */
+            void CheckServiceSource(esp_service_source_t source) const;
 
             /**
              * @brief Handle registration event
@@ -108,6 +124,21 @@ namespace Greenhouse
              * @param[in] scanResult     : Point to callback parameter, currently is union type
              */
             void HandleScanResultEvent(esp_ble_gap_cb_param_t *scanResult);
+
+            /**
+             * @brief Handle service information
+             *
+             * @param[in] gatts_if      : GATT server access interface
+             * @param[in] connectionID  : Connection ID
+             */
+            void HandleServiceInformation(esp_gatt_if_t gattc_if, uint16_t connectionID);
+
+            /**
+             * @brief Handle discoonection event
+             *
+             * @param[in] reason        : Disconnection reason
+             */
+            void HandleDisconnection(esp_gatt_conn_reason_t reason);
 
             /**
              * @brief Return connection status to remote device

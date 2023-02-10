@@ -42,7 +42,9 @@ extern "C" void app_main(void)
 
     while (true)
     {
+        greenhouseManager->SendDataToServer();
+
         // Wait for 10s
-        vTaskDelay(10000);
+        vTaskDelay(60000 * 2);
     }
 }
