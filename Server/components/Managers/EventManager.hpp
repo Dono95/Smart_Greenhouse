@@ -4,7 +4,7 @@
 /* Common components includes */
 #include "Publisher/PublisherInterface.hpp"
 
-/* STL includes */
+/* STD includes */
 #include <mutex>
 #include <unordered_set>
 #include <map>

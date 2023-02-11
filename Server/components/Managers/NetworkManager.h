@@ -116,6 +116,18 @@ namespace Greenhouse
              */
             void Publish(const std::string &topic, const std::shared_ptr<SensorsData> sensorsData);
 
+            /**
+             * @brief Method to subscribe all predefined topics
+             */
+            void SubscribeTopics();
+
+            /**
+             * @brief Process event data
+             *
+             * @param[in] eventData  : Event data
+             */
+            void ProcessEventData(esp_mqtt_event_handle_t eventData);
+
             class MQTT_Client
             {
             public:
@@ -171,6 +183,14 @@ namespace Greenhouse
                  * @return int  : Message ID
                  */
                 int Publish(const std::string &topic, const std::string &data, int QoS, bool retain = false);
+
+                /**
+                 * @brief Client subscribe defined topic
+                 *
+                 * @param[in] topic  : Topic to subscribe
+                 * @param[in] QoS    : Quality of Service
+                 */
+                int Subscribe(const std::string &topic, int QoS);
 
             private:
                 // Pointer to client MQTT configuration file

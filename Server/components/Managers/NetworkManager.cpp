@@ -1,7 +1,7 @@
 /* Project specific includes */
 #include "NetworkManager.h"
 #include "EventManager.hpp"
-#include "Common_components/Convertors/Convertor_JSON.hpp"
+#include "GreenhouseDefinitions.hpp"
 
 /* ESP log library*/
 #include <esp_log.h>
@@ -19,8 +19,6 @@ using namespace Greenhouse::Manager;
 
 NetworkManager *NetworkManager::mInstance{nullptr};
 std::mutex NetworkManager::mMutex;
-
-static const char *TAG = "MQTT_EXAMPLE";
 
 /*********************************************
  *              PRIVATE API                  *
@@ -58,26 +56,41 @@ NetworkManager::~NetworkManager()
 void NetworkManager::MQTT_EventHandler(void *handlerArg, esp_event_base_t base,
                                        int32_t eventID, void *eventData)
 {
-    ESP_LOGD(NETWORK_MANAGER_TAG, "Event dispatched from event loop base=%s, event_id=%d", base, eventID);
-
     auto event = static_cast<esp_mqtt_event_handle_t>(eventData);
 
     switch (static_cast<esp_mqtt_event_id_t>(eventID))
     {
     case (MQTT_EVENT_CONNECTED):
     {
+        auto network_manager = reinterpret_cast<NetworkManager *>(handlerArg);
+
         ESP_LOGI(NETWORK_MANAGER_TAG, "MQTT Client is connected to MQTT Broker.");
-        NetworkManager::GetInstance()->SendInfoToServer();
+        // Send basic infor about board
+        network_manager->SendInfoToServer();
+
+        // Subscribe all topics in greenhouse_topics data structure
+        network_manager->SubscribeTopics();
         break;
     }
     case (MQTT_EVENT_DISCONNECTED):
     {
-        ESP_LOGI(NETWORK_MANAGER_TAG, "MQTT Client is disconnected from MQTT Broker.");
+        ESP_LOGI(NETWORK_MANAGER_TAG, "MQTT Client has been disconnected from MQTT Broker.");
         break;
     }
     case MQTT_EVENT_PUBLISHED:
     {
-        ESP_LOGI(NETWORK_MANAGER_TAG, "MQTT Client publish data. Message ID: %d", event->msg_id);
+        ESP_LOGI(NETWORK_MANAGER_TAG, "Published data with message ID: %d", event->msg_id);
+        break;
+    }
+    case MQTT_EVENT_SUBSCRIBED:
+    {
+        ESP_LOGI(NETWORK_MANAGER_TAG, "Subscribed with message ID %d", event->msg_id);
+        break;
+    }
+    case MQTT_EVENT_DATA:
+    {
+        auto network_manager = reinterpret_cast<NetworkManager *>(handlerArg);
+        network_manager->ProcessEventData(event);
         break;
     }
     default:
@@ -171,6 +184,13 @@ int NetworkManager::MQTT_Client::Publish(const std::string &topic, const std::st
     return esp_mqtt_client_publish(mClient, topic.c_str(), data.c_str(), data.size(), QoS, retain);
 }
 
+/**
+ * @brief Client subscribe defined topic
+ */
+int NetworkManager::MQTT_Client::Subscribe(const std::string &topic, int QoS)
+{
+    return esp_mqtt_client_subscribe(mClient, topic.c_str(), QoS);
+}
 /*********************************************
  *              PUBLIC API                   *
  ********************************************/
@@ -258,7 +278,7 @@ esp_err_t NetworkManager::ConnectTo_MQTT_Broker(const std::string &uri)
         return ESP_ERR_INVALID_ARG;
 
     mMQTT_Client = new MQTT_Client(uri, CONFIG_MQTT_CLIENT_NAME);
-    if (mMQTT_Client->RegisterEventHandler(esp_mqtt_event_id_t::MQTT_EVENT_ANY, NetworkManager::MQTT_EventHandler, nullptr))
+    if (mMQTT_Client->RegisterEventHandler(esp_mqtt_event_id_t::MQTT_EVENT_ANY, NetworkManager::MQTT_EventHandler, this))
     {
         ESP_LOGE(MQTT_CLIENT_TAG, "Registration event handler failed.");
         return ESP_FAIL;
@@ -284,7 +304,7 @@ void NetworkManager::SendToServer(const std::shared_ptr<SensorsData> sensorsData
         if (sensorsData->GetPosition() == SensorsData::Position::UNKNOWN)
             ESP_LOGE(NETWORK_MANAGER_TAG, "Sensor data does not contain sensor's position.");
 
-        Publish("SensorData", sensorsData);
+        Publish(SENSOR_DATA, sensorsData);
     }
 }
 
@@ -302,7 +322,7 @@ void NetworkManager::SendInfoToServer() const
 
     cJSON_AddStringToObject(root, "IP address", GetIpAddressAsString(true).c_str());
 
-    mMQTT_Client->Publish("Greenhouse_info", cJSON_Print(root), 1);
+    mMQTT_Client->Publish(INFO, cJSON_Print(root), 1);
 }
 
 /**
@@ -325,4 +345,22 @@ void NetworkManager::Publish(const std::string &topic, const std::shared_ptr<Sen
     cJSON_AddNumberToObject(data, "CO2", sensorsData->GetCO2());
 
     mMQTT_Client->Publish(topic, cJSON_Print(root), 1);
+}
+
+/**
+ * @brief Method to subscribe all predefined topics
+ */
+void NetworkManager::SubscribeTopics()
+{
+    for (const auto &topic : greenhouse_topics)
+        mMQTT_Client->Subscribe(topic, 1);
+}
+
+/**
+ * @brief Process event data
+ */
+void NetworkManager::ProcessEventData(esp_mqtt_event_handle_t eventData)
+{
+    if (!eventData)
+        return;
 }
