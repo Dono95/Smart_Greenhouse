@@ -9,6 +9,7 @@
 
 /* Common components includes */
 #include "Drivers/Network/WiFiDriver.hpp"
+#include "Utility/Network/MQTT_Client.hpp"
 
 /* Project specific includes */
 #include "Observers/BluetoothDataObserver.hpp"
@@ -18,9 +19,6 @@
 #include <mqtt_client.h>
 
 #define NETWORK_MANAGER_TAG "Network manager"
-#define MQTT_CLIENT_TAG "MQTT client"
-
-#define DEFAULT_CLIENT_NAME "ESP_Client"
 
 namespace Greenhouse
 {
@@ -118,6 +116,7 @@ namespace Greenhouse
 
             /**
              * @brief Method to subscribe all predefined topics
+             * @warning Method must be called only after MQTT connected event
              */
             void SubscribeTopics();
 
@@ -127,78 +126,6 @@ namespace Greenhouse
              * @param[in] eventData  : Event data
              */
             void ProcessEventData(esp_mqtt_event_handle_t eventData);
-
-            class MQTT_Client
-            {
-            public:
-                /**
-                 * @brief Class constructor
-                 */
-                explicit MQTT_Client(const std::string &uri, const std::string &clientName = DEFAULT_CLIENT_NAME);
-
-                /**
-                 * @brief Class destructor
-                 */
-                ~MQTT_Client();
-
-                /**
-                 * @brief Register MQTT event
-                 *
-                 * @param[in] event             : MQTT event type
-                 * @param[in] eventHandler      : Handler callback
-                 * @param[in] eventHandlerArg   : Handler context data
-                 *
-                 * @return esp_err_t    ESP_OK              : Success
-                 *                      ESP_ERR_INVALID_ARG : Wrong inicialization
-                 *                      ESP_ERR_NO_MEM      : Failed to allocate
-                 */
-                esp_err_t RegisterEventHandler(esp_mqtt_event_id_t event, esp_event_handler_t eventHandler, void *eventHandlerArg) const;
-
-                /**
-                 * @brief Start MQTT client
-                 *
-                 * @return esp_err_t    ESP_OK              : Success
-                 *                      ESP_ERR_INVALID_ARG : Wrong inicialization
-                 *                      ESP_FAIL            : Client is in invalid state
-                 */
-                esp_err_t Start() const;
-
-                /**
-                 * @brief Stop MQTT client
-                 *
-                 * @return esp_err_t    ESP_OK              : Success
-                 *                      ESP_ERR_INVALID_ARG : Wrong inicialization
-                 *                      ESP_FAIL            : Client is in invalid state
-                 */
-                esp_err_t Stop() const;
-
-                /**
-                 * @brief Client publish message to MQTT broker
-                 *
-                 * @param[in] topic  : MQTT topic
-                 * @param[in] data   : Data
-                 * @param[in] QoS    : Quality of Service
-                 * @param[in] retain : Retain flag (Default false)
-                 *
-                 * @return int  : Message ID
-                 */
-                int Publish(const std::string &topic, const std::string &data, int QoS, bool retain = false);
-
-                /**
-                 * @brief Client subscribe defined topic
-                 *
-                 * @param[in] topic  : Topic to subscribe
-                 * @param[in] QoS    : Quality of Service
-                 */
-                int Subscribe(const std::string &topic, int QoS);
-
-            private:
-                // Pointer to client MQTT configuration file
-                esp_mqtt_client_config_t *mConfig;
-
-                // MQTT client
-                esp_mqtt_client_handle_t mClient;
-            };
 
             // Typedef to WiFi driver component
             using WifiDriver = Component::Driver::Network::WifiDriver;
@@ -213,7 +140,7 @@ namespace Greenhouse
             WifiDriver *mWifiDriver;
 
             // MQTT Client
-            MQTT_Client *mMQTT_Client;
+            Utility::Network::MQTT_Client *mMQTT_Client;
 
             // BluetoothObserver
             Observer::BluetoothDataObserver *mBluetoothObserver;
