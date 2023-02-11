@@ -131,6 +131,21 @@ CONFIG_PARTITION_TABLE_MD5=y
 #
 CONFIG_Greenhouse_ID=0
 CONFIG_ESP_Board="esp-wroom-32"
+
+#
+# Motor
+#
+CONFIG_COIL_A=12
+CONFIG_COIL_B=13
+CONFIG_COIL_C=5
+CONFIG_COIL_D=23
+# end of Motor
+
+#
+# Water pump
+#
+CONFIG_WATER_PUMP=17
+# end of Water pump
 # end of General
 
 #
