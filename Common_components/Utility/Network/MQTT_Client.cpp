@@ -1,5 +1,7 @@
 #include "MQTT_Client.hpp"
 
+#ifdef CONFIG_ENABLE_NETWORK
+
 using namespace Utility::Network;
 
 /**
@@ -94,3 +96,5 @@ int MQTT_Client::Subscribe(const std::string &topic, int QoS)
 {
   return esp_mqtt_client_subscribe(mClient, topic.c_str(), QoS);
 }
+
+#endif

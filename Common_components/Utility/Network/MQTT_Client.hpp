@@ -16,6 +16,7 @@ namespace Utility
 {
   namespace Network
   {
+#ifdef CONFIG_ENABLE_NETWORK
     class MQTT_Client
     {
     public:
@@ -87,6 +88,7 @@ namespace Utility
       // MQTT client
       esp_mqtt_client_handle_t mClient;
     };
+#endif
   } // namespace Network
 } // namespace Utility
 
