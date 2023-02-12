@@ -10,7 +10,8 @@ set(SOURCES
 ./Drivers/Sensor/WaterLevelSensor.cpp
 ./Drivers/Motor/StepMotor.cpp
 ./Drivers/Active/WaterPump.cpp
-./Utility/Indicator/RGB.cpp)
+./Utility/Indicator/RGB.cpp
+./Utility/Network/MQTT_Client.cpp)
 
 set(DIRECTORIES
 "."
@@ -19,11 +20,12 @@ set(DIRECTORIES
 "./Drivers/Sensor"
 "./Drivers/Motor"
 "./Drivers/Active"
-"./Utility/Indicator")
+"./Utility/Indicator"
+"./Utility/Network")
 # Register components with include header files
 idf_component_register(SRCS ${SOURCES}
                                 INCLUDE_DIRS ${DIRECTORIES}
-                                REQUIRES bt json)
+                                REQUIRES bt json mqtt)
 
 
 
