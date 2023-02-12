@@ -12,4 +12,41 @@ menu "General"
 
         help 
             Type of main ESP Board
+
+    menu "Motor"
+        config COIL_A
+            int "COIL A"
+            default -1
+    
+            help 
+                Pin number to coil A
+                
+        config COIL_B
+            int "COIL B"
+            default -1
+            
+            help 
+                Pin number to coil B
+
+        config COIL_C
+            int "COIL C"
+            default -1
+    
+            help 
+                Pin number to coil C
+        config COIL_D
+            int "COIL D"
+            default -1
+            
+            help 
+                Pin number to coil D
+    endmenu
+    menu "Water pump"
+        config WATER_PUMP
+            int "Water pump"
+            default -1
+            
+            help 
+                Pin number to water pump   
+    endmenu
 endmenu

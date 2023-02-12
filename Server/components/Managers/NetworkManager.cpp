@@ -1,7 +1,8 @@
 /* Project specific includes */
 #include "NetworkManager.h"
 #include "EventManager.hpp"
-#include "Common_components/Convertors/Convertor_JSON.hpp"
+#include "ComponentController.hpp"
+#include "GreenhouseDefinitions.hpp"
 
 /* ESP log library*/
 #include <esp_log.h>
@@ -12,15 +13,10 @@
 /* SDK config file */
 #include "sdkconfig.h"
 
-/* ESP cJSON library */
-#include <cJSON.h>
-
 using namespace Greenhouse::Manager;
 
 NetworkManager *NetworkManager::mInstance{nullptr};
 std::mutex NetworkManager::mMutex;
-
-static const char *TAG = "MQTT_EXAMPLE";
 
 /*********************************************
  *              PRIVATE API                  *
@@ -30,9 +26,9 @@ static const char *TAG = "MQTT_EXAMPLE";
  * @brief Class constructor
  */
 NetworkManager::NetworkManager()
-    : mWifiDriver(nullptr), mMQTT_Client(nullptr)
+		: mWifiDriver(nullptr), mMQTT_Client(nullptr)
 {
-    mBluetoothObserver = new Observer::BluetoothDataObserver(EventManager::GetInstance());
+	mBluetoothObserver = new Observer::BluetoothDataObserver(EventManager::GetInstance());
 }
 
 /**
@@ -40,135 +36,65 @@ NetworkManager::NetworkManager()
  */
 NetworkManager::~NetworkManager()
 {
-    if (mWifiDriver)
-    {
-        delete mWifiDriver;
-        mWifiDriver = nullptr;
-    }
-    if (mMQTT_Client)
-    {
-        delete mMQTT_Client;
-        mMQTT_Client = nullptr;
-    }
+	if (mWifiDriver)
+	{
+		delete mWifiDriver;
+		mWifiDriver = nullptr;
+	}
+
+	if (mMQTT_Client)
+	{
+		delete mMQTT_Client;
+		mMQTT_Client = nullptr;
+	}
 }
 
 /**
  * @brief Callback function when an event occurs
  */
 void NetworkManager::MQTT_EventHandler(void *handlerArg, esp_event_base_t base,
-                                       int32_t eventID, void *eventData)
+																			 int32_t eventID, void *eventData)
 {
-    ESP_LOGD(NETWORK_MANAGER_TAG, "Event dispatched from event loop base=%s, event_id=%d", base, eventID);
+	auto event = static_cast<esp_mqtt_event_handle_t>(eventData);
 
-    auto event = static_cast<esp_mqtt_event_handle_t>(eventData);
+	switch (static_cast<esp_mqtt_event_id_t>(eventID))
+	{
+	case (MQTT_EVENT_CONNECTED):
+	{
+		auto network_manager = reinterpret_cast<NetworkManager *>(handlerArg);
 
-    switch (static_cast<esp_mqtt_event_id_t>(eventID))
-    {
-    case (MQTT_EVENT_CONNECTED):
-    {
-        ESP_LOGI(NETWORK_MANAGER_TAG, "MQTT Client is connected to MQTT Broker.");
-        NetworkManager::GetInstance()->SendInfoToServer();
-        break;
-    }
-    case (MQTT_EVENT_DISCONNECTED):
-    {
-        ESP_LOGI(NETWORK_MANAGER_TAG, "MQTT Client is disconnected from MQTT Broker.");
-        break;
-    }
-    case MQTT_EVENT_PUBLISHED:
-    {
-        ESP_LOGI(NETWORK_MANAGER_TAG, "MQTT Client publish data. Message ID: %d", event->msg_id);
-        break;
-    }
-    default:
-        ESP_LOGW(NETWORK_MANAGER_TAG, "Unhandled event in switch with ID: %d", eventID);
-    }
-}
+		ESP_LOGI(NETWORK_MANAGER_TAG, "MQTT Client is connected to MQTT Broker.");
+		// Send basic infor about board
+		network_manager->SendInfoToServer();
 
-/************   MQTT Client     ************/
-/**
- * @brief Class constructor
- */
-NetworkManager::MQTT_Client::MQTT_Client(const std::string &uri, const std::string &clientName)
-{
-    // Create clear config structure
-    mConfig = (esp_mqtt_client_config_t *)calloc(1, sizeof(esp_mqtt_client_config_t));
-
-    // Allocate memory and set URI to config structure
-    mConfig->uri = (const char *)malloc(uri.size());
-    mConfig->uri = uri.c_str();
-
-    // Allocate memory and set client name
-    mConfig->client_id = (const char *)malloc(clientName.size());
-    mConfig->client_id = clientName.c_str();
-
-    // Allocate memory and set mqtt username
-    mConfig->username = (const char *)malloc(strlen(CONFIG_MQTT_USERNAME));
-    mConfig->username = CONFIG_MQTT_USERNAME;
-
-    // Allocate memory and set mqtt password
-    mConfig->password = (const char *)malloc(strlen(CONFIG_MQTT_PASSWORD));
-    mConfig->password = CONFIG_MQTT_PASSWORD;
-
-    mClient = esp_mqtt_client_init(mConfig);
-}
-
-/**
- * @brief Class destructor
- */
-NetworkManager::MQTT_Client::~MQTT_Client()
-{
-    // Free memory
-    free((char *)mConfig->uri);
-    free((char *)mConfig->client_id);
-
-    free((char *)mConfig->username);
-    free((char *)mConfig->password);
-
-    free(mConfig);
-
-    esp_mqtt_client_destroy(mClient);
-}
-
-/**
- * @brief Register MQTT event
- */
-esp_err_t NetworkManager::MQTT_Client::RegisterEventHandler(esp_mqtt_event_id_t event,
-                                                            esp_event_handler_t eventHandler,
-                                                            void *eventHandlerArg) const
-{
-    return esp_mqtt_client_register_event(mClient, event, eventHandler, eventHandlerArg);
-}
-
-/**
- * @brief Start MQTT client
- */
-esp_err_t NetworkManager::MQTT_Client::Start() const
-{
-    return esp_mqtt_client_start(mClient);
-}
-
-/**
- * @brief Stop MQTT client
- */
-esp_err_t NetworkManager::MQTT_Client::Stop() const
-{
-    return esp_mqtt_client_stop(mClient);
-}
-
-/**
- * @brief Client publish message to MQTT broker
- *
- * @param[in] topic  : MQTT topic
- * @param[in] data   : Data
- * @param[in] QoS    : Quality of Service
- * @param[in] retain : Retain flag (Default false)
- *
- * @return int  : Message ID
- */
-int NetworkManager::MQTT_Client::Publish(const std::string &topic, const std::string &data, int QoS, bool retain)
-{
-    return esp_mqtt_client_publish(mClient, topic.c_str(), data.c_str(), data.size(), QoS, retain);
+		// Subscribe all topics in greenhouse_topics data structure
+		network_manager->SubscribeTopics();
+		break;
+	}
+	case (MQTT_EVENT_DISCONNECTED):
+	{
+		ESP_LOGI(NETWORK_MANAGER_TAG, "MQTT Client has been disconnected from MQTT Broker.");
+		break;
+	}
+	case MQTT_EVENT_PUBLISHED:
+	{
+		ESP_LOGI(NETWORK_MANAGER_TAG, "Published data with message ID: %d", event->msg_id);
+		break;
+	}
+	case MQTT_EVENT_SUBSCRIBED:
+	{
+		ESP_LOGI(NETWORK_MANAGER_TAG, "Subscribed with message ID %d", event->msg_id);
+		break;
+	}
+	case MQTT_EVENT_DATA:
+	{
+		auto network_manager = reinterpret_cast<NetworkManager *>(handlerArg);
+		network_manager->ProcessEventData(event);
+		break;
+	}
+	default:
+		ESP_LOGW(NETWORK_MANAGER_TAG, "Unhandled event in switch with ID: %d", eventID);
+	}
 }
 
 /*********************************************
@@ -180,11 +106,11 @@ int NetworkManager::MQTT_Client::Publish(const std::string &topic, const std::st
  */
 NetworkManager *NetworkManager::GetInstance()
 {
-    std::lock_guard<std::mutex> lock(mMutex);
-    if (!mInstance)
-        mInstance = new NetworkManager();
+	std::lock_guard<std::mutex> lock(mMutex);
+	if (!mInstance)
+		mInstance = new NetworkManager();
 
-    return mInstance;
+	return mInstance;
 }
 
 /**
@@ -192,13 +118,13 @@ NetworkManager *NetworkManager::GetInstance()
  */
 bool NetworkManager::ConnectToWifi(const std::pair<std::string, std::string> &wifiLogin)
 {
-    using WiFiMode = Component::Driver::Network::WiFi_MODE;
+	using WiFiMode = Component::Driver::Network::WiFi_MODE;
 
-    ESP_LOGI(NETWORK_MANAGER_TAG, "Trying to connect WiFi \"%s\"", wifiLogin.first.c_str());
-    mWifiDriver = new WifiDriver(wifiLogin.first, wifiLogin.second, WiFiMode::MODE_STA);
-    mWifiDriver->Enable();
+	ESP_LOGI(NETWORK_MANAGER_TAG, "Trying to connect WiFi \"%s\"", wifiLogin.first.c_str());
+	mWifiDriver = new WifiDriver(wifiLogin.first, wifiLogin.second, WiFiMode::MODE_STA);
+	mWifiDriver->Enable();
 
-    return mWifiDriver->Connect();
+	return mWifiDriver->Connect();
 }
 
 /**
@@ -206,10 +132,10 @@ bool NetworkManager::ConnectToWifi(const std::pair<std::string, std::string> &wi
  */
 esp_ip4_addr_t NetworkManager::GetIpAddress() const
 {
-    if (!mWifiDriver)
-        return {};
+	if (!mWifiDriver)
+		return {};
 
-    return mWifiDriver->GetIpAddress();
+	return mWifiDriver->GetIpAddress();
 }
 
 /**
@@ -219,58 +145,58 @@ esp_ip4_addr_t NetworkManager::GetIpAddress() const
  */
 std::string NetworkManager::GetIpAddressAsString(bool reverse) const
 {
-    auto ip_address = GetIpAddress().addr;
+	auto ip_address = GetIpAddress().addr;
 
-    // If no address set return 0.0.0.0
-    if (!ip_address)
-        return "0.0.0.0";
+	// If no address set return 0.0.0.0
+	if (!ip_address)
+		return "0.0.0.0";
 
-    // String IP address
-    std::string ip_str;
+	// String IP address
+	std::string ip_str;
 
-    // IP block
-    uint32_t block = reverse ? 0x000000FF : 0xFF000000;
+	// IP block
+	uint32_t block = reverse ? 0x000000FF : 0xFF000000;
 
-    for (uint8_t i = 0; i < 4; ++i)
-    {
-        // Logical and to filter parts of IP address
-        // Example 192.168.0.124 & 0x00FF0000 = 0.168.0.0
-        auto ip_block_number = (ip_address & block);
+	for (uint8_t i = 0; i < 4; ++i)
+	{
+		// Logical and to filter parts of IP address
+		// Example 192.168.0.124 & 0x00FF0000 = 0.168.0.0
+		auto ip_block_number = (ip_address & block);
 
-        // Shift IP part to right edge
-        ip_block_number = reverse ? (ip_block_number >> (i * 8)) : (ip_block_number >> (24 - (i * 8)));
+		// Shift IP part to right edge
+		ip_block_number = reverse ? (ip_block_number >> (i * 8)) : (ip_block_number >> (24 - (i * 8)));
 
-        ip_str.append(std::to_string(ip_block_number) + '.');
+		ip_str.append(std::to_string(ip_block_number) + '.');
 
-        // Shift 8 bits to left or right base of reverse parameter
-        block = reverse ? block << 8 : block >> 8;
-    }
+		// Shift 8 bits to left or right base of reverse parameter
+		block = reverse ? block << 8 : block >> 8;
+	}
 
-    // Remove last useless dot
-    ip_str.pop_back();
+	// Remove last useless dot
+	ip_str.pop_back();
 
-    return ip_str;
+	return ip_str;
 }
 
 esp_err_t NetworkManager::ConnectTo_MQTT_Broker(const std::string &uri)
 {
-    if (uri.empty())
-        return ESP_ERR_INVALID_ARG;
+	if (uri.empty())
+		return ESP_ERR_INVALID_ARG;
 
-    mMQTT_Client = new MQTT_Client(uri, CONFIG_MQTT_CLIENT_NAME);
-    if (mMQTT_Client->RegisterEventHandler(esp_mqtt_event_id_t::MQTT_EVENT_ANY, NetworkManager::MQTT_EventHandler, nullptr))
-    {
-        ESP_LOGE(MQTT_CLIENT_TAG, "Registration event handler failed.");
-        return ESP_FAIL;
-    }
+	mMQTT_Client = new Utility::Network::MQTT_Client(uri);
+	if (mMQTT_Client->RegisterEventHandler(esp_mqtt_event_id_t::MQTT_EVENT_ANY, NetworkManager::MQTT_EventHandler, this))
+	{
+		ESP_LOGE(NETWORK_MANAGER_TAG, "Registration event handler failed.");
+		return ESP_FAIL;
+	}
 
-    if (mMQTT_Client->Start())
-    {
-        ESP_LOGE(MQTT_CLIENT_TAG, "Failed to start MQTT client.");
-        return ESP_FAIL;
-    }
+	if (mMQTT_Client->Start())
+	{
+		ESP_LOGE(NETWORK_MANAGER_TAG, "Failed to start MQTT client.");
+		return ESP_FAIL;
+	}
 
-    return ESP_OK;
+	return ESP_OK;
 }
 /**
  * @brief Method to send data to Server
@@ -279,13 +205,13 @@ esp_err_t NetworkManager::ConnectTo_MQTT_Broker(const std::string &uri)
  */
 void NetworkManager::SendToServer(const std::shared_ptr<SensorsData> sensorsData)
 {
-    if (mMQTT_Client)
-    {
-        if (sensorsData->GetPosition() == SensorsData::Position::UNKNOWN)
-            ESP_LOGE(NETWORK_MANAGER_TAG, "Sensor data does not contain sensor's position.");
+	if (mMQTT_Client)
+	{
+		if (sensorsData->GetPosition() == SensorsData::Position::UNKNOWN)
+			ESP_LOGE(NETWORK_MANAGER_TAG, "Sensor data does not contain sensor's position.");
 
-        Publish("SensorData", sensorsData);
-    }
+		Publish(SENSOR_DATA, sensorsData);
+	}
 }
 
 /**
@@ -293,16 +219,17 @@ void NetworkManager::SendToServer(const std::shared_ptr<SensorsData> sensorsData
  */
 void NetworkManager::SendInfoToServer() const
 {
-    if (!mMQTT_Client)
-        return;
+	if (!mMQTT_Client)
+		return;
 
-    auto root = cJSON_CreateObject();
-    cJSON_AddNumberToObject(root, "ID", CONFIG_Greenhouse_ID);
-    cJSON_AddStringToObject(root, "Board", CONFIG_ESP_Board);
+	auto root = cJSON_CreateObject();
+	cJSON_AddNumberToObject(root, "ID", CONFIG_Greenhouse_ID);
+	cJSON_AddStringToObject(root, "Board", CONFIG_ESP_Board);
 
-    cJSON_AddStringToObject(root, "IP address", GetIpAddressAsString(true).c_str());
+	cJSON_AddStringToObject(root, "IP address", GetIpAddressAsString(true).c_str());
 
-    mMQTT_Client->Publish("Greenhouse_info", cJSON_Print(root), 1);
+	mMQTT_Client->Publish(INFO, cJSON_Print(root), 1);
+	cJSON_Delete(root);
 }
 
 /**
@@ -312,17 +239,88 @@ void NetworkManager::SendInfoToServer() const
  */
 void NetworkManager::Publish(const std::string &topic, const std::shared_ptr<SensorsData> sensorsData)
 {
-    auto root = cJSON_CreateObject();
+	auto root = cJSON_CreateObject();
 
-    cJSON_AddNumberToObject(root, "ID", CONFIG_Greenhouse_ID);
-    cJSON_AddNumberToObject(root, "position", static_cast<uint8_t>(sensorsData->GetPosition()));
+	cJSON_AddNumberToObject(root, "ID", CONFIG_Greenhouse_ID);
+	cJSON_AddNumberToObject(root, "position", static_cast<uint8_t>(sensorsData->GetPosition()));
 
-    auto data = cJSON_AddObjectToObject(root, "Data");
+	auto data = cJSON_AddObjectToObject(root, "Data");
 
-    cJSON_AddNumberToObject(data, "measure_time", sensorsData->GetMeasureTime());
-    cJSON_AddNumberToObject(data, "temperature", sensorsData->GetTemperature());
-    cJSON_AddNumberToObject(data, "humanity", sensorsData->GetHumanity());
-    cJSON_AddNumberToObject(data, "CO2", sensorsData->GetCO2());
+	cJSON_AddNumberToObject(data, "measure_time", sensorsData->GetMeasureTime());
+	cJSON_AddNumberToObject(data, "temperature", sensorsData->GetTemperature());
+	cJSON_AddNumberToObject(data, "humanity", sensorsData->GetHumanity());
+	cJSON_AddNumberToObject(data, "CO2", sensorsData->GetCO2());
 
-    mMQTT_Client->Publish(topic, cJSON_Print(root), 1);
+	mMQTT_Client->Publish(topic, cJSON_Print(root), 1);
+}
+
+/**
+ * @brief Method to subscribe all predefined topics
+ */
+void NetworkManager::SubscribeTopics()
+{
+	for (const auto &topic : greenhouse_topics)
+		mMQTT_Client->Subscribe(topic, 1);
+}
+
+/**
+ * @brief Process event data
+ */
+void NetworkManager::ProcessEventData(esp_mqtt_event_handle_t eventData)
+{
+	if (!eventData)
+		return;
+
+	std::string topic;
+	topic.assign(eventData->topic, eventData->topic_len);
+
+	std::string data;
+	data.assign(eventData->data, eventData->data_len);
+
+	auto json_data = cJSON_Parse(data.c_str());
+
+	if ((topic.compare(WINDOW) == 0) || (topic.compare(WINDOW_ID) == 0))
+	{
+		WindowEvent(json_data);
+		return;
+	}
+
+	if ((topic.compare(IRRIGATION) == 0) || (topic.compare(IRRIGATION_ID) == 0))
+	{
+		WindowEvent(json_data);
+		return;
+	}
+}
+
+/**
+ * @brief Hadnle event for window
+ */
+void NetworkManager::WindowEvent(const cJSON *const json)
+{
+	if (!json)
+		return;
+
+	auto controller = Manager::ComponentController::GetInstance();
+
+	if (cJSON_HasObjectItem(json, "requested"))
+	{
+		bool requested = static_cast<bool>(cJSON_GetNumberValue(cJSON_GetObjectItem(json, "requested")));
+		if (requested == controller->WindowState())
+		{
+			ESP_LOGI(NETWORK_MANAGER_TAG, "Request state is same with current window state");
+			return;
+		}
+
+		if (requested)
+			controller->OpenWindow();
+		else
+			controller->CloseWindow();
+	}
+}
+
+/**
+ * @brief Hadnle event for irrigation
+ */
+void NetworkManager::IrrigationEvent(const cJSON *const json)
+{
 }
