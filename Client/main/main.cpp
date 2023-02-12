@@ -7,6 +7,7 @@
 
 /* Project specific includes*/
 #include "GreenhouseManager.hpp"
+#include "ClientStatusIndicator.hpp"
 
 /* FreeRTOS includes */
 #include "freertos/FreeRTOS.h"
@@ -18,7 +19,7 @@
 #define MAIN_TAG "Main"
 
 /******** TEST ************/
-#include "sdkconfig.h"
+#include "Common_components/Utility/Indicator/RGB.hpp"
 /*******  END TEST ********/
 
 extern "C" void app_main(void)
@@ -38,13 +39,19 @@ extern "C" void app_main(void)
     auto greenhouseManager = Greenhouse::GreenhouseManager::GetInstance();
 
     if (!greenhouseManager->StartBluetooth())
+    {
         ESP_LOGE(MAIN_TAG, "Failed to start bluetooth.");
+        Greenhouse::ClientStatusIndicator::GetInstance()->RaiseState(Greenhouse::StateCode::BLUETOOTH_INIT_FAILED);
+        return;
+    }
+    else
+        Greenhouse::ClientStatusIndicator::GetInstance()->RaiseState(Greenhouse::StateCode::BLUETOOTH_INIT_SUCCESSED);
 
     while (true)
     {
-        greenhouseManager->SendDataToServer();
-
-        // Wait for 10s
+        // Wait for 2 min
         vTaskDelay(60000 * 2);
+
+        greenhouseManager->SendDataToServer();
     }
 }

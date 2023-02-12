@@ -1,5 +1,6 @@
 /* Project specific includes */
 #include "GreenhouseManager.hpp"
+#include "ClientStatusIndicator.hpp"
 #include "Drivers/Sensors/SHT4x.hpp"
 #include "Drivers/Sensors/SCD4x.hpp"
 
@@ -174,6 +175,13 @@ void GreenhouseManager::SendDataToServer()
 {
 	// Perform measurement
 	mAirSensor->Measure();
+
+	if (!mBluetoothHandler->IsConnected())
+	{
+		ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Client in not connected to server. Unable to send data");
+		ClientStatusIndicator::GetInstance()->RaiseState(StateCode::CLIENT_NOT_CONNECTED_TO_BLE_SERVER);
+		return;
+	}
 
 	auto profile = mBluetoothHandler->GetGattcProfile(GREENHOUSE_PROFILE);
 

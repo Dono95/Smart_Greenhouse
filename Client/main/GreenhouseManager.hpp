@@ -1,10 +1,5 @@
-/**
- * Definition of Greenhouse manager
- *
- * @author Dominik Regec
- */
-#ifndef GREENHOUSE_MANAGER
-#define GREENHOUSE_MANAGER
+#ifndef GREENHOUSE_MANAGER_H
+#define GREENHOUSE_MANAGER_H
 
 /* Project specific includes */
 #include "ClientBluetoothController.hpp"
@@ -138,4 +133,4 @@ namespace Greenhouse
     };
 } // namespace Greenhouse
 
-#endif // GREENHOUSE_MANAGER
+#endif // GREENHOUSE_MANAGER_H

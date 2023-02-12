@@ -135,9 +135,9 @@ CONFIG_PARTITION_TABLE_MD5=y
 #
 # Greenhouse general
 #
-CONFIG_CLIENT_ID=32
-# CONFIG_INSIDE is not set
-CONFIG_OUTSIDE=y
+CONFIG_CLIENT_ID=0
+CONFIG_INSIDE=y
+# CONFIG_OUTSIDE is not set
 # end of Greenhouse general
 
 #
