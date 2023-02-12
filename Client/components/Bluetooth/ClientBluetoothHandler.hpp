@@ -92,6 +92,14 @@ namespace Greenhouse
              */
             void GreenhouseEventHandler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if, esp_ble_gattc_cb_param_t *param);
 
+            /**
+             * @brief Return connection status to remote device
+             *
+             * @return bool :   true  -> Client is connected to remote device
+             *                  false -> Otherwise
+             */
+            bool IsConnected() const;
+
         private:
             /**
              * @brief Method to check if incoming event is registration event
@@ -139,14 +147,6 @@ namespace Greenhouse
              * @param[in] reason        : Disconnection reason
              */
             void HandleDisconnection(esp_gatt_conn_reason_t reason);
-
-            /**
-             * @brief Return connection status to remote device
-             *
-             * @return bool :   true  -> Client is connected to remote device
-             *                  false -> Otherwise
-             */
-            bool IsConnected() const;
 
             /* Profiles map */
             Component::Bluetooth::ClientProfileMap mProfilesMap;

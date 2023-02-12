@@ -166,7 +166,7 @@ void ClientBluetoothHandler::HandleGapEvent(esp_gap_ble_cb_event_t event, esp_bl
  */
 void ClientBluetoothHandler::GreenhouseEventHandler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if, esp_ble_gattc_cb_param_t *param)
 {
-	ESP_LOGI(CLIENT_BLUETOOTH_HANDLER_TAG, "[%s] Event: %s.", __func__, Component::Bluetooth::EnumToString(event).c_str());
+	ESP_LOGD(CLIENT_BLUETOOTH_HANDLER_TAG, "[%s] Event: %s.", __func__, Component::Bluetooth::EnumToString(event).c_str());
 
 	// Create shared_pointer from weak_ptr mBluetooth controller
 	const auto controller = mBluetoothController.lock();
@@ -276,6 +276,14 @@ void ClientBluetoothHandler::GreenhouseEventHandler(esp_gattc_cb_event_t event, 
 	}
 }
 
+/**
+ * @brief Return connection status to remote device
+ */
+bool ClientBluetoothHandler::IsConnected() const
+{
+	return mConnected;
+}
+
 /*********************************************
  *              PRIVATE API                  *
  ********************************************/
@@ -349,7 +357,7 @@ bool ClientBluetoothHandler::HandleRegistrationEvent(esp_gatt_if_t gattc_if, esp
  */
 void ClientBluetoothHandler::HandleScanResultEvent(esp_ble_gap_cb_param_t *scanResult)
 {
-	ESP_LOGI(CLIENT_BLUETOOTH_HANDLER_TAG, "[%s] Search event: %s.", __func__, Component::Bluetooth::EnumToString(scanResult->scan_rst.search_evt).c_str());
+	ESP_LOGD(CLIENT_BLUETOOTH_HANDLER_TAG, "[%s] Search event: %s.", __func__, Component::Bluetooth::EnumToString(scanResult->scan_rst.search_evt).c_str());
 
 	switch (scanResult->scan_rst.search_evt)
 	{
@@ -455,12 +463,4 @@ void ClientBluetoothHandler::HandleDisconnection(esp_gatt_conn_reason_t reason)
 	default:
 		break;
 	}
-}
-
-/**
- * @brief Return connection status to remote device
- */
-bool ClientBluetoothHandler::IsConnected() const
-{
-	return mConnected;
 }
