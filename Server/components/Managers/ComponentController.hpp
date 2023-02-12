@@ -42,6 +42,22 @@ namespace Greenhouse
       void CloseWindow();
 
       /**
+       * @brief Check if window is open
+       *
+       * @return bool   : true  - window is open
+       *                : false - window is close
+       */
+      bool IsWindowOpen() const;
+
+      /**
+       * @brief Get window current state
+       *
+       * @return bool   : true  - window is open
+       *                : false - window is close
+       */
+      bool WindowState() const;
+
+      /**
        * @brief Method to turn on irrigation
        */
       void TurnOnIrrigation();
@@ -70,6 +86,9 @@ namespace Greenhouse
 
       /* Pointer to step motor driver for window */
       Component::Driver::Motor::StepMotor *mWindowMotor;
+
+      /* Window state */
+      bool mWindowState;
 
       /* Pointer to water pump */
       Component::Driver::Active::WaterPump *mWaterPump;

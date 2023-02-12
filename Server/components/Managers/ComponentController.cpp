@@ -17,6 +17,7 @@ ComponentController::ComponentController()
           CONFIG_COIL_B,
           CONFIG_COIL_C,
           CONFIG_COIL_D)),
+      mWindowState{false},
       mWaterPump(new Component::Driver::Active::WaterPump(CONFIG_WATER_PUMP))
 {
 }
@@ -59,7 +60,8 @@ ComponentController *ComponentController::GetInstance()
  */
 void ComponentController::OpenWindow()
 {
-  mWindowMotor->RotateClockwise();
+  mWindowMotor->RotateClockwise(180);
+  mWindowState = true;
 }
 
 /**
@@ -74,7 +76,24 @@ void ComponentController::OpenWindow(uint8_t percentage)
  */
 void ComponentController::CloseWindow()
 {
-  mWindowMotor->RotateCounterClockWise();
+  mWindowMotor->RotateCounterClockWise(180);
+  mWindowState = false;
+}
+
+/**
+ * @brief Check if window is open
+ */
+bool ComponentController::IsWindowOpen() const
+{
+  return mWindowState;
+}
+
+/**
+ * @brief Get window current state
+ */
+bool ComponentController::WindowState() const
+{
+  return mWindowState;
 }
 
 /**
