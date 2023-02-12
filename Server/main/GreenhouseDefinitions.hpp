@@ -21,12 +21,16 @@
 // Defines must be stored in greenhouse_topics data structure to be applied
 #define WINDOW "Greenhouse/window"
 #define WINDOW_ID "Greenhouse/window/" + std::to_string(CONFIG_Greenhouse_ID)
+#define IRRIGATION "Greenhouse/irrigation"
+#define IRRIGATION_ID "Greenhouse/irrigation/" + std::to_string(CONFIG_Greenhouse_ID)
 
 //---------------------------------------------------------------------------------//
 
 // The data structure should only contain definitions from the subscribe block
 static std::vector<std::string> greenhouse_topics = {
     WINDOW,
-    WINDOW_ID};
+    WINDOW_ID,
+    IRRIGATION,
+    IRRIGATION_ID};
 
 #endif
