@@ -12,7 +12,8 @@ set(SOURCES
 ./Drivers/Motor/StepMotor.cpp
 ./Drivers/Active/WaterPump.cpp
 ./Utility/Indicator/RGB.cpp
-./Utility/Network/MQTT_Client.cpp)
+./Utility/Network/MQTT_Client.cpp
+./Trackers/BluetoothConnectionTracker.cpp)
 
 set(DIRECTORIES
 "."
