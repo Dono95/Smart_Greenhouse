@@ -287,6 +287,14 @@ bool ClientBluetoothHandler::IsConnected() const
 	return mConnected;
 }
 
+/**
+ * @brief Get reference to bluetooth connection state
+ */
+const bool &ClientBluetoothHandler::GetReferenceToConnectionState() const
+{
+	return mConnected;
+}
+
 /*********************************************
  *              PRIVATE API                  *
  ********************************************/

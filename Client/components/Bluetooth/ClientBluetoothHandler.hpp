@@ -100,6 +100,13 @@ namespace Greenhouse
              */
             bool IsConnected() const;
 
+            /**
+             * @brief Get reference to bluetooth connection state
+             *
+             * @return const bool&  : Const reference to connection state
+             */
+            const bool &GetReferenceToConnectionState() const;
+
         private:
             /**
              * @brief Method to check if incoming event is registration event
