@@ -19,39 +19,38 @@
 #define MAIN_TAG "Main"
 
 /******** TEST ************/
-#include "Common_components/Utility/Indicator/RGB.hpp"
 /*******  END TEST ********/
 
 extern "C" void app_main(void)
 {
-    // Initialize NVS.
-    esp_err_t result = nvs_flash_init();
-    if (result == ESP_ERR_NVS_NO_FREE_PAGES || result == ESP_ERR_NVS_NEW_VERSION_FOUND)
-    {
-        ESP_ERROR_CHECK(nvs_flash_erase());
-        result = nvs_flash_init();
-    }
+	// Initialize NVS.
+	esp_err_t result = nvs_flash_init();
+	if (result == ESP_ERR_NVS_NO_FREE_PAGES || result == ESP_ERR_NVS_NEW_VERSION_FOUND)
+	{
+		ESP_ERROR_CHECK(nvs_flash_erase());
+		result = nvs_flash_init();
+	}
 
-    // Check result of initialization non-volatile flash memory
-    ESP_ERROR_CHECK(result);
+	// Check result of initialization non-volatile flash memory
+	ESP_ERROR_CHECK(result);
 
-    // Creating Greenhouse manager
-    auto greenhouseManager = Greenhouse::GreenhouseManager::GetInstance();
+	// Creating Greenhouse manager
+	auto greenhouseManager = Greenhouse::GreenhouseManager::GetInstance();
 
-    if (!greenhouseManager->StartBluetooth())
-    {
-        ESP_LOGE(MAIN_TAG, "Failed to start bluetooth.");
-        Greenhouse::ClientStatusIndicator::GetInstance()->RaiseState(Greenhouse::StateCode::BLUETOOTH_INIT_FAILED);
-        return;
-    }
-    else
-        Greenhouse::ClientStatusIndicator::GetInstance()->RaiseState(Greenhouse::StateCode::BLUETOOTH_INIT_SUCCESSED);
+	if (!greenhouseManager->StartBluetooth())
+	{
+		ESP_LOGE(MAIN_TAG, "Failed to start bluetooth.");
+		Greenhouse::ClientStatusIndicator::GetInstance()->RaiseState(Greenhouse::StateCode::BLUETOOTH_INIT_FAILED);
+		return;
+	}
+	else
+		Greenhouse::ClientStatusIndicator::GetInstance()->RaiseState(Greenhouse::StateCode::BLUETOOTH_INIT_SUCCESSED);
 
-    while (true)
-    {
-        // Wait for 2 min
-        vTaskDelay(60000 * 2);
+	while (true)
+	{
+		// Wait for 2 min
+		vTaskDelay(60000 * 2);
 
-        greenhouseManager->SendDataToServer();
-    }
+		greenhouseManager->SendDataToServer();
+	}
 }

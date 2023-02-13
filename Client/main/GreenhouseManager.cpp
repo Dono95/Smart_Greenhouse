@@ -32,7 +32,8 @@ std::mutex GreenhouseManager::mManagerMutex;
 GreenhouseManager::GreenhouseManager()
 		: mBluetoothController(new Bluetooth::ClientBluetoothControlller()),
 			mBluetoothHandler(new Bluetooth::ClientBluetoothHandler(mBluetoothController)),
-			mI2C(new I2C(GPIO_NUM_21, GPIO_NUM_22))
+			mI2C(new I2C(GPIO_NUM_21, GPIO_NUM_22)),
+			mSoilMoistureSensor(new Component::Driver::Sensor::SoilMoistureSensor(adc2_channel_t::ADC2_CHANNEL_3, ADC_WIDTH_12Bit, ADC_ATTEN_11db))
 {
 	mI2C->SetMode(i2c_mode_t::I2C_MODE_MASTER, I2C_NUM_0, I2C_400_kHz);
 
@@ -44,8 +45,6 @@ GreenhouseManager::GreenhouseManager()
 #else
 	mAirSensor = new Sensor::SHT4x(0x44, mI2C);
 #endif
-
-	mAirSensor->Measure();
 }
 
 /**
@@ -62,7 +61,7 @@ void GreenhouseManager::PrepareData(BluetoothDataVector &data)
 {
 	// Client ID and position
 	data.emplace_back((CONFIG_CLIENT_ID << 2) | GetPosition());
-	// Data content (For now it is clear)
+	// Data content fill up during incialization data strucutre with sensors values
 	data.emplace_back(0x00);
 
 	// Temperature
@@ -91,6 +90,15 @@ void GreenhouseManager::PrepareData(BluetoothDataVector &data)
 	data.emplace_back(co2 & 0xFF);				// L
 
 	data.at(1) |= 0x20;
+#endif
+// Soil moisture
+#ifdef CONFIG_SOIL_MOISURE
+	auto soilMoisure = mSoilMoistureSensor->Measure();
+	ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Soil moisure is %.2f %%", soilMoisure);
+	data.emplace_back(GetExponent<uint8_t>(soilMoisure));
+	data.emplace_back(GetMantisa<uint8_t>(soilMoisure, 2));
+
+	data.at(1) |= 0x10;
 #endif
 }
 
@@ -173,15 +181,15 @@ GreenhouseManager::Shared_Bluetooth_Handler GreenhouseManager::GetHandler(void) 
  */
 void GreenhouseManager::SendDataToServer()
 {
-	// Perform measurement
-	mAirSensor->Measure();
-
 	if (!mBluetoothHandler->IsConnected())
 	{
 		ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Client in not connected to server. Unable to send data");
 		ClientStatusIndicator::GetInstance()->RaiseState(StateCode::CLIENT_NOT_CONNECTED_TO_BLE_SERVER);
 		return;
 	}
+
+	// Perform measurement
+	mAirSensor->Measure();
 
 	auto profile = mBluetoothHandler->GetGattcProfile(GREENHOUSE_PROFILE);
 

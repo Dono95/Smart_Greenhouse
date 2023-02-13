@@ -4,6 +4,7 @@
 /* Project specific includes */
 #include "ClientBluetoothController.hpp"
 #include "ClientBluetoothHandler.hpp"
+#include "Common_components/Drivers/Sensor/SoilMoistureSensor.hpp"
 #include "Common_components/Drivers/Communication/I2C.hpp"
 #include "Drivers/Sensors/Sensor.hpp"
 
@@ -130,6 +131,9 @@ namespace Greenhouse
 
         /* Pointer to air's properties sensor*/
         Sensor::AirSensor_I *mAirSensor;
+
+        /* Pointer to soil moisure sensor */
+        Component::Driver::Sensor::SoilMoistureSensor *mSoilMoistureSensor;
     };
 } // namespace Greenhouse
 
