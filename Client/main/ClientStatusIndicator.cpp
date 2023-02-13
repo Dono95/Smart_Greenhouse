@@ -71,6 +71,11 @@ void ClientStatusIndicator::RaiseState(StateCode stateCode)
     mLed->Blick(LedColor::RED, 300);
     break;
   }
+  case (StateCode::CLIENT_CONNECTED_TO_BLE_SERVER):
+  {
+    mLed->Blick(LedColor::BLUE_LIGHT, 300);
+    break;
+  }
   default:
     break;
   }

@@ -7,9 +7,12 @@
 /* Common components */
 #include "Utility/Indicator/RGB.hpp"
 
-#define RED_PIN 14
-#define GREEN_PIN 26
-#define BLUE_PIN 27
+/* SDK config file */
+#include "sdkconfig.h"
+
+#define RED_PIN CONFIG_RED_PIN
+#define GREEN_PIN CONFIG_GREEN_PIN
+#define BLUE_PIN CONFIG_BLUE_PIN
 
 namespace Greenhouse
 {
@@ -17,7 +20,8 @@ namespace Greenhouse
   {
     BLUETOOTH_INIT_SUCCESSED,
     BLUETOOTH_INIT_FAILED,
-    CLIENT_NOT_CONNECTED_TO_BLE_SERVER
+    CLIENT_NOT_CONNECTED_TO_BLE_SERVER,
+    CLIENT_CONNECTED_TO_BLE_SERVER
 
   };
 
