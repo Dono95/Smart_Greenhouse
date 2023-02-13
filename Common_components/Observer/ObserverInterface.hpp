@@ -19,6 +19,8 @@ namespace Component
 
                 /**
                  * @brief Class constructor
+                 *
+                 * @param event : Event to observer
                  */
                 ObserverInterface(Event_T event) : mObserverEvent(event) {}
 
@@ -35,6 +37,9 @@ namespace Component
                     return mObserverEvent;
                 }
 
+                /**
+                 * @brief Pure virtual method to update all observers with new event data
+                 */
                 virtual void Update(Component::Publisher::EventData *eventData) = 0;
 
             private:
