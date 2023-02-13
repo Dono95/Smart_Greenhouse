@@ -148,6 +148,13 @@ namespace Greenhouse
              */
             void HandleDisconnection(esp_gatt_conn_reason_t reason);
 
+            /**
+             * @brief Set connection status
+             *
+             * @param currentState      : Current state
+             */
+            void SetConnectionStatus(bool currentState);
+
             /* Profiles map */
             Component::Bluetooth::ClientProfileMap mProfilesMap;
 
@@ -158,6 +165,8 @@ namespace Greenhouse
             std::string mRemoteDevice;
 
             /* Value stored connection status to remote device*/
+            // Value should never be set via the assign operator.
+            // !!! Use SetConnectionStatus method instead !!!
             bool mConnected;
         };
     } // namespace Bluetooth

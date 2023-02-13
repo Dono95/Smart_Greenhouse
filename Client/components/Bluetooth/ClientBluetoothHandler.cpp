@@ -1,6 +1,7 @@
 /* Project specific includes */
 #include "ClientBluetoothHandler.hpp"
 #include "GreenhouseManager.hpp"
+#include "ClientStatusIndicator.hpp"
 
 /* ESP log library*/
 #include "esp_log.h"
@@ -251,6 +252,8 @@ void ClientBluetoothHandler::GreenhouseEventHandler(esp_gattc_cb_event_t event, 
 		mProfilesMap.at(GREENHOUSE_PROFILE).conn_id = param->connect.conn_id;
 		memcpy(mProfilesMap.at(GREENHOUSE_PROFILE).remote_bda, param->connect.remote_bda, sizeof(esp_bd_addr_t));
 
+		SetConnectionStatus(true);
+
 		controller->Send_MTU_Request(gattc_if, mProfilesMap.at(GREENHOUSE_PROFILE).conn_id);
 		break;
 	}
@@ -463,4 +466,14 @@ void ClientBluetoothHandler::HandleDisconnection(esp_gatt_conn_reason_t reason)
 	default:
 		break;
 	}
+
+	SetConnectionStatus(false);
+}
+
+/**
+ * @brief Set connection status
+ */
+void ClientBluetoothHandler::SetConnectionStatus(bool currentState)
+{
+	mConnected = currentState;
 }
