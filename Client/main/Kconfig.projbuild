@@ -48,5 +48,12 @@ menu "Greenhouse"
     
             help
                 Enable/Disable measure CO2
+
+        config SOIL_MOISURE
+            bool "Soil moisure"
+            default n
+    
+            help
+                Enable/Disable measure soil moisure
     endmenu
 endmenu
