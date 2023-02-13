@@ -33,7 +33,8 @@ GreenhouseManager::GreenhouseManager()
 		: mBluetoothController(new Bluetooth::ClientBluetoothControlller()),
 			mBluetoothHandler(new Bluetooth::ClientBluetoothHandler(mBluetoothController)),
 			mI2C(new I2C(GPIO_NUM_21, GPIO_NUM_22)),
-			mSoilMoistureSensor(new Component::Driver::Sensor::SoilMoistureSensor(adc2_channel_t::ADC2_CHANNEL_3, ADC_WIDTH_12Bit, ADC_ATTEN_11db))
+			mSoilMoistureSensor(new Component::Driver::Sensor::SoilMoistureSensor(adc2_channel_t::ADC2_CHANNEL_3, ADC_WIDTH_12Bit, ADC_ATTEN_11db)),
+			mBluetoothConnectionTracker(new Component::Tracker::BluetoothConnectionTracker(mBluetoothHandler->GetReferenceToConnectionState()))
 {
 	mI2C->SetMode(i2c_mode_t::I2C_MODE_MASTER, I2C_NUM_0, I2C_400_kHz);
 
@@ -166,6 +167,14 @@ bool GreenhouseManager::StartBluetooth(void)
 	}
 
 	return true;
+}
+
+/**
+ * @brief Start tracking bluetooth connection
+ */
+void GreenhouseManager::StartTrackBluetoothConnection()
+{
+	mBluetoothConnectionTracker->StartTracking(10000);
 }
 
 /**

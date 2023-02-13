@@ -4,9 +4,12 @@
 /* Project specific includes */
 #include "ClientBluetoothController.hpp"
 #include "ClientBluetoothHandler.hpp"
-#include "Common_components/Drivers/Sensor/SoilMoistureSensor.hpp"
-#include "Common_components/Drivers/Communication/I2C.hpp"
 #include "Drivers/Sensors/Sensor.hpp"
+
+/* Common components */
+#include "Common_components/Drivers/Communication/I2C.hpp"
+#include "Common_components/Drivers/Sensor/SoilMoistureSensor.hpp"
+#include "Common_components/Trackers/BluetoothConnectionTracker.hpp"
 
 /* STD library */
 #include <memory>
@@ -34,8 +37,12 @@ namespace Greenhouse
          * @return bool     true    : Initialization was successful
          *                  false   : Otherwise
          */
-
         bool StartBluetooth(void);
+
+        /**
+         * @brief Start tracking bluetooth connection
+         */
+        void StartTrackBluetoothConnection();
 
         /**
          * @brief Getter for bluetooth handler
@@ -134,6 +141,9 @@ namespace Greenhouse
 
         /* Pointer to soil moisure sensor */
         Component::Driver::Sensor::SoilMoistureSensor *mSoilMoistureSensor;
+
+        /* Pointer to bluetooth connection tracker */
+        Component::Tracker::BluetoothConnectionTracker *mBluetoothConnectionTracker;
     };
 } // namespace Greenhouse
 

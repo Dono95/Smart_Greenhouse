@@ -58,7 +58,7 @@ void ClientStatusIndicator::RaiseState(StateCode stateCode)
   {
   case (StateCode::BLUETOOTH_INIT_SUCCESSED):
   {
-    mLed->MultipleBlick(LedColor::GREEN, 3, 300);
+    mLed->MultipleBlick(LedColor::GREEN, 3, 200);
     break;
   }
   case (StateCode::BLUETOOTH_INIT_FAILED):
@@ -68,12 +68,12 @@ void ClientStatusIndicator::RaiseState(StateCode stateCode)
   }
   case (StateCode::CLIENT_NOT_CONNECTED_TO_BLE_SERVER):
   {
-    mLed->Blick(LedColor::RED, 300);
+    mLed->Blick(LedColor::RED, 100);
     break;
   }
   case (StateCode::CLIENT_CONNECTED_TO_BLE_SERVER):
   {
-    mLed->Blick(LedColor::BLUE_LIGHT, 300);
+    mLed->Blick(LedColor::BLUE_LIGHT, 100);
     break;
   }
   default:

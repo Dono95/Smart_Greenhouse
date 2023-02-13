@@ -19,6 +19,10 @@
 #define MAIN_TAG "Main"
 
 /******** TEST ************/
+#include "Common_components/Trackers/BluetoothConnectionTracker.hpp"
+#include "Common_components/Trackers/BluetoothConnectionTracker.cpp"
+
+#include "esp_timer.h"
 /*******  END TEST ********/
 
 extern "C" void app_main(void)
@@ -43,8 +47,9 @@ extern "C" void app_main(void)
 		Greenhouse::ClientStatusIndicator::GetInstance()->RaiseState(Greenhouse::StateCode::BLUETOOTH_INIT_FAILED);
 		return;
 	}
-	else
-		Greenhouse::ClientStatusIndicator::GetInstance()->RaiseState(Greenhouse::StateCode::BLUETOOTH_INIT_SUCCESSED);
+
+	Greenhouse::ClientStatusIndicator::GetInstance()->RaiseState(Greenhouse::StateCode::BLUETOOTH_INIT_SUCCESSED);
+	greenhouseManager->StartTrackBluetoothConnection();
 
 	while (true)
 	{
