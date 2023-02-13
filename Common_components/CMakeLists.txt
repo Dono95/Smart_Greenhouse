@@ -8,6 +8,7 @@ set(SOURCES
 ./Convertors/Convertor_JSON.cpp
 ./Managers/TimeManager.cpp
 ./Drivers/Sensor/WaterLevelSensor.cpp
+./Drivers/Sensor/SoilMoistureSensor.cpp
 ./Drivers/Motor/StepMotor.cpp
 ./Drivers/Active/WaterPump.cpp
 ./Utility/Indicator/RGB.cpp
