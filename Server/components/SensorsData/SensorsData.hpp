@@ -12,79 +12,66 @@ namespace Greenhouse
 {
     // Alias for sensor data type
     template <typename T>
-    using SensorValue = Utility::DataType::Value<T>;
+    using Value = Utility::DataType::Value<T>;
 
-    class SensorsData
+    enum class Position
     {
-    public:
-        enum class Position
-        {
-            UNKNOWN = 0x00,
-            INSIDE = 0x01,
-            OUTSIDE = 0x02
-        };
-
-        /**
-         * @brief Class constructor
-         */
-        explicit SensorsData(Position position, float temperature, int8_t humanity, int8_t co2);
-
-        /**
-         * @brief Get Position
-         *
-         * @return Position
-         */
-        Position GetPosition() const;
-
-        /**
-         * @brief Class destructor
-         */
-        ~SensorsData();
-
-        /**
-         * @brief Get temperature
-         *
-         * @return float
-         */
-        float GetTemperature() const;
-
-        /**
-         * @brief Get humanity
-         *
-         * @return int8_t
-         */
-        int8_t GetHumanity() const;
-
-        /**
-         * @brief Get CO2
-         *
-         * @return int8_t
-         */
-        int8_t GetCO2() const;
-
-        /**
-         * @brief Get measure time
-         *
-         * @return time_t
-         */
-        time_t GetMeasureTime() const;
-
-    private:
-        // Position
-        Position mPosition;
-
-        // Temperature
-        SensorValue<float> mTemperature;
-
-        // Humanity
-        SensorValue<int8_t> mHumanity;
-
-        // CO2
-        SensorValue<int8_t> mCO2;
-
-        // Creation time (Measure time)
-        time_t mMeasureTime;
+        UNKNOWN = 0x00,
+        INSIDE = 0x01,
+        OUTSIDE = 0x02
     };
+
+    struct BasicData
+    {
+        // Client ID
+        uint8_t clientID;
+        // Position
+        Position position{Position::UNKNOWN};
+
+        // Time
+        time_t time;
+    };
+
+    struct Air
+    {
+        // Sensor temperature
+        Value<float> temperature;
+
+        // Sensor humidity
+        Value<float> humidity;
+
+        // Sensor CO2
+        Value<uint16_t> co2;
+    };
+
+    struct Soil
+    {
+        // Sensor soil moisture
+        Value<float> soilMoisture;
+    };
+
+    struct SensorsData
+    {
+        /**
+         * @brief Struct constructor
+         */
+        explicit SensorsData()
+        {
+            basic.time = Component::Manager::TimeManager::GetInstance()->GetRawTime();
+        }
+
+        ~SensorsData() {}
+
+        // Basic information about sensors data
+        BasicData basic;
+
+        // Sensors values from air
+        Air air;
+
+        // Sensors values from soil
+        Soil soil;
+    };
+
 } // namespace Greenhouse
 
 #endif

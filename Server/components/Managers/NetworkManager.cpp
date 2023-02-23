@@ -207,7 +207,7 @@ void NetworkManager::SendToServer(const std::shared_ptr<SensorsData> sensorsData
 {
 	if (mMQTT_Client)
 	{
-		if (sensorsData->GetPosition() == SensorsData::Position::UNKNOWN)
+		if (sensorsData->basic.position == Position::UNKNOWN)
 			ESP_LOGE(NETWORK_MANAGER_TAG, "Sensor data does not contain sensor's position.");
 
 		Publish(SENSOR_DATA, sensorsData);
@@ -242,14 +242,23 @@ void NetworkManager::Publish(const std::string &topic, const std::shared_ptr<Sen
 	auto root = cJSON_CreateObject();
 
 	cJSON_AddNumberToObject(root, "ID", CONFIG_Greenhouse_ID);
-	cJSON_AddNumberToObject(root, "position", static_cast<uint8_t>(sensorsData->GetPosition()));
+	cJSON_AddNumberToObject(root, "position", static_cast<uint8_t>(sensorsData->basic.position));
 
 	auto data = cJSON_AddObjectToObject(root, "Data");
 
-	cJSON_AddNumberToObject(data, "measure_time", sensorsData->GetMeasureTime());
-	cJSON_AddNumberToObject(data, "temperature", sensorsData->GetTemperature());
-	cJSON_AddNumberToObject(data, "humanity", sensorsData->GetHumanity());
-	cJSON_AddNumberToObject(data, "CO2", sensorsData->GetCO2());
+	cJSON_AddNumberToObject(data, "measure_time", sensorsData->basic.time);
+
+	if (sensorsData->air.temperature.IsValueSet())
+		cJSON_AddNumberToObject(data, "temperature", sensorsData->air.temperature.Get());
+
+	if (sensorsData->air.humidity.IsValueSet())
+		cJSON_AddNumberToObject(data, "humidity", sensorsData->air.humidity.Get());
+
+	if (sensorsData->air.co2.IsValueSet())
+		cJSON_AddNumberToObject(data, "CO2", sensorsData->air.co2.Get());
+
+	if (sensorsData->soil.soilMoisture.IsValueSet())
+		cJSON_AddNumberToObject(data, "soil_moisture", sensorsData->soil.soilMoisture.Get());
 
 	mMQTT_Client->Publish(topic, cJSON_Print(root), 1);
 }
@@ -287,7 +296,7 @@ void NetworkManager::ProcessEventData(esp_mqtt_event_handle_t eventData)
 
 	if ((topic.compare(IRRIGATION) == 0) || (topic.compare(IRRIGATION_ID) == 0))
 	{
-		WindowEvent(json_data);
+		IrrigationEvent(json_data);
 		return;
 	}
 }
@@ -319,7 +328,7 @@ void NetworkManager::WindowEvent(const cJSON *const json)
 }
 
 /**
- * @brief Hadnle event for irrigation
+ * @brief Handle event for irrigation
  */
 void NetworkManager::IrrigationEvent(const cJSON *const json)
 {

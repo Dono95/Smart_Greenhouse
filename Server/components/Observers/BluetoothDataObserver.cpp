@@ -36,10 +36,24 @@ void BluetoothDataObserver::Update(Component::Publisher::EventData *eventData)
         return;
     }
 
-    Manager::NetworkManager::GetInstance()->SendToServer(
-        std::make_shared<SensorsData>(
-            static_cast<SensorsData::Position>(bluetoothData->GetPosition()),
-            bluetoothData->GetTemperature(),
-            bluetoothData->GetHumanity(),
-            bluetoothData->GetCO2()));
+    auto sensorData = std::make_shared<SensorsData>();
+    // Set basic data
+    sensorData->basic.clientID = bluetoothData->GetClientID();
+    sensorData->basic.position = static_cast<Position>(bluetoothData->GetPosition());
+
+    // Air values
+    if (bluetoothData->IsTemperatureSet())
+        sensorData->air.temperature.Set(bluetoothData->GetTemperature());
+
+    if (bluetoothData->IsHumiditySet())
+        sensorData->air.humidity.Set(bluetoothData->GetHumidity());
+
+    if (bluetoothData->IsCO2Set())
+        sensorData->air.co2.Set(bluetoothData->GetCO2());
+
+    // Soil values
+    if (bluetoothData->IsSoilMoistureSet())
+        sensorData->soil.soilMoisture.Set(bluetoothData->GetSoilMoisture());
+
+    Manager::NetworkManager::GetInstance()->SendToServer(sensorData);
 }
