@@ -68,36 +68,44 @@ void GreenhouseManager::PrepareData(BluetoothDataVector &data)
 	// Temperature
 #ifdef CONFIG_TEMPERATURE
 	auto temperature = mAirSensor->GetTemperature();
-	ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Temperature is %.2f °C", temperature);
+	ESP_LOGI(GREENHOUSE_MANAGER_TAG, "Temperature is %.2f °C", temperature);
 	data.emplace_back(GetExponent<uint8_t>(temperature));
+	ESP_LOGD(GREENHOUSE_MANAGER_TAG, "Temperature exponent: %d", data.back());
 	data.emplace_back(GetMantisa<uint8_t>(temperature, 2));
+	ESP_LOGD(GREENHOUSE_MANAGER_TAG, "Temperature mantisa: %d", data.back());
 
 	data.at(1) |= 0x80;
 #endif
 	// Humanity
 #ifdef CONFIG_HUMANITY
 	auto humanity = mAirSensor->GetHumanity();
-	ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Humanity is %.2f %%", humanity);
+	ESP_LOGI(GREENHOUSE_MANAGER_TAG, "Humanity is %.2f %%", humanity);
 	data.emplace_back(GetExponent<uint8_t>(humanity));
+	ESP_LOGD(GREENHOUSE_MANAGER_TAG, "Humanity exponent: %d", data.back());
 	data.emplace_back(GetMantisa<uint8_t>(humanity, 2));
+	ESP_LOGD(GREENHOUSE_MANAGER_TAG, "Humanity mantisa: %d", data.back());
 
 	data.at(1) |= 0x40;
 #endif
 // CO2
 #ifdef CONFIG_CO2
 	auto co2 = mAirSensor->GetCO2();
-	ESP_LOGE(GREENHOUSE_MANAGER_TAG, "CO2 is %d ppm\n", co2);
+	ESP_LOGI(GREENHOUSE_MANAGER_TAG, "CO2 is %d ppm\n", co2);
 	data.emplace_back((co2 >> 8) & 0xFF); // H
-	data.emplace_back(co2 & 0xFF);				// L
+	ESP_LOGD(GREENHOUSE_MANAGER_TAG, "CO2 H register: %d", data.back());
+	data.emplace_back(co2 & 0xFF); // L
+	ESP_LOGD(GREENHOUSE_MANAGER_TAG, "CO2 L register: %d", data.back());
 
 	data.at(1) |= 0x20;
 #endif
 // Soil moisture
 #ifdef CONFIG_SOIL_MOISURE
 	auto soilMoisure = mSoilMoistureSensor->Measure();
-	ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Soil moisure is %.2f %%", soilMoisure);
+	ESP_LOGI(GREENHOUSE_MANAGER_TAG, "Soil moisure is %.2f %%", soilMoisure);
 	data.emplace_back(GetExponent<uint8_t>(soilMoisure));
+	ESP_LOGD(GREENHOUSE_MANAGER_TAG, "Soil exponent: %d", data.back());
 	data.emplace_back(GetMantisa<uint8_t>(soilMoisure, 2));
+	ESP_LOGD(GREENHOUSE_MANAGER_TAG, "Soil mantisa: %d", data.back());
 
 	data.at(1) |= 0x10;
 #endif
