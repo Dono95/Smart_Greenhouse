@@ -1,8 +1,10 @@
 /* Project specific includes */
 #include "GreenhouseManager.hpp"
-#include "ClientStatusIndicator.hpp"
 #include "Drivers/Sensors/SHT4x.hpp"
 #include "Drivers/Sensors/SCD4x.hpp"
+
+/* Common components*/
+#include "Common_components/Utility/Indicator/StatusIndicator.hpp"
 
 /* ESP logs library */
 #include "esp_log.h"
@@ -33,7 +35,6 @@ GreenhouseManager::GreenhouseManager()
 		: mBluetoothController(new Bluetooth::ClientBluetoothControlller()),
 			mBluetoothHandler(new Bluetooth::ClientBluetoothHandler(mBluetoothController)),
 			mI2C(new I2C(GPIO_NUM_21, GPIO_NUM_22)),
-			mSoilMoistureSensor(new Component::Driver::Sensor::SoilMoistureSensor(adc2_channel_t::ADC2_CHANNEL_3, ADC_WIDTH_12Bit, ADC_ATTEN_11db)),
 			mBluetoothConnectionTracker(new Component::Tracker::BluetoothConnectionTracker(mBluetoothHandler->GetReferenceToConnectionState()))
 {
 	mI2C->SetMode(i2c_mode_t::I2C_MODE_MASTER, I2C_NUM_0, I2C_400_kHz);
@@ -45,6 +46,10 @@ GreenhouseManager::GreenhouseManager()
 	mAirSensor = new Sensor::SCD4x(0x62, mI2C);
 #else
 	mAirSensor = new Sensor::SHT4x(0x44, mI2C);
+#endif
+
+#ifdef CONFIG_SOIL_MOISURE
+	mSoilMoistureSensor = new Component::Driver::Sensor::SoilMoistureSensor(adc2_channel_t::ADC2_CHANNEL_3, ADC_WIDTH_12Bit, ADC_ATTEN_11db);
 #endif
 }
 
@@ -201,7 +206,7 @@ void GreenhouseManager::SendDataToServer()
 	if (!mBluetoothHandler->IsConnected())
 	{
 		ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Client in not connected to server. Unable to send data");
-		ClientStatusIndicator::GetInstance()->RaiseState(StateCode::CLIENT_NOT_CONNECTED_TO_BLE_SERVER);
+		Utility::Indicator::StatusIndicator::GetInstance()->RaiseState(Utility::Indicator::StatusCode::CLIENT_NOT_CONNECTED_TO_BLE_SERVER);
 		return;
 	}
 

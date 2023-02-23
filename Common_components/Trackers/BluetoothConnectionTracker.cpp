@@ -4,7 +4,8 @@
 /* ESP log library */
 #include <esp_log.h>
 
-#include "../Client/main/ClientStatusIndicator.hpp"
+/* Indicator */
+#include "StatusIndicator.hpp"
 
 using namespace Component::Tracker;
 
@@ -36,10 +37,10 @@ BluetoothConnectionTracker::~BluetoothConnectionTracker()
 void BluetoothConnectionTracker::TrackerCallback(void *arg)
 {
   auto tracker = reinterpret_cast<BluetoothConnectionTracker *>(arg);
-  auto indicator = Greenhouse::ClientStatusIndicator::GetInstance();
+  auto indicator = Utility::Indicator::StatusIndicator::GetInstance();
 
   if (tracker->GetValueOfTrackedObject())
-    indicator->RaiseState(Greenhouse::StateCode::CLIENT_CONNECTED_TO_BLE_SERVER);
+    indicator->RaiseState(Utility::Indicator::StatusCode::CLIENT_CONNECTED_TO_BLE_SERVER);
   else
-    indicator->RaiseState(Greenhouse::StateCode::CLIENT_NOT_CONNECTED_TO_BLE_SERVER);
+    indicator->RaiseState(Utility::Indicator::StatusCode::CLIENT_NOT_CONNECTED_TO_BLE_SERVER);
 }
