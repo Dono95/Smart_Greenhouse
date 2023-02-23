@@ -6,11 +6,11 @@
 /* ESP log library */
 #include "esp_log.h"
 
-/* STL includes */
-#include "algorithm"
+/* STD library  */
+#include <algorithm>
 #include <cstring>
 
-// Include FreeRTOS for delay
+/* FreeRTOS library  */
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
@@ -91,13 +91,6 @@ void ServerBluetoothHandler::HandleGapEvent(esp_gap_ble_cb_event_t event, esp_bl
         break;
     }
     case (ESP_GAP_BLE_UPDATE_CONN_PARAMS_EVT):
-        /*ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "update connection params status = %d, min_int = %d, max_int = %d,conn_int = %d,latency = %d, timeout = %d",
-                 param->update_conn_params.status,
-                 param->update_conn_params.min_int,
-                 param->update_conn_params.max_int,
-                 param->update_conn_params.conn_int,
-                 param->update_conn_params.latency,
-                 param->update_conn_params.timeout);*/
         break;
     default:
     {
@@ -217,7 +210,6 @@ void ServerBluetoothHandler::GreenhouseEventHandler(esp_gatts_cb_event_t event, 
     }
     case ESP_GATTS_READ_EVT:
     {
-        // ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "GATT_READ_EVT, conn_id %d, trans_id %d, handle %d\n", param->read.conn_id, param->read.trans_id, param->read.handle);
         break;
     }
     case ESP_GATTS_WRITE_EVT:
@@ -229,21 +221,24 @@ void ServerBluetoothHandler::GreenhouseEventHandler(esp_gatts_cb_event_t event, 
             return;
         }
 
-        controller->SendResponse(gatts_if, param->write.conn_id, param->write.trans_id, ESP_GATT_OK);
+        if (param->write.need_rsp)
+            controller->SendResponse(gatts_if, param->write.conn_id, param->write.trans_id, ESP_GATT_OK);
 
-        auto eventManager = Manager::EventManager::GetInstance();
-
-        ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "Received data: ");
-        for (uint16_t i = 0; i < param->write.len; ++i)
+        std::vector<uint8_t> sensorData(param->write.value, param->write.value + param->write.len);
+        if (sensorData.empty())
         {
-            printf("[%d] Data: 0x%x\n", i, param->write.value[i]);
+            ESP_LOGE(SERVER_BLUETOOTH_HANDLER_TAG, "No sensor data to parse");
+            break;
         }
-        /*esp_ble_gatts_send_response(gatts_if, param->write.conn_id, param->write.trans_id, ESP_GATT_OK, NULL);*/
-        // ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "Goint to sleep.");
-        // vTaskDelay(10000);
-        // ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "Woke up");
 
-        // delete eventData;
+        auto eventData = new Component::Publisher::ClientBluetoothEventData_Greenhouse((sensorData.at(0) >> 2), (sensorData.at(0) & 0x03));
+
+        if (ParseData(sensorData, eventData))
+        {
+            auto eventManager = Greenhouse::Manager::EventManager::GetInstance();
+            eventManager->Notify(Greenhouse::Manager::EventManager::Event_T::BLUETOOTH_DATA_RECEIVED, eventData);
+        }
+
         break;
     }
     case ESP_GATTS_EXEC_WRITE_EVT:
@@ -288,10 +283,6 @@ void ServerBluetoothHandler::GreenhouseEventHandler(esp_gatts_cb_event_t event, 
         std::vector<uint8_t> attrValues;
         controller->GetAttributeValues(param->add_char.attr_handle, attrValues);
 
-        /*ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "The gatts char length = %x\n", attrValues.size());
-        for (const auto &value : attrValues)
-            ESP_LOGI(SERVER_BLUETOOTH_HANDLER_TAG, "Char value = %x\n", value);*/
-
         controller->AddCharacteristicDescriptor(mProfilesMap.at(GREENHOUSE_PROFILE).service_handle,
                                                 &mProfilesMap.at(GREENHOUSE_PROFILE).descr_uuid,
                                                 ESP_GATT_PERM_WRITE);
@@ -321,11 +312,16 @@ void ServerBluetoothHandler::GreenhouseEventHandler(esp_gatts_cb_event_t event, 
                  param->connect.remote_bda[3], param->connect.remote_bda[4], param->connect.remote_bda[5]);
         mProfilesMap.at(GREENHOUSE_PROFILE).conn_id = param->connect.conn_id;
 
-        // start sent the update connection parameters to the peer device.
-        if (auto connector = GetBluetoothController().lock())
-            connector->UpdateConParameteres(&conn_params);
+        auto connector = GetBluetoothController().lock();
+        if (!connector)
+            break;
 
-        // esp_ble_gap_start_advertising(&adv_params);
+        // Start sent the update connection parameters to the peer device.
+        connector->UpdateConParameteres(&conn_params);
+
+        // Start advertising for other clients
+        connector->StartAdvertising(&adv_params);
+
         break;
     }
     case ESP_GATTS_DISCONNECT_EVT:
@@ -345,4 +341,73 @@ void ServerBluetoothHandler::GreenhouseEventHandler(esp_gatts_cb_event_t event, 
     default:
         break;
     }
+}
+
+/**
+ * @brief Extract data from vector during parsing bluetooth data
+ */
+template <typename T>
+void ServerBluetoothHandler::ExtractData(std::vector<uint8_t> &data, GreenhouseBluetoothEventData *eventDataClass, void (GreenhouseBluetoothEventData::*SetFunction)(T)) const
+{
+    (eventDataClass->*SetFunction)(*(data.end() - 2) + (static_cast<T>(data.back()) / 100));
+    data.resize(data.size() - 2);
+}
+
+/**
+ * @brief Parse data from bluettoth wrte event
+ */
+bool ServerBluetoothHandler::ParseData(const std::vector<uint8_t> &sensorData, Component::Publisher::ClientBluetoothEventData_Greenhouse *eventData) const
+{
+    if (!eventData)
+        return false;
+
+#ifdef CONFIG_LOG_DEFAULT_LEVEL_DEBUG
+    auto PrintContent = [&sensorData]()
+    {
+        ESP_LOGD(SERVER_BLUETOOTH_HANDLER_TAG, "Sensor data: ");
+        for (const auto &value : sensorData)
+            ESP_LOGD(SERVER_BLUETOOTH_HANDLER_TAG, "0x%x", value);
+    };
+#endif
+    std::vector<uint8_t> sensorDataCopy(sensorData);
+
+#ifdef CONFIG_LOG_DEFAULT_LEVEL_DEBUG
+    PrintContent();
+#endif
+
+    const auto &content = sensorDataCopy.at(1);
+
+    // Check if Soil moisture block is in data vector
+    if (content & 0x10)
+        ExtractData<float>(sensorDataCopy, eventData, &GreenhouseBluetoothEventData::SetSoilMoisture);
+
+    // Check if CO2 block is in data vector
+    if (content & 0x20)
+    {
+        eventData->SetCO2((*(sensorDataCopy.end() - 2) << 8) + (sensorDataCopy.back()));
+        sensorDataCopy.resize(sensorDataCopy.size() - 2);
+    }
+
+    // Check if Humidity block is in data vector
+    if (content & 0x40)
+        ExtractData<float>(sensorDataCopy, eventData, &GreenhouseBluetoothEventData::SetHumidity);
+
+    // Check if Temperature block is in data vector
+    if (content & 0x80)
+        ExtractData<float>(sensorDataCopy, eventData, &GreenhouseBluetoothEventData::SetTemperature);
+
+#ifdef CONFIG_LOG_DEFAULT_LEVEL_DEBUG
+    ESP_LOGD(SERVER_BLUETOOTH_HANDLER_TAG, "Client ID: %d", eventData->GetClientID());
+    ESP_LOGD(SERVER_BLUETOOTH_HANDLER_TAG, "Position: %d", eventData->GetPosition());
+    if (eventData->IsTemperatureSet())
+        ESP_LOGD(SERVER_BLUETOOTH_HANDLER_TAG, "Temperature: %.2f °C", eventData->GetTemperature());
+    if (eventData->IsHumiditySet())
+        ESP_LOGD(SERVER_BLUETOOTH_HANDLER_TAG, "Humidity: %.2f %%", eventData->GetHumidity());
+    if (eventData->IsCO2Set())
+        ESP_LOGD(SERVER_BLUETOOTH_HANDLER_TAG, "CO2: %d ppm", eventData->GetCO2());
+    if (eventData->IsSoilMoistureSet())
+        ESP_LOGD(SERVER_BLUETOOTH_HANDLER_TAG, "Soil moisture: %.2f %%", eventData->GetSoilMoisture());
+#endif
+
+    return true;
 }

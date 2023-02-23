@@ -8,6 +8,7 @@
 
 /* Project specific includes */
 #include "ServerBluetoothController.hpp"
+#include "Managers/EventManager.hpp"
 
 /* Common components */
 #include "Bluetooth/BluetoothDefinitions.hpp"
@@ -15,6 +16,8 @@
 
 /* STD library includes */
 #include <memory>
+#include <vector>
+#include <functional>
 
 /*************         DEFINES        *************/
 #define SERVER_BLUETOOTH_HANDLER_TAG "ServerBluetoothHandler"
@@ -67,6 +70,9 @@ namespace Greenhouse
             void HandleGattsEvent(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param) override;
 
         private:
+            // Alias for client bluetooth event data
+            using GreenhouseBluetoothEventData = Component::Publisher::ClientBluetoothEventData_Greenhouse;
+
             /**
              * @brief Checking eventy for comparison on ESP_GATTS_REG_EVT
              *
@@ -96,6 +102,27 @@ namespace Greenhouse
              * @param param     : Point to callback parameter, currently is union type
              */
             void GreenhouseEventHandler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);
+
+            /**
+             * @brief Extract data from vector during parsing bluetooth data
+             *
+             * @param[in] data              : Data from bluetooth write event
+             * @param[in] eventDataClass    : Event data class for storing incoming bluetooth data
+             * @param[in] SetFunction       : Setting function
+             */
+            template <typename T>
+            void ExtractData(std::vector<uint8_t> &data, GreenhouseBluetoothEventData *eventDataClass, void (GreenhouseBluetoothEventData::*SetFunction)(T)) const;
+
+            /**
+             * @brief Parse data from bluettoth wrte event to event data structure
+             *
+             * @param[in] sensorData    : Vector of sensor data
+             * @param[in] eventData     : Event data structure
+             *
+             * @return bool             : true  - if parsing was successful
+             *                          : false - otherwise
+             */
+            bool ParseData(const std::vector<uint8_t> &sensorData, Component::Publisher::ClientBluetoothEventData_Greenhouse *eventData) const;
 
             /* Profiles map */
             Component::Bluetooth::ServerProfileMap mProfilesMap;
