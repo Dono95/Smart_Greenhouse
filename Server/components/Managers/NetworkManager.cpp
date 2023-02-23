@@ -287,6 +287,8 @@ void NetworkManager::ProcessEventData(esp_mqtt_event_handle_t eventData)
 	data.assign(eventData->data, eventData->data_len);
 
 	auto json_data = cJSON_Parse(data.c_str());
+	if (!json_data)
+		return;
 
 	if ((topic.compare(WINDOW) == 0) || (topic.compare(WINDOW_ID) == 0))
 	{
@@ -306,9 +308,6 @@ void NetworkManager::ProcessEventData(esp_mqtt_event_handle_t eventData)
  */
 void NetworkManager::WindowEvent(const cJSON *const json)
 {
-	if (!json)
-		return;
-
 	auto controller = Manager::ComponentController::GetInstance();
 
 	if (cJSON_HasObjectItem(json, "requested"))
@@ -332,4 +331,20 @@ void NetworkManager::WindowEvent(const cJSON *const json)
  */
 void NetworkManager::IrrigationEvent(const cJSON *const json)
 {
+	auto controller = Manager::ComponentController::GetInstance();
+
+	if (cJSON_HasObjectItem(json, "requested"))
+	{
+		bool requested = static_cast<bool>(cJSON_GetNumberValue(cJSON_GetObjectItem(json, "requested")));
+		if (requested == controller->IrrigationState())
+		{
+			ESP_LOGI(NETWORK_MANAGER_TAG, "Request state is same with current irrigation state");
+			return;
+		}
+
+		if (requested)
+			controller->TurnOnIrrigation();
+		else
+			controller->TurnOffIrrigation();
+	}
 }

@@ -67,6 +67,22 @@ namespace Greenhouse
        */
       void TurnOffIrrigation();
 
+      /**
+       * @brief Check if irrigation is turn on
+       *
+       * @return bool   : true  - irrigation is turn on
+       *                : false - irrigation is turn off
+       */
+      bool IsIrrigationTurnOn() const;
+
+      /**
+       * @brief Get irrigation current state
+       *
+       * @return bool   : true  - irrigation is turn on
+       *                : false - irrigation is turn off
+       */
+      bool IrrigationState() const;
+
     private:
       /**
        * @brief Class constructor
@@ -92,6 +108,9 @@ namespace Greenhouse
 
       /* Pointer to water pump */
       Component::Driver::Active::WaterPump *mWaterPump;
+
+      /* Water pump state */
+      bool mIrrigationState;
     };
   } // namespace Manager
 } // namespace Greenhouse

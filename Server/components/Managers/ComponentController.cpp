@@ -111,3 +111,19 @@ void ComponentController::TurnOffIrrigation()
 {
   mWaterPump->TurnOff();
 }
+
+/**
+ * @brief Check if irrigation is turn on
+ */
+bool ComponentController::IsIrrigationTurnOn() const
+{
+  return mIrrigationState;
+}
+
+/**
+ * @brief Get irrigation current state
+ */
+bool ComponentController::IrrigationState() const
+{
+  return mIrrigationState;
+}
