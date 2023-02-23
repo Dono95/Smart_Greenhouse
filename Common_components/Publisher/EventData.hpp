@@ -31,64 +31,170 @@ namespace Component
             /**
              * @brief Class constructor
              */
-            ClientBluetoothEventData_Greenhouse(float temperature, int8_t humanity, int8_t co2) : mTemperature(temperature), mHumanity(humanity), mCO2(co2) {}
+            ClientBluetoothEventData_Greenhouse(uint8_t clientID, uint8_t position)
+                : mClientID(clientID),
+                  mPosition(position),
+                  mTemperature(nullptr),
+                  mHumidity(nullptr),
+                  mCO2(nullptr),
+                  mSoilMoisture(nullptr)
+            {
+            }
 
             /**
              * @brief Class destructor
              */
-            ~ClientBluetoothEventData_Greenhouse() {}
+            ~ClientBluetoothEventData_Greenhouse()
+            {
+                if (mTemperature)
+                {
+                    delete mTemperature;
+                    mTemperature = nullptr;
+                }
+
+                if (mHumidity)
+                {
+                    delete mHumidity;
+                    mHumidity = nullptr;
+                }
+
+                if (mCO2)
+                {
+                    delete mCO2;
+                    mCO2 = nullptr;
+                }
+
+                if (mSoilMoisture)
+                {
+                    delete mSoilMoisture;
+                    mSoilMoisture = nullptr;
+                }
+            }
 
             /**
-             * @brief Set position
+             * @brief Get client ID
              *
-             * @param[in] uint8_t    : Position
+             * @return uint8_t      : Client ID value
              */
-            void SetPosition(uint8_t position) { mPosition.Set(position); }
+            uint8_t GetClientID() const { return mClientID.Get(); }
 
             /**
              * @brief Get position
              *
-             * @return uint8_t    : CO2 value
+             * @return uint8_t      : Position value
              */
             uint8_t GetPosition() const { return mPosition.Get(); }
+
+            /**
+             * @brief Check if temperature is set
+             *
+             * @return bool     : True  - temperature is set
+             *                    False - otherwise
+             */
+            bool IsTemperatureSet() const { return mTemperature != nullptr; }
 
             /**
              * @brief Get temperature
              *
              * @return float    : Temperature value
              */
-            float GetTemperature() const { return mTemperature.Get(); }
+            float GetTemperature() const { return mTemperature->Get(); }
 
             /**
-             * @brief Get humanity
+             * @brief Set temperature
              *
-             * @return int8_t    : Humanity value
+             * @param[in] temperature    : Temperature value
              */
-            int8_t GetHumanity() const { return mHumanity.Get(); }
+            void SetTemperature(float temperature) { mTemperature = new Value<float>(temperature); }
 
             /**
-             * @brief Get CO2
+             * @brief Check if humidity is set
              *
-             * @return int8_t    : CO2 value
+             * @return bool     : True  - humidity is set
+             *                    False - otherwise
              */
-            int8_t GetCO2() const { return mCO2.Get(); }
+            bool IsHumiditySet() const { return mHumidity != nullptr; }
+
+            /**
+             * @brief Get humidity
+             *
+             * @return float    : Humidity value
+             */
+            float GetHumidity() const { return mHumidity->Get(); }
+
+            /**
+             * @brief Set humidity
+             *
+             * @param[in] humidity    : Humidity value
+             */
+            void SetHumidity(float humidity) { mHumidity = new Value<float>(humidity); }
+
+            /**
+             * @brief Check if co2 is set
+             *
+             * @return bool     : True  - co2 is set
+             *                    False - otherwise
+             */
+            bool IsCO2Set() const { return mCO2 != nullptr; }
+
+            /**
+             * @brief Get co2
+             *
+             * @return uint16_t    : CO2 value
+             */
+            uint16_t GetCO2() const { return mCO2->Get(); }
+
+            /**
+             * @brief Set co2
+             *
+             * @param[in] co2    : CO2 value
+             */
+            void SetCO2(uint16_t co2) { mCO2 = new Value<uint16_t>(co2); }
+
+            /**
+             * @brief Check if soil moisture is set
+             *
+             * @return bool     : True  - soil moisture is set
+             *                    False - otherwise
+             */
+            bool IsSoilMoistureSet() const { return mSoilMoisture != nullptr; }
+
+            /**
+             * @brief Get soil moisture
+             *
+             * @return float    : Soil moisture value
+             */
+            float GetSoilMoisture() const { return mSoilMoisture->Get(); }
+
+            /**
+             * @brief Set soil moisture
+             *
+             * @param[in] soilMoisture    : Soil moisture value
+             */
+            void SetSoilMoisture(float soilMoisture) { mSoilMoisture = new Value<float>(soilMoisture); }
 
         private:
             // Alias for Value utility
             template <typename T>
             using Value = Utility::DataType::Value<T>;
 
-            // Temperature
-            Value<float> mTemperature;
-
-            // Humanity
-            Value<int8_t> mHumanity;
-
-            // CO2
-            Value<int8_t> mCO2;
+            /* Client ID */
+            const Value<uint8_t> mClientID;
 
             // Position
-            Value<uint8_t> mPosition;
+            const Value<uint8_t> mPosition;
+
+            // Temperature
+            Value<float> *mTemperature;
+
+            // Humidity
+            Value<float> *mHumidity;
+
+            // CO2
+            Value<uint16_t> *mCO2;
+
+            // Soil moisture
+            Value<float> *mSoilMoisture;
         };
     } // namespace Publisher
 } // namespace Greenhouse
