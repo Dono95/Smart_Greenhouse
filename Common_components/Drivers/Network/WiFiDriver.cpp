@@ -10,7 +10,7 @@ using namespace Component::Driver::Network;
  * @brief Class constructor
  */
 WifiDriver::WifiDriver(const std::string &ssid, const std::string &password,
-                       WiFi_MODE mode, bool connnect)
+                       WiFi_MODE mode)
     : mSSID(ssid),
       mEnabled(false),
       mConnected(false),
@@ -68,11 +68,12 @@ WifiDriver::WifiDriver(const std::string &ssid, const std::string &password,
 
     mIP_Address.addr = 0;
 
-    if (connnect)
-    {
-        Enable();
-        Connect();
-    }
+    ESP_ERROR_CHECK(esp_wifi_init(&mInitConfig));
+    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &mConfig));
+
+    Enable();
+    ESP_ERROR_CHECK(esp_wifi_start());
 }
 
 /**
@@ -124,12 +125,7 @@ bool WifiDriver::Connect()
         return true;
 
     ESP_LOGI(WIFI_DRIVER_TAG, "Connecting to \"%s\" ... ", GetWifiName().c_str());
-
-    ESP_ERROR_CHECK(esp_wifi_init(&mInitConfig));
-    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
-    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &mConfig));
-
-    ESP_ERROR_CHECK(esp_wifi_start());
+    esp_wifi_connect();
 
     // Wait to connect to AP
     uint16_t timeoutAttempts = DEFAULT_MAX_TIMEOUT / 100;
@@ -189,7 +185,6 @@ void WifiDriver::WifiEventHandler(void *arg, esp_event_base_t eventBase,
         {
         case (WIFI_EVENT_STA_START):
         {
-            esp_wifi_connect();
             break;
         }
         case (WIFI_EVENT_STA_DISCONNECTED):
@@ -198,7 +193,7 @@ void WifiDriver::WifiEventHandler(void *arg, esp_event_base_t eventBase,
             {
                 mAttempts = 0;
                 mConnected = false;
-                ESP_LOGE(WIFI_DRIVER_TAG, "Maximal number of attempts reaed. Failed to connect to \"%s\" !", GetWifiName().c_str());
+                ESP_LOGE(WIFI_DRIVER_TAG, "Maximal number of attempts reached. Failed to connect to \"%s\" !", GetWifiName().c_str());
                 break;
             }
 
