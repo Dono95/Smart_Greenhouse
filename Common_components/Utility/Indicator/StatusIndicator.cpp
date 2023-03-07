@@ -65,6 +65,21 @@ void StatusIndicator::RaiseState(StatusCode stateCode)
     mLed->Blick(Color::BLUE_LIGHT, 100);
     break;
   }
+  case (StatusCode::CLIENT_CONNECTING_TO_NETWORK):
+  {
+    mLed->SwitchOn(Color::YELLOW);
+    break;
+  }
+  case (StatusCode::CLIENT_CONNECTION_FAILED):
+  {
+    mLed->SwitchOn(Color::RED);
+    break;
+  }
+  case (StatusCode::CLIENT_CONNECTION_ESTABLISHED):
+  {
+    mLed->MultipleBlick(Color::BLUE, 5, 100);
+    break;
+  }
   default:
     break;
   }
