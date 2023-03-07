@@ -121,7 +121,8 @@ bool NetworkManager::ConnectToWifi(const std::pair<std::string, std::string> &wi
 	using WiFiMode = Component::Driver::Network::WiFi_MODE;
 
 	ESP_LOGI(NETWORK_MANAGER_TAG, "Trying to connect WiFi \"%s\"", wifiLogin.first.c_str());
-	mWifiDriver = new WifiDriver(wifiLogin.first, wifiLogin.second, WiFiMode::MODE_STA);
+	if (!mWifiDriver)
+		mWifiDriver = new WifiDriver(wifiLogin.first, wifiLogin.second, WiFiMode::MODE_STA);
 	mWifiDriver->Enable();
 
 	return mWifiDriver->Connect();

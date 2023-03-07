@@ -12,6 +12,7 @@ set(SOURCES
 ./Drivers/Motor/StepMotor.cpp
 ./Drivers/Active/WaterPump.cpp
 ./Utility/Indicator/RGB.cpp
+./Utility/Indicator/StatusIndicator.cpp
 ./Utility/Network/MQTT_Client.cpp
 ./Trackers/BluetoothConnectionTracker.cpp)
 

@@ -2,6 +2,8 @@
 
 using namespace Greenhouse::Manager;
 
+#define MOTOR_MAX_ROTAION_FOR_WINDOW 180
+
 ComponentController *ComponentController::mControllerInstance{nullptr};
 std::mutex ComponentController::mControllerMutex;
 
@@ -60,7 +62,7 @@ ComponentController *ComponentController::GetInstance()
  */
 void ComponentController::OpenWindow()
 {
-  mWindowMotor->RotateClockwise(180);
+  mWindowMotor->RotateCounterClockWise(MOTOR_MAX_ROTAION_FOR_WINDOW);
   mWindowState = true;
 }
 
@@ -76,7 +78,7 @@ void ComponentController::OpenWindow(uint8_t percentage)
  */
 void ComponentController::CloseWindow()
 {
-  mWindowMotor->RotateCounterClockWise(180);
+  mWindowMotor->RotateClockwise(MOTOR_MAX_ROTAION_FOR_WINDOW);
   mWindowState = false;
 }
 
@@ -102,6 +104,7 @@ bool ComponentController::WindowState() const
 void ComponentController::TurnOnIrrigation()
 {
   mWaterPump->TurnOn();
+  mIrrigationState = true;
 }
 
 /**
@@ -110,6 +113,7 @@ void ComponentController::TurnOnIrrigation()
 void ComponentController::TurnOffIrrigation()
 {
   mWaterPump->TurnOff();
+  mIrrigationState = false;
 }
 
 /**

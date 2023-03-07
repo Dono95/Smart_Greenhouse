@@ -15,27 +15,20 @@
 /* ESP log library*/
 #include "esp_log.h"
 
-#define MAIN_TAG "Main"
-
-// TIME
-#define MAX_ATTEMPTS 10    // 10 attempts
-#define WAIT_FOR_SYNC 1000 // 1
-
-////// TEST
-
+/* Time manager */
 #include "Common_components/Managers/TimeManager.hpp"
 
-#include "Common_components/Drivers/Communication/I2C.hpp"
-#include "Common_components/Drivers/Sensor/WaterLevelSensor.hpp"
+/* Status indicator */
+#include "Common_components/Utility/Indicator/StatusIndicator.hpp"
 
-#include "GreenhouseDefinitions.hpp"
+// Alias for indicator status code
+using StatusCode = Utility::Indicator::StatusCode;
 
-#include "Managers/ComponentController.hpp"
-
-/// END TEST
+#define MAIN_TAG "Main"
 
 extern "C" void app_main(void)
 {
+
     // Initialize NVS.
     esp_err_t result = nvs_flash_init();
     if (result == ESP_ERR_NVS_NO_FREE_PAGES || result == ESP_ERR_NVS_NEW_VERSION_FOUND)
@@ -48,19 +41,38 @@ extern "C" void app_main(void)
     // Check result of initialization non-volatile flash memory
     ESP_ERROR_CHECK(result);
 
+    const auto indicator = Utility::Indicator::StatusIndicator::GetInstance();
+
     // Creating Greenhouse manager
     auto greenhouseManager = Greenhouse::GreenhouseManager::GetInstance();
-    if (!greenhouseManager->ConnectToNetwork())
+    if (!greenhouseManager->StartBluetoothServer())
+    {
+        indicator->RaiseState(StatusCode::BLUETOOTH_INIT_FAILED);
+        ESP_LOGE(MAIN_TAG, "Bluetooth startup failed!");
+        return;
+    }
+    else
+    {
+        indicator->RaiseState(StatusCode::BLUETOOTH_INIT_SUCCESSED);
+    }
+
+    indicator->RaiseState(StatusCode::CLIENT_CONNECTING_TO_NETWORK);
+    while (const auto networkStatus = !(greenhouseManager->ConnectToNetwork()))
+    {
+        indicator->RaiseState(StatusCode::CLIENT_CONNECTION_FAILED);
         ESP_LOGE(MAIN_TAG, "Failed to connect to WiFi network!");
+        vTaskDelay(60000);
+
+        indicator->RaiseState(StatusCode::CLIENT_CONNECTING_TO_NETWORK);
+    }
+
+    indicator->RaiseState(StatusCode::CLIENT_CONNECTION_ESTABLISHED);
 
     auto timeManager = Component::Manager::TimeManager::GetInstance();
     timeManager->Initialize();
 
     if (!greenhouseManager->ConnectToMQTT())
         ESP_LOGE(MAIN_TAG, "Failed to connect to MQTT Broker!");
-
-    if (!greenhouseManager->StartBluetoothServer())
-        ESP_LOGE(MAIN_TAG, "Bluetooth startup failed!");
 
     while (true)
     {

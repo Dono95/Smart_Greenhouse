@@ -35,10 +35,8 @@ namespace Component
                  * @param[in]   ssid        : Servise set identifier
                  * @param[in]   password    : Password
                  * @param[in]   mode        : Wifi mode
-                 * @param[in]   connect     : The parameter defined whether to connect to
-                 *                            the AP in the constructor (default false)
                  */
-                explicit WifiDriver(const std::string &ssid, const std::string &password, WiFi_MODE mode, bool connnect = false);
+                explicit WifiDriver(const std::string &ssid, const std::string &password, WiFi_MODE mode);
 
                 /**
                  * @brief Class destructor

@@ -7,7 +7,9 @@
 
 /* Project specific includes*/
 #include "GreenhouseManager.hpp"
-#include "ClientStatusIndicator.hpp"
+
+/* Common components */
+#include "Common_components/Utility/Indicator/StatusIndicator.hpp"
 
 /* FreeRTOS includes */
 #include "freertos/FreeRTOS.h"
@@ -22,8 +24,16 @@
 #include "Common_components/Trackers/BluetoothConnectionTracker.hpp"
 #include "Common_components/Trackers/BluetoothConnectionTracker.cpp"
 
+#include "Common_components/Utility/Indicator/StatusIndicator.hpp"
+
 #include "esp_timer.h"
 /*******  END TEST ********/
+
+// Alias for status indicator
+using Indicator = Utility::Indicator::StatusIndicator;
+
+// Alias for indicator status code
+using Indicator_StatusCode = Utility::Indicator::StatusCode;
 
 extern "C" void app_main(void)
 {
@@ -44,11 +54,11 @@ extern "C" void app_main(void)
 	if (!greenhouseManager->StartBluetooth())
 	{
 		ESP_LOGE(MAIN_TAG, "Failed to start bluetooth.");
-		Greenhouse::ClientStatusIndicator::GetInstance()->RaiseState(Greenhouse::StateCode::BLUETOOTH_INIT_FAILED);
+		Indicator::GetInstance()->RaiseState(Indicator_StatusCode::BLUETOOTH_INIT_FAILED);
 		return;
 	}
 
-	Greenhouse::ClientStatusIndicator::GetInstance()->RaiseState(Greenhouse::StateCode::BLUETOOTH_INIT_SUCCESSED);
+	Indicator::GetInstance()->RaiseState(Indicator_StatusCode::BLUETOOTH_INIT_SUCCESSED);
 	greenhouseManager->StartTrackBluetoothConnection();
 
 	while (true)

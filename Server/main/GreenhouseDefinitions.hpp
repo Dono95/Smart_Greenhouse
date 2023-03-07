@@ -12,7 +12,7 @@
 /******                 NETWORK                   *****/
 /******************************************************/
 
-/**********           MQTT TOPIS            ***********/
+/**********           MQTT TOPIC            ***********/
 // PUBLISH
 #define INFO "Greenhouse/info"
 #define SENSOR_DATA "Greenhouse/SensorData"

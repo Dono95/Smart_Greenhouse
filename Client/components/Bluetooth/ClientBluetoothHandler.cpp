@@ -1,7 +1,6 @@
 /* Project specific includes */
 #include "ClientBluetoothHandler.hpp"
 #include "GreenhouseManager.hpp"
-#include "ClientStatusIndicator.hpp"
 
 /* ESP log library*/
 #include "esp_log.h"

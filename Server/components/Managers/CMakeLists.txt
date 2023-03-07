@@ -1,6 +1,6 @@
 message(STATUS "Building component: Server managers")
 
-# Set source file to variable SOURCES
+# Set source files to variable SOURCES
 set(SOURCES
 ./EventManager.cpp
 ./NetworkManager.cpp

@@ -4,14 +4,16 @@
 /* ESP log library */
 #include <esp_log.h>
 
-#include "../Client/main/ClientStatusIndicator.hpp"
+/* Indicator */
+#include "StatusIndicator.hpp"
 
 using namespace Component::Tracker;
 
 /**
  * @brief Class constructor
  */
-BluetoothConnectionTracker::BluetoothConnectionTracker(const bool &trackedObject) : TrackerInterface<bool>(trackedObject)
+BluetoothConnectionTracker::BluetoothConnectionTracker(const bool &trackedObject)
+    : TrackerInterface<bool>(trackedObject)
 {
   const esp_timer_create_args_t timerConfig = {
       .callback = &BluetoothConnectionTracker::TrackerCallback,
@@ -19,7 +21,20 @@ BluetoothConnectionTracker::BluetoothConnectionTracker(const bool &trackedObject
       /* name is optional, but may help identify the timer when debugging */
       .name = "BluetoothConnectionTimer"};
 
-  TrackerInterface<bool>::SetTimerConfig(timerConfig);
+  mTimerConfig = timerConfig;
+
+  TrackerInterface<bool>::SetTimerConfig(mTimerConfig);
+  TrackerInterface<bool>::CreateTimer();
+}
+
+/**
+ * @brief Class constructor
+ */
+BluetoothConnectionTracker::BluetoothConnectionTracker(const bool &trackedObject, const esp_timer_create_args_t &timerConfig)
+    : TrackerInterface<bool>(trackedObject),
+      mTimerConfig(timerConfig)
+{
+  TrackerInterface<bool>::SetTimerConfig(mTimerConfig);
   TrackerInterface<bool>::CreateTimer();
 }
 
@@ -36,10 +51,10 @@ BluetoothConnectionTracker::~BluetoothConnectionTracker()
 void BluetoothConnectionTracker::TrackerCallback(void *arg)
 {
   auto tracker = reinterpret_cast<BluetoothConnectionTracker *>(arg);
-  auto indicator = Greenhouse::ClientStatusIndicator::GetInstance();
+  auto indicator = Utility::Indicator::StatusIndicator::GetInstance();
 
   if (tracker->GetValueOfTrackedObject())
-    indicator->RaiseState(Greenhouse::StateCode::CLIENT_CONNECTED_TO_BLE_SERVER);
+    indicator->RaiseState(Utility::Indicator::StatusCode::CLIENT_CONNECTED_TO_BLE_SERVER);
   else
-    indicator->RaiseState(Greenhouse::StateCode::CLIENT_NOT_CONNECTED_TO_BLE_SERVER);
+    indicator->RaiseState(Utility::Indicator::StatusCode::CLIENT_NOT_CONNECTED_TO_BLE_SERVER);
 }
