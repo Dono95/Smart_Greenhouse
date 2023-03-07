@@ -40,7 +40,6 @@ namespace Component
         ESP_ERROR_CHECK(esp_timer_stop(mTimer));
       }
 
-    protected:
       /**
        * @brief Get content of tracked object
        *
@@ -48,6 +47,7 @@ namespace Component
        */
       T GetValueOfTrackedObject() const { return mTrackedObject; }
 
+    protected:
       /**
        * @brief Get timer
        *

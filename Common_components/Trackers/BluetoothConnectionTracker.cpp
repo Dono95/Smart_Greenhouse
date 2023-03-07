@@ -12,7 +12,8 @@ using namespace Component::Tracker;
 /**
  * @brief Class constructor
  */
-BluetoothConnectionTracker::BluetoothConnectionTracker(const bool &trackedObject) : TrackerInterface<bool>(trackedObject)
+BluetoothConnectionTracker::BluetoothConnectionTracker(const bool &trackedObject)
+    : TrackerInterface<bool>(trackedObject)
 {
   const esp_timer_create_args_t timerConfig = {
       .callback = &BluetoothConnectionTracker::TrackerCallback,
@@ -20,7 +21,20 @@ BluetoothConnectionTracker::BluetoothConnectionTracker(const bool &trackedObject
       /* name is optional, but may help identify the timer when debugging */
       .name = "BluetoothConnectionTimer"};
 
-  TrackerInterface<bool>::SetTimerConfig(timerConfig);
+  mTimerConfig = timerConfig;
+
+  TrackerInterface<bool>::SetTimerConfig(mTimerConfig);
+  TrackerInterface<bool>::CreateTimer();
+}
+
+/**
+ * @brief Class constructor
+ */
+BluetoothConnectionTracker::BluetoothConnectionTracker(const bool &trackedObject, const esp_timer_create_args_t &timerConfig)
+    : TrackerInterface<bool>(trackedObject),
+      mTimerConfig(timerConfig)
+{
+  TrackerInterface<bool>::SetTimerConfig(mTimerConfig);
   TrackerInterface<bool>::CreateTimer();
 }
 
