@@ -337,7 +337,6 @@ void NetworkManager::IrrigationEvent(const cJSON *const json)
 	if (cJSON_HasObjectItem(json, "requested"))
 	{
 		bool requested = static_cast<bool>(cJSON_GetNumberValue(cJSON_GetObjectItem(json, "requested")));
-		ESP_LOGI(NETWORK_MANAGER_TAG, "Requested state: %d", requested);
 		if (requested == controller->IrrigationState())
 		{
 			ESP_LOGI(NETWORK_MANAGER_TAG, "Request state is same with current irrigation state");
