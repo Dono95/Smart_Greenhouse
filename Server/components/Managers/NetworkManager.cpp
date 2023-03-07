@@ -121,7 +121,8 @@ bool NetworkManager::ConnectToWifi(const std::pair<std::string, std::string> &wi
 	using WiFiMode = Component::Driver::Network::WiFi_MODE;
 
 	ESP_LOGI(NETWORK_MANAGER_TAG, "Trying to connect WiFi \"%s\"", wifiLogin.first.c_str());
-	mWifiDriver = new WifiDriver(wifiLogin.first, wifiLogin.second, WiFiMode::MODE_STA);
+	if (!mWifiDriver)
+		mWifiDriver = new WifiDriver(wifiLogin.first, wifiLogin.second, WiFiMode::MODE_STA);
 	mWifiDriver->Enable();
 
 	return mWifiDriver->Connect();
@@ -336,6 +337,7 @@ void NetworkManager::IrrigationEvent(const cJSON *const json)
 	if (cJSON_HasObjectItem(json, "requested"))
 	{
 		bool requested = static_cast<bool>(cJSON_GetNumberValue(cJSON_GetObjectItem(json, "requested")));
+		ESP_LOGI(NETWORK_MANAGER_TAG, "Requested state: %d", requested);
 		if (requested == controller->IrrigationState())
 		{
 			ESP_LOGI(NETWORK_MANAGER_TAG, "Request state is same with current irrigation state");
