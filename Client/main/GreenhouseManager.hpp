@@ -4,6 +4,7 @@
 /* Project specific includes */
 #include "ClientBluetoothController.hpp"
 #include "ClientBluetoothHandler.hpp"
+#include "ConnectionHolder.hpp"
 #include "Drivers/Sensors/Sensor.hpp"
 
 /* Common components */
@@ -77,6 +78,13 @@ namespace Greenhouse
         ~GreenhouseManager();
 
         /**
+         * @brief Callback for Bluetooth coonection tracker
+         *
+         * @param[in] arg   : Callback argument
+         */
+        static void BluetoothConnectionTrackerCallback(void *arg);
+
+        /**
          * @brief Method to prepare data for sending to BLE server
          *
          * @param[out] data     : Prepared data vector
@@ -121,6 +129,12 @@ namespace Greenhouse
          */
         uint8_t GetPosition() const;
 
+        typedef struct TrackerData
+        {
+            Component::Tracker::BluetoothConnectionTracker *tracker;
+            std::weak_ptr<Bluetooth::ClientBluetoothControlller> bluetoothController;
+        } TracerData;
+
         /* Singleton instance of GreenhouseManager object */
         static GreenhouseManager *mManagerInstance;
 
@@ -133,6 +147,9 @@ namespace Greenhouse
         /* Shared pointer to client bluetooth handler*/
         Shared_Bluetooth_Handler mBluetoothHandler;
 
+        /* Bluetooth connection holder */
+        Bluetooth::ConnectionHolder *mConnectionHolder;
+
         /* Pointer to I2C driver */
         I2C *mI2C;
 
@@ -144,6 +161,9 @@ namespace Greenhouse
 
         /* Pointer to bluetooth connection tracker */
         Component::Tracker::BluetoothConnectionTracker *mBluetoothConnectionTracker;
+
+        /* Bluetooth conecction tracer data */
+        TrackerData mBluetoothConnectionTrackerData;
     };
 } // namespace Greenhouse
 

@@ -3,8 +3,7 @@ message(STATUS "Building: main")
 # Set source files to variable SOURCES
 set(SOURCES 
 ./main.cpp
-./GreenhouseManager.cpp
-./ClientStatusIndicator)
+./GreenhouseManager.cpp)
 
 set(DIRECTORIES
 "../components/")

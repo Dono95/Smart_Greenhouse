@@ -56,18 +56,4 @@ menu "Greenhouse"
             help
                 Enable/Disable measure soil moisure
     endmenu
-
-    menu "Indicator"
-        config RED_PIN
-            int "Red color pin"
-            default -1
-        
-        config GREEN_PIN
-            int "Green color pin"
-            default -1
-        
-        config BLUE_PIN
-            int "Blue color pin"
-            default -1
-    endmenu
 endmenu

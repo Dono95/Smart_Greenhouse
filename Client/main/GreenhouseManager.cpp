@@ -15,9 +15,15 @@
 /* STD library */
 #include <limits>
 
+// Timer divider
 #define TIMER_DIVIDER 16
 
+// I2C frequency
 #define I2C_400_kHz 400000u
+
+// Time constant
+#define SEC 1000
+#define MIN 60 * SEC
 
 using namespace Greenhouse;
 
@@ -34,9 +40,11 @@ std::mutex GreenhouseManager::mManagerMutex;
 GreenhouseManager::GreenhouseManager()
 		: mBluetoothController(new Bluetooth::ClientBluetoothControlller()),
 			mBluetoothHandler(new Bluetooth::ClientBluetoothHandler(mBluetoothController)),
-			mI2C(new I2C(GPIO_NUM_21, GPIO_NUM_22)),
-			mBluetoothConnectionTracker(new Component::Tracker::BluetoothConnectionTracker(mBluetoothHandler->GetReferenceToConnectionState()))
+			mConnectionHolder(new Bluetooth::ConnectionHolder(mBluetoothController, mBluetoothHandler->GetReferenceToConnectionState(), 10 * MIN)),
+			mI2C(new I2C(GPIO_NUM_21, GPIO_NUM_22))
 {
+	mBluetoothConnectionTracker = new Component::Tracker::BluetoothConnectionTracker(mBluetoothHandler->GetReferenceToConnectionState());
+
 	mI2C->SetMode(i2c_mode_t::I2C_MODE_MASTER, I2C_NUM_0, I2C_400_kHz);
 
 	if (mI2C->Activate() != ESP_OK)
@@ -187,7 +195,7 @@ bool GreenhouseManager::StartBluetooth(void)
  */
 void GreenhouseManager::StartTrackBluetoothConnection()
 {
-	mBluetoothConnectionTracker->StartTracking(10000);
+	mBluetoothConnectionTracker->StartTracking(10 * SEC);
 }
 
 /**
@@ -206,7 +214,6 @@ void GreenhouseManager::SendDataToServer()
 	if (!mBluetoothHandler->IsConnected())
 	{
 		ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Client in not connected to server. Unable to send data");
-		Utility::Indicator::StatusIndicator::GetInstance()->RaiseState(Utility::Indicator::StatusCode::CLIENT_NOT_CONNECTED_TO_BLE_SERVER);
 		return;
 	}
 
