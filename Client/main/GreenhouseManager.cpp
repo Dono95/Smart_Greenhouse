@@ -45,15 +45,19 @@ GreenhouseManager::GreenhouseManager()
 {
 	mBluetoothConnectionTracker = new Component::Tracker::BluetoothConnectionTracker(mBluetoothHandler->GetReferenceToConnectionState());
 
+#ifdef CONFIG_TEMPERATURE || CONFIG_HUMANITY || CONFIG_CO2
 	mI2C->SetMode(i2c_mode_t::I2C_MODE_MASTER, I2C_NUM_0, I2C_400_kHz);
 
 	if (mI2C->Activate() != ESP_OK)
 		ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Activation of I2C failed");
+#endif
 
 #ifdef CONFIG_CO2
 	mAirSensor = new Sensor::SCD4x(0x62, mI2C);
-#else
+#elif CONFIG_TEMPERATURE || CONFIG_HUMANITY
 	mAirSensor = new Sensor::SHT4x(0x44, mI2C);
+#else
+	ESP_LOGW(GREENHOUSE_MANAGER_TAG, "None of air values has been chosen");
 #endif
 
 #ifdef CONFIG_SOIL_MOISURE
@@ -217,8 +221,9 @@ void GreenhouseManager::SendDataToServer()
 		return;
 	}
 
-	// Perform measurement
-	mAirSensor->Measure();
+	if (mAirSensor != nullptr)
+		// Perform measurement
+		mAirSensor->Measure();
 
 	auto profile = mBluetoothHandler->GetGattcProfile(GREENHOUSE_PROFILE);
 
