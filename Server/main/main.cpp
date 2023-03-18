@@ -76,6 +76,6 @@ extern "C" void app_main(void)
 
     while (true)
     {
-        vTaskDelay(10000);
+        vTaskDelay(1000);
     }
 }

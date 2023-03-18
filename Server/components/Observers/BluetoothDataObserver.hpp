@@ -19,6 +19,8 @@ namespace Greenhouse
         public:
             /**
              * @brief Class constructor
+             *
+             * @param[in] manager : Pointer to event manager
              */
             BluetoothDataObserver(Greenhouse::Manager::EventManager *manager);
 
@@ -27,7 +29,20 @@ namespace Greenhouse
              */
             ~BluetoothDataObserver();
 
+            /**
+             * @brief Method which is called be event manager for notify client
+             *
+             * @param[in] eventData : Pointer to event data
+             */
             void Update(Component::Publisher::EventData *eventData) override;
+
+        private:
+            /**
+             * @brief Handle bluetooth data
+             *
+             * @param[in] event_data : Bluetooth data
+             */
+            static void HandleBluetoothData(void *event_data);
         };
     } // namespace Observer
 } // namespace Greenhouse
