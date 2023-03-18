@@ -54,6 +54,17 @@ GreenhouseManager::GreenhouseManager()
 
 #ifdef CONFIG_CO2
 	mAirSensor = new Sensor::SCD4x(0x62, mI2C);
+
+	/*auto scd = dynamic_cast<Sensor::SCD4x *>(mAirSensor);
+
+	printf("Offset: %d\n", scd->GetTemperatureOffset());
+	scd->SetTemperatureOffset(1);
+	printf("Offset: %d\n", scd->GetTemperatureOffset());
+
+	mAirSensor->Measure();
+
+	printf("Temperature: %.2f\n", mAirSensor->GetTemperature());*/
+
 #elif CONFIG_TEMPERATURE || CONFIG_HUMANITY
 	mAirSensor = new Sensor::SHT4x(0x44, mI2C);
 #else
@@ -81,6 +92,12 @@ void GreenhouseManager::PrepareData(BluetoothDataVector &data)
 	data.emplace_back((CONFIG_CLIENT_ID << 2) | GetPosition());
 	// Data content fill up during incialization data strucutre with sensors values
 	data.emplace_back(0x00);
+
+	if (mAirSensor != nullptr)
+	{
+		// Perform measurement
+		mAirSensor->Measure();
+	}
 
 	// Temperature
 #ifdef CONFIG_TEMPERATURE
@@ -220,10 +237,6 @@ void GreenhouseManager::SendDataToServer()
 		ESP_LOGE(GREENHOUSE_MANAGER_TAG, "Client in not connected to server. Unable to send data");
 		return;
 	}
-
-	if (mAirSensor != nullptr)
-		// Perform measurement
-		mAirSensor->Measure();
 
 	auto profile = mBluetoothHandler->GetGattcProfile(GREENHOUSE_PROFILE);
 
