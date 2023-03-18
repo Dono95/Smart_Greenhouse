@@ -55,6 +55,30 @@ namespace Sensor
         virtual I2C_OperationResult SendCommand(const uint32_t command, const uint32_t timeout, const uint8_t command_length = 1) const;
 
         /**
+         * @brief Method to send command to sensor with parameterrs
+         *
+         * @param[in] command           : Sensor commmand
+         * @param[in] parameters        : Additional command parameters
+         * @param[in] timeout           : Timeout to complete sensor commmand
+         * @param[in] command_length    : Command length in bytes (Default is 1 byte)
+         */
+        virtual I2C_OperationResult SendCommand(const uint32_t command, const std::vector<uint8_t> &parameters,
+                                                const uint32_t timeout, const uint8_t command_length = 1) const;
+
+        /**
+         * @brief Method to send command to sensor with expecting sensor response
+         *
+         * @param[in]  command              : Sensor command
+         * @param[in] parameters            : Additional command parameters
+         * @param[in]  timeout              : Timeout to complete sensor command and start to read sensor response
+         * @param[in]  command_length       : Command length in bytes
+         * @param[out] sensor_response      : Sensor response data
+         * @param[in]  expected_data_length : Expected length of sensor data response
+         */
+        virtual I2C_OperationResult SendCommand(const uint32_t command, const std::vector<uint8_t> &parameters, const uint32_t timeout,
+                                                const uint8_t command_length, std::vector<uint8_t> &sensor_response, const uint8_t expected_data_length) const;
+
+        /**
          * @brief Method to send command to sensor with expecting sensor response
          *
          * @param[in]  command              : Sensor command
@@ -93,6 +117,25 @@ namespace Sensor
         virtual void SoftReset() const = 0;
 
     private:
+        /**
+         * @brief Check if command length is valid in range <1 - 4>
+         *
+         * @param[in] command_length   : Commmand length
+         *
+         * @return bool                : True  - command length is valid
+         *                               False - command length is not valid
+         */
+        bool IsCommandLengthValid(const uint8_t command_length) const;
+
+        /**
+         * @brief Add command to data structure
+         *
+         * @param[in] command       : Command
+         * @param[in] commandLength : Command length
+         * @param[in/out] data      : Data structure
+         */
+        void AddCommand(uint32_t command, const uint8_t commandLength, std::vector<uint8_t> &data) const;
+
         /* I2C slave address */
         uint8_t mI2C_address;
 

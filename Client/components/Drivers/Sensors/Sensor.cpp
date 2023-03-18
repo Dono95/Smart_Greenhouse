@@ -65,6 +65,72 @@ I2C_OperationResult Sensor_I::SendCommand(const uint32_t command, const uint32_t
 }
 
 /**
+ * @brief Method to send command to sensor with parameterrs
+ */
+I2C_OperationResult Sensor_I::SendCommand(const uint32_t command, const std::vector<uint8_t> &parameters, const uint32_t timeout, const uint8_t command_length) const
+{
+    if (!IsCommandLengthValid(command_length))
+        return I2C_OperationResult::INVALID_ARGUMENT;
+
+    std::vector<uint8_t> data;
+    data.reserve(command_length + parameters.size());
+
+    AddCommand(command, command_length, data);
+
+    data.insert(data.end(), parameters.begin(), parameters.end());
+
+    auto i2c_result = mI2C->Write(mI2C_address, data);
+    if (i2c_result != I2C_OperationResult::WRITE_DATA_SUCCESSFUL)
+    {
+        ESP_LOGE(SENSOR_TAG, "Failed to send command[0x%x]: %s", command, I2C_RESULT_TO_STRING(i2c_result));
+        return i2c_result;
+    }
+
+    vTaskDelay(timeout);
+
+    return I2C_OperationResult::I2C_OK;
+}
+
+/**
+ * @brief Method to send command to sensor with expecting sensor response
+ */
+I2C_OperationResult Sensor_I::SendCommand(const uint32_t command, const std::vector<uint8_t> &parameters, const uint32_t timeout,
+                                          const uint8_t command_length, std::vector<uint8_t> &sensor_response, const uint8_t expected_data_length) const
+{
+    if (!IsCommandLengthValid(command_length))
+        return I2C_OperationResult::INVALID_ARGUMENT;
+
+    std::vector<uint8_t> data;
+    data.reserve(command_length + parameters.size());
+
+    AddCommand(command, command_length, data);
+
+    data.insert(data.end(), parameters.begin(), parameters.end());
+
+    auto i2c_result = mI2C->Write(mI2C_address, data);
+    if (i2c_result != I2C_OperationResult::WRITE_DATA_SUCCESSFUL)
+    {
+        ESP_LOGE(SENSOR_TAG, "Failed to send command[0x%x]: %s", command, I2C_RESULT_TO_STRING(i2c_result));
+        return i2c_result;
+    }
+
+    vTaskDelay(timeout);
+
+    // Reservce space in data structure with expected data length
+    sensor_response.reserve(expected_data_length);
+
+    // Read sensor response
+    i2c_result = mI2C->Read(mI2C_address, sensor_response, expected_data_length);
+    if (i2c_result != I2C_OperationResult::READ_DATA_SUCCESSFUL)
+    {
+        ESP_LOGE(SENSOR_TAG, "Failed to read sensor response: %s", I2C_RESULT_TO_STRING(i2c_result));
+        return i2c_result;
+    }
+
+    return I2C_OperationResult::I2C_OK;
+}
+
+/**
  * @brief Method to send command to sensor with expecting sensor response
  */
 I2C_OperationResult Sensor_I::SendCommand(const uint32_t command, const uint32_t timeout, const uint8_t command_length,
@@ -104,6 +170,28 @@ uint8_t Sensor_I::CalculateChecksum_CRC_8() const
     }
 
     return 0;
+}
+
+/**
+ * @brief Check if command length is valid in range <1 - 4>
+ */
+bool Sensor_I::IsCommandLengthValid(const uint8_t command_length) const
+{
+    return command_length >= 1 && command_length <= 4;
+}
+
+/**
+ * @brief Add command to data structure
+ */
+void Sensor_I::AddCommand(uint32_t command, const uint8_t commandLength, std::vector<uint8_t> &data) const
+{
+    command <<= (4 - commandLength) * 8;
+
+    for (uint8_t i = 0; i < commandLength; ++i)
+    {
+        data.emplace_back((command & 0xFF000000) >> 24);
+        command <<= 8;
+    }
 }
 
 /**
