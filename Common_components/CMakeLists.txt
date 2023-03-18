@@ -14,7 +14,8 @@ set(SOURCES
 ./Utility/Indicator/RGB.cpp
 ./Utility/Indicator/StatusIndicator.cpp
 ./Utility/Network/MQTT_Client.cpp
-./Trackers/BluetoothConnectionTracker.cpp)
+./Trackers/BluetoothConnectionTracker.cpp
+./Trackers/WifiConnectionTracker.cpp)
 
 set(DIRECTORIES
 "."
@@ -25,7 +26,7 @@ set(DIRECTORIES
 "./Drivers/Active"
 "./Utility/Indicator"
 "./Utility/Network")
-# Register components with include header files
+# Register components with include header filess
 idf_component_register(SRCS ${SOURCES}
                                 INCLUDE_DIRS ${DIRECTORIES}
                                 REQUIRES bt json mqtt)

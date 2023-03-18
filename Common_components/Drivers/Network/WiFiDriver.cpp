@@ -14,6 +14,7 @@ WifiDriver::WifiDriver(const std::string &ssid, const std::string &password,
     : mSSID(ssid),
       mEnabled(false),
       mConnected(false),
+      mTryingToConnect(false),
       mAttempts(0)
 {
     // Clear config structure
@@ -124,20 +125,30 @@ bool WifiDriver::Connect()
     if (IsConnected())
         return true;
 
+    mTryingToConnect = true;
+
     ESP_LOGI(WIFI_DRIVER_TAG, "Connecting to \"%s\" ... ", GetWifiName().c_str());
-    esp_wifi_connect();
+    if (esp_wifi_connect() != ESP_OK)
+        return false;
 
     // Wait to connect to AP
-    uint16_t timeoutAttempts = DEFAULT_MAX_TIMEOUT / 100;
+    uint16_t timeoutAttempts = DEFAULT_MAX_TIMEOUT / 1000;
     for (uint8_t i = 0; i < timeoutAttempts; ++i)
     {
         if (mAttempts >= MAX_NUMBER_OF_ATTEMPTS || IsConnected())
             break;
 
-        vTaskDelay(100);
+        vTaskDelay(1000);
     }
 
+    mTryingToConnect = false;
+
     return IsConnected();
+}
+
+void Disconnect()
+{
+    esp_wifi_disconnect();
 }
 
 /**
@@ -146,6 +157,14 @@ bool WifiDriver::Connect()
 bool WifiDriver::IsConnected() const
 {
     return mConnected;
+}
+
+/**
+ * @brief Check is client is trying to connect
+ */
+bool WifiDriver::IsTryingToConnect() const
+{
+    return mTryingToConnect;
 }
 
 /**
@@ -208,6 +227,11 @@ void WifiDriver::WifiEventHandler(void *arg, esp_event_base_t eventBase,
             mAttempts = 0;
             mConnected = true;
 
+            break;
+        }
+        case (WIFI_EVENT_STA_BEACON_TIMEOUT):
+        {
+            mConnected = false;
             break;
         }
         default:

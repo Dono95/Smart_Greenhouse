@@ -55,18 +55,37 @@ namespace Component
 
                 /**
                  * @brief Check if the Wifi driver is enabled to use
+                 *
+                 * @return bool     true    : Wifi driver is enabled
+                 *                  false   : Wifi driver is not enabled
                  */
                 bool IsEnabled() const;
 
                 /**
                  * @brief Method to connect ot WiFi
+                 *
+                 * @return bool     true    : Wifi driver connected to network
+                 *                  false   : Wifi driver is not connected to network
                  */
                 bool Connect();
 
+                void Disconnect();
+
                 /**
                  * @brief Check if the ESP module is connected to AP
+                 *
+                 * @return          true    : Client is connected
+                 *                  false   : Client is not connected
                  */
                 bool IsConnected() const;
+
+                /**
+                 * @brief Check is client is trying to connect
+                 *
+                 * @return          true    : Client is trying to connect
+                 *                  false   : Client is not trying connect now
+                 */
+                bool IsTryingToConnect() const;
 
                 /**
                  * @brief Method to get wifi name of connnected WiFi network
@@ -115,6 +134,9 @@ namespace Component
 
                 /* Store value if WiFi has IP address and is connected to AP*/
                 volatile bool mConnected;
+
+                /* Store value define if client is trying to connect*/
+                volatile bool mTryingToConnect;
 
                 /* IP address */
                 esp_ip4_addr_t mIP_Address;

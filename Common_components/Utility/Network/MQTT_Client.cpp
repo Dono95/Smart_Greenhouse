@@ -76,13 +76,6 @@ esp_err_t MQTT_Client::Stop() const
 
 /**
  * @brief Client publish message to MQTT broker
- *
- * @param[in] topic  : MQTT topic
- * @param[in] data   : Data
- * @param[in] QoS    : Quality of Service
- * @param[in] retain : Retain flag (Default false)
- *
- * @return int  : Message ID
  */
 int MQTT_Client::Publish(const std::string &topic, const std::string &data, int QoS, bool retain)
 {

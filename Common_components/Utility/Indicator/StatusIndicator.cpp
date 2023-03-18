@@ -77,7 +77,12 @@ void StatusIndicator::RaiseState(StatusCode stateCode)
   }
   case (StatusCode::CLIENT_CONNECTION_ESTABLISHED):
   {
-    mLed->MultipleBlick(Color::BLUE, 5, 100);
+    mLed->MultipleBlick(Color::BLUE, 2, 200);
+    break;
+  }
+  case (StatusCode::CLIENT_CONNECTION_NOT_ESTABLISHED):
+  {
+    mLed->MultipleBlick(Color::RED, 2, 200);
     break;
   }
   default:

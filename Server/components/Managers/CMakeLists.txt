@@ -4,7 +4,8 @@ message(STATUS "Building component: Server managers")
 set(SOURCES
 ./EventManager.cpp
 ./NetworkManager.cpp
-./ComponentController.cpp)
+./ComponentController.cpp
+./WifiConnectionHolder.cpp)
 
 set(DIRECTORIES
 "." 

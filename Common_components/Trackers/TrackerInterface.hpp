@@ -47,6 +47,13 @@ namespace Component
        */
       T GetValueOfTrackedObject() const { return mTrackedObject; }
 
+      /**
+       * @brief Get content of tracked object
+       *
+       * @return T : Content of tracked object
+       */
+      const T &GetReferenceOfTrackedObject() const { return mTrackedObject; }
+
     protected:
       /**
        * @brief Get timer

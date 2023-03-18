@@ -8,12 +8,14 @@
 #include <memory>
 
 /* Common components includes */
-#include "Drivers/Network/WiFiDriver.hpp"
-#include "Utility/Network/MQTT_Client.hpp"
+#include <Drivers/Network/WiFiDriver.hpp>
+#include <Utility/Network/MQTT_Client.hpp>
+#include <Trackers/WifiConnectionTracker.hpp>
 
 /* Project specific includes */
 #include "Observers/BluetoothDataObserver.hpp"
 #include "SensorsData/SensorsData.hpp"
+#include "WifiConnectionHolder.hpp"
 
 /* ESP MQTT library */
 #include <mqtt_client.h>
@@ -99,6 +101,18 @@ namespace Greenhouse
 			~NetworkManager();
 
 			/**
+			 * @brief Enable wifi connection tracker
+			 *
+			 * @param period : Time period to generate interrupt
+			 */
+			void EnableWifiConnectionTracker(const uint64_t period);
+
+			/**
+			 * @brief Disable wifi connection tracker
+			 */
+			void DisableWifiConnectionTracker();
+
+			/**
 			 * @brief Callback function when an event occurs
 			 *
 			 * @param[in] handlerArg    : Pointer to handler arguments
@@ -155,6 +169,12 @@ namespace Greenhouse
 
 			// Wifi driver
 			WifiDriver *mWifiDriver;
+
+			// Wifi connection tracker
+			Component::Tracker::WifiConnectionTracker *mWifiConnectionTracker;
+
+			// Wifi connection holder
+			WifiConnectionHolder *mWifiConnectionHolder;
 
 			// MQTT Client
 			Utility::Network::MQTT_Client *mMQTT_Client;

@@ -26,7 +26,10 @@ std::mutex NetworkManager::mMutex;
  * @brief Class constructor
  */
 NetworkManager::NetworkManager()
-		: mWifiDriver(nullptr), mMQTT_Client(nullptr)
+		: mWifiDriver(nullptr),
+			mWifiConnectionTracker(nullptr),
+			//	mWifiConnectionHolder(nullptr),
+			mMQTT_Client(nullptr)
 {
 	mBluetoothObserver = new Observer::BluetoothDataObserver(EventManager::GetInstance());
 }
@@ -47,6 +50,22 @@ NetworkManager::~NetworkManager()
 		delete mMQTT_Client;
 		mMQTT_Client = nullptr;
 	}
+}
+
+/**
+ * @brief Enable wifi connection tracker
+ */
+void NetworkManager::EnableWifiConnectionTracker(const uint64_t period)
+{
+	mWifiConnectionTracker->StartTracking(period);
+}
+
+/**
+ * @brief Disable wifi connection tracker
+ */
+void NetworkManager::DisableWifiConnectionTracker()
+{
+	mWifiConnectionTracker->StopTracking();
 }
 
 /**
@@ -122,10 +141,22 @@ bool NetworkManager::ConnectToWifi(const std::pair<std::string, std::string> &wi
 
 	ESP_LOGI(NETWORK_MANAGER_TAG, "Trying to connect WiFi \"%s\"", wifiLogin.first.c_str());
 	if (!mWifiDriver)
+	{
 		mWifiDriver = new WifiDriver(wifiLogin.first, wifiLogin.second, WiFiMode::MODE_STA);
+		printf("pointer Address connect network manager %p\n", &(*mWifiDriver));
+		mWifiConnectionTracker = new Component::Tracker::WifiConnectionTracker(*mWifiDriver);
+	}
+
 	mWifiDriver->Enable();
 
-	return mWifiDriver->Connect();
+	auto isConnected = mWifiDriver->Connect();
+	if (isConnected)
+	{
+		EnableWifiConnectionTracker(10000);
+		mWifiConnectionHolder = new WifiConnectionHolder(mWifiDriver, 60000);
+	}
+
+	return isConnected;
 }
 
 /**
@@ -261,7 +292,7 @@ void NetworkManager::Publish(const std::string &topic, const std::shared_ptr<Sen
 	if (sensorsData->soil.soilMoisture.IsValueSet())
 		cJSON_AddNumberToObject(data, "soil_moisture", sensorsData->soil.soilMoisture.Get());
 
-	mMQTT_Client->Publish(topic, cJSON_Print(root), 1);
+	mMQTT_Client->Publish(topic, cJSON_Print(root), 1, true);
 }
 
 /**
@@ -270,7 +301,7 @@ void NetworkManager::Publish(const std::string &topic, const std::shared_ptr<Sen
 void NetworkManager::SubscribeTopics()
 {
 	for (const auto &topic : greenhouse_topics)
-		mMQTT_Client->Subscribe(topic, 1);
+		mMQTT_Client->Subscribe(topic, 0);
 }
 
 /**
