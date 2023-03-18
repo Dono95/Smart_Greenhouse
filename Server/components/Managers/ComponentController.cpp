@@ -20,7 +20,8 @@ ComponentController::ComponentController()
           CONFIG_COIL_C,
           CONFIG_COIL_D)),
       mWindowState{false},
-      mWaterPump(new Component::Driver::Active::WaterPump(CONFIG_WATER_PUMP))
+      mWaterPump(new Component::Driver::Active::WaterPump(CONFIG_WATER_PUMP)),
+      mIrrigationState{false}
 {
 }
 
