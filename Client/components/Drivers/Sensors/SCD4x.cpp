@@ -8,6 +8,8 @@
 /* STD library */
 #include <cmath>
 
+#define PERFORMING_INTERVAL 60000 * 3
+
 using namespace Sensor;
 
 /**
@@ -129,6 +131,162 @@ void SCD4x::SoftReset() const
 }
 
 /**
+ * @brief Perform forced recalibration
+ */
+void SCD4x::PerformForcedRecalibration()
+{
+    // Step 1 -> Start periodic measurement more than 3 minutes
+    StartPeriodicMeasurement(true);
+    vTaskDelay(PERFORMING_INTERVAL);
+
+    // Step 2 -> Stop periodic measurement
+    StopPeriodicMeasurement();
+    vTaskDelay(500);
+
+    // Send command with parameter to force recalibration
+    std::vector<uint8_t> response;
+    if (SendCommand(PERFORM_FORCED_RECALIBRATION, {0x01, 0xe0, 0xb4}, 400, 2, response, 3) != I2C_OperationResult::I2C_OK)
+    {
+        ESP_LOGI(SCD4x_TAG, "Forcing recalibration failed");
+        return;
+    }
+
+    for (const auto &byte : response)
+        printf("0x%x\n", byte);
+}
+
+/**
+ * @brief Check if automatic self calibration is enabled
+ */
+bool SCD4x::IsAutomaticSelfCalibrationEnabled() const
+{
+    std::vector<uint8_t> response;
+    if (SendCommand(GET_AUTOMATIC_SELF_CALIBRATION_ENABLED, 1, 2, response, 3) != I2C_OperationResult::I2C_OK)
+    {
+        ESP_LOGE(SCD4x_TAG, "Failed to get sensor serial number");
+        return false;
+    }
+
+    if (response.empty() && response.size() == 3)
+        return false;
+
+    for (const auto &byte : response)
+        printf("0x%x\n", byte);
+
+    printf("\n");
+    return response.at(1);
+}
+
+/**
+ * @brief Enable automatic self calibration
+ */
+void SCD4x::EnableAutomaticSelfCalibration() const
+{
+    // Send command with parameter
+    if (SendCommand(SET_AUTOMATIC_SELF_CALIBRATION_ENABLED, {0x01, 0xB0}, 1, 2) != I2C_OperationResult::I2C_OK)
+    {
+        ESP_LOGI(SCD4x_TAG, "Enabling self automatic calibration failed");
+        return;
+    }
+
+    ESP_LOGI(SCD4x_TAG, "Self automatic calibration is enabled");
+    SavePersistSettings();
+}
+
+/**
+ * @brief Disable automatic self calibration
+ */
+void SCD4x::DisableAutomaticSelfCalibration() const
+{
+    // Send command with parameter
+    if (SendCommand(SET_AUTOMATIC_SELF_CALIBRATION_ENABLED, {0x00, 0x81}, 1, 2) != I2C_OperationResult::I2C_OK)
+    {
+        ESP_LOGI(SCD4x_TAG, "Enabling self automatic calibration failed");
+        return;
+    }
+
+    ESP_LOGI(SCD4x_TAG, "Self automatic calibration is disabled");
+    SavePersistSettings();
+}
+
+/**
+ * @brief Get sensor altitude
+ */
+uint16_t SCD4x::GetSensorAltitude() const
+{
+    std::vector<uint8_t> response;
+    // Send command to read measured values
+    if (SendCommand(GET_SENSOR_ALTITUDE, 1, 2, response, 3) != I2C_OperationResult::I2C_OK)
+    {
+        ESP_LOGE(SCD4x_TAG, "Failed to read sensor altitude");
+        return 0;
+    }
+
+    if (response.empty() || response.size() != 3)
+        return 0;
+
+    uint16_t altitude = response.at(0);
+    altitude <<= 8;
+    altitude += response.at(1);
+
+    return altitude;
+}
+
+/**
+ * @brief Set sensor altitude
+ */
+void SCD4x::SetSensorAltitude(const uint16_t sensorAltitude) const
+{
+    // Send command with parameter
+    if (SendCommand(SET_SENSOR_ALTITUDE, {0x02, 0xAC, 0xD9}, 1, 2) != I2C_OperationResult::I2C_OK)
+    {
+        ESP_LOGE(SCD4x_TAG, "Setting sensor altitude failed");
+        return;
+    }
+
+    // Save persist settings
+    SavePersistSettings();
+}
+
+/**
+ * @brief Get temperature offset
+ */
+uint16_t SCD4x::GetTemperatureOffset() const
+{
+    std::vector<uint8_t> response;
+    // Send command to read measured values
+    if (SendCommand(GET_TEMPERATURE_OFFSET, 1, 2, response, 3) != I2C_OperationResult::I2C_OK)
+    {
+        ESP_LOGE(SCD4x_TAG, "Failed to read temperature offset");
+        return 0;
+    }
+
+    if (response.empty() || response.size() != 3)
+        return 0;
+
+    uint16_t offset = response.at(0);
+    offset <<= 8;
+    offset += response.at(1);
+
+    return (175 * offset) / pow(2, 16);
+}
+
+/**
+ * @brief Set temperature offset
+ */
+void SCD4x::SetTemperatureOffset(const uint16_t sensorAltitude) const
+{
+    // Send command with parameter
+    if (SendCommand(SET_TEMPERATURE_OFFSET, {0x00, 0x00, 0x81}, 1, 2) != I2C_OperationResult::I2C_OK)
+    {
+        ESP_LOGI(SCD4x_TAG, "Setting temperature offset failed");
+        return;
+    }
+
+    SavePersistSettings();
+}
+
+/**
  * @brief Calculate values
  */
 void SCD4x::CalculateAirValues(const std::vector<uint8_t> &sensorData)
@@ -176,4 +334,19 @@ std::string SCD4x::FormatSerialNumber(const std::vector<uint8_t> &sensorData) co
         serial_number.pop_back();
 
     return serial_number;
+}
+
+/**
+ * @brief Save persist setttings
+ */
+void SCD4x::SavePersistSettings() const
+{
+    // Send command to save settings
+    if (SendCommand(PERSIST_SETTINGS, 800, 2) != I2C_OperationResult::I2C_OK)
+    {
+        ESP_LOGE(SCD4x_TAG, "Saving settings failed");
+        return;
+    }
+
+    ESP_LOGI(SCD4x_TAG, "Saving persist settings have been successful");
 }

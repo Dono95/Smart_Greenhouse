@@ -73,6 +73,56 @@ namespace Sensor
          */
         virtual void SoftReset() const override;
 
+        /**
+         * @brief Perform forced recalibration
+         */
+        void PerformForcedRecalibration();
+
+        /**
+         * @brief Check if automatic self calibration is enabled
+         *
+         * @return bool : True if self automatic calibration is enabled
+         */
+        bool IsAutomaticSelfCalibrationEnabled() const;
+
+        /**
+         * @brief Enable automatic self calibration
+         */
+        void EnableAutomaticSelfCalibration() const;
+
+        /**
+         * @brief Disable automatic self calibration
+         */
+        void DisableAutomaticSelfCalibration() const;
+
+        /**
+         * @brief Get sensor altitude
+         *
+         * @return uint16_t : Sensor altutude
+         */
+        uint16_t GetSensorAltitude() const;
+
+        /**
+         * @brief Set sensor altitude
+         *
+         * @param[in] uint16_t : Sensor altutude
+         */
+        void SetSensorAltitude(const uint16_t sensorAltitude) const;
+
+        /**
+         * @brief Get temperature offset
+         *
+         * @return uint16_t : Temperature offset
+         */
+        uint16_t GetTemperatureOffset() const;
+
+        /**
+         * @brief Set temperature offset
+         *
+         * @param[in] uint16_t : Temperature offset
+         */
+        void SetTemperatureOffset(const uint16_t sensorAltitude) const;
+
     private:
         /* Type alias -> 16 bit command convert to vector structure */
         using Command = std::vector<uint8_t>;
@@ -92,6 +142,11 @@ namespace Sensor
          * @return std::string
          */
         std::string FormatSerialNumber(const std::vector<uint8_t> &sensorData) const;
+
+        /**
+         * @brief Save persist setttings
+         */
+        void SavePersistSettings() const;
     };
 } // namespace Sensor
 
