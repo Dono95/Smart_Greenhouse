@@ -212,6 +212,8 @@ std::string NetworkManager::GetIpAddressAsString(bool reverse) const
 
 esp_err_t NetworkManager::ConnectTo_MQTT_Broker(const std::string &uri)
 {
+
+	ESP_LOGI(NETWORK_MANAGER_TAG, "Connecting to : %s", uri.c_str());
 	if (uri.empty())
 		return ESP_ERR_INVALID_ARG;
 
