@@ -150,7 +150,7 @@ CONFIG_BLUETOOTH_SERVER="Greenhouse"
 # Sensor
 #
 CONFIG_TEMPERATURE=y
-CONFIG_HUMANITY=y
+# CONFIG_HUMANITY is not set
 # CONFIG_CO2 is not set
 CONFIG_SOIL_MOISURE=y
 # end of Sensor
