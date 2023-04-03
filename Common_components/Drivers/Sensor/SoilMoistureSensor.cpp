@@ -71,7 +71,14 @@ SoilMoistureSensor::~SoilMoistureSensor()
 float SoilMoistureSensor::Measure() const
 {
   float raw_data = MeasureRawData();
-  return ((raw_data - IN_MIN) * (OUT_MAX - OUT_MIN)) / (IN_MAX - IN_MIN) + OUT_MIN;
+  auto sensor_output = (((raw_data - SENSOR_MIN) / (SENSOR_MAX - SENSOR_MIN)) * 100);
+
+  if (sensor_output < OUTPUT_MIN)
+    return OUTPUT_MAX;
+  else if (sensor_output > OUTPUT_MAX)
+    return OUTPUT_MIN;
+  else
+    return 100 - sensor_output;
 }
 
 /**

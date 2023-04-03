@@ -7,10 +7,11 @@
 
 #define SOIL_MOISTURE_SENSOR_TAG "SoilMoistureSensor"
 
-#define IN_MIN 2902
-#define IN_MAX 1260
-#define OUT_MIN 0
-#define OUT_MAX 100
+#define SENSOR_MIN 800
+#define SENSOR_MAX 2900
+
+#define OUTPUT_MAX 100
+#define OUTPUT_MIN 0
 
 namespace Component
 {
