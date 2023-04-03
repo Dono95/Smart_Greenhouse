@@ -9,6 +9,9 @@
 /* FreeRTOS*/
 #include <freertos/task.h>
 
+/* Component controller */
+#include "Managers/ComponentController.hpp"
+
 using namespace Greenhouse::Observer;
 
 /**
@@ -71,6 +74,22 @@ void BluetoothDataObserver::HandleBluetoothData(void *event_data)
     {
         sensorData->air.temperature.Set(bluetoothData->GetTemperature());
         ESP_LOGD(BLUETOOTH_DATA_OBSERVER_TAG, "Temperature: %.2f", sensorData->air.temperature.Get());
+
+        if (sensorData->basic.position == Position::INSIDE)
+        {
+            auto controller = Manager::ComponentController::GetInstance();
+
+            if (sensorData->air.temperature.Get() > 21)
+            {
+                if (!controller->IsWindowOpen())
+                    controller->OpenWindow();
+            }
+            else if (sensorData->air.temperature.Get() < 14)
+            {
+                if (controller->IsWindowOpen)
+                    controller->CloseWindow();
+            }
+        }
     }
 
     if (bluetoothData->IsHumiditySet())
@@ -90,6 +109,23 @@ void BluetoothDataObserver::HandleBluetoothData(void *event_data)
     {
         sensorData->soil.soilMoisture.Set(bluetoothData->GetSoilMoisture());
         ESP_LOGD(BLUETOOTH_DATA_OBSERVER_TAG, "Soil moisture: %.2f", sensorData->soil.soilMoisture.Get());
+
+        if (sensorData->basic.position == Position::INSIDE)
+        {
+            if (sensorData->soil.soilMoisture.Get() < 60)
+            {
+                auto controller = Manager::ComponentController::GetInstance();
+                if (!controller->IsIrrigationTurnOn())
+                {
+                    // Turn irrigation on
+                    controller->TurnOnIrrigation();
+                    // Wait for 3 sec
+                    vTaskDelay(3000);
+                    // Turn irrigation off
+                    controller->TurnOffIrrigation();
+                }
+            }
+        }
     }
 
     Manager::NetworkManager::GetInstance()->SendToServer(sensorData);
